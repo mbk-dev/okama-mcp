@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>okama-mcp — MCP server for investment analysis</title>
+  <meta name="description" content="MCP (Model Context Protocol) server that exposes the okama investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, and any other MCP-compatible client." />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #5a6472;
+      --accent: #2563eb;
+      --accent-fg: #ffffff;
+      --code-bg: #f4f5f7;
+      --border: #e5e7eb;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1115;
+        --fg: #e5e7eb;
+        --muted: #9aa3af;
+        --accent: #60a5fa;
+        --accent-fg: #0f1115;
+        --code-bg: #161a21;
+        --border: #2a2f3a;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 56px 24px 72px;
+    }
+    header h1 {
+      font-size: 2rem;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    header p.tagline {
+      color: var(--muted);
+      margin: 0 0 32px;
+      font-size: 1.05rem;
+    }
+    h2 {
+      margin-top: 36px;
+      margin-bottom: 12px;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+    }
+    p { margin: 0 0 12px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    code {
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.92em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    pre code { background: transparent; padding: 0; font-size: inherit; }
+    .endpoint {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    ul.links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    ul.links li {
+      padding: 6px 0;
+    }
+    ul.links li span.label {
+      color: var(--muted);
+      margin-right: 6px;
+    }
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>okama-mcp</h1>
+    <p class="tagline">
+      A Model Context Protocol (MCP) server that exposes the
+      <a href="https://github.com/mbk-dev/okama">okama</a> investment-portfolio toolkit to
+      AI assistants — Claude Desktop, Claude Code, Cursor, and any other MCP-compatible client.
+    </p>
+    <p>
+      Public MCP endpoint: <span class="endpoint">https://mcp.okama.io/mcp</span>
+      (streamable-http transport).
+    </p>
+  </header>
+
+  <section>
+    <h2>What you can ask</h2>
+    <p>With okama-mcp connected, you can ask an AI things like:</p>
+    <ul>
+      <li><em>"Backtest a portfolio of 30% gold and 70% real estate over the last 15 years."</em></li>
+      <li><em>"Run a Monte Carlo retirement forecast withdrawing $1,000/month indexed to inflation over 25 years."</em></li>
+      <li><em>"What's the tangency portfolio of SPY, BND, and GLD with a 3% risk-free rate?"</em></li>
+    </ul>
+    <p>
+      The AI calls the MCP tools, which call okama directly — no Python code needed on your side.
+    </p>
+  </section>
+
+  <section>
+    <h2>Connect a remote client</h2>
+    <p>Point your MCP-compatible client at the public endpoint:</p>
+    <pre><code>{
+  "mcpServers": {
+    "okama": {
+      "type": "http",
+      "url": "https://mcp.okama.io/mcp"
+    }
+  }
+}</code></pre>
+    <p>The server is open and requires no authentication in v1.</p>
+  </section>
+
+  <section>
+    <h2>Run locally instead</h2>
+    <p>Prefer to run your own instance? Requires Python ≥ 3.14 and Poetry.</p>
+    <pre><code>git clone https://github.com/mbk-dev/okama-mcp
+cd okama-mcp
+poetry install
+
+# stdio — for Claude Desktop, Claude Code, Cursor
+poetry run okama-mcp stdio
+
+# streamable HTTP
+poetry run okama-mcp http --host 127.0.0.1 --port 8765</code></pre>
+    <p>
+      Full setup guide and client configurations (Claude Desktop, Claude Code, Cursor):
+      see the <a href="https://github.com/mbk-dev/okama-mcp#readme">README on GitHub</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Links</h2>
+    <ul class="links">
+      <li><span class="label">Project repo:</span> <a href="https://github.com/mbk-dev/okama-mcp">github.com/mbk-dev/okama-mcp</a></li>
+      <li><span class="label">okama library:</span> <a href="https://github.com/mbk-dev/okama">github.com/mbk-dev/okama</a></li>
+      <li><span class="label">Interactive widgets:</span> <a href="https://okama.io">okama.io</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    Licensed under MIT, same as okama.
+  </footer>
+</main>
+</body>
+</html>
