@@ -110,7 +110,7 @@ hash, so repeated calls on the same spec are fast.
 | Tool | Purpose |
 |---|---|
 | `search_assets(query, namespace?)` | Free-text search across all okama symbols by name / ticker / ISIN. |
-| `list_namespaces(kind="all"|"assets"|"macro")` | Show the available okama namespaces. |
+| `list_namespaces(kind="all"\|"assets"\|"macro")` | Show the available okama namespaces. |
 | `get_asset_info(symbol)` | Metadata for one symbol — name, country, currency, type, date range. |
 
 ### Single asset & comparisons
