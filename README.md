@@ -20,7 +20,7 @@ Built on [FastMCP](https://github.com/jlowin/fastmcp). Single codebase, two tran
 
 ## Install
 
-Requires Python ≥ 3.11.
+Requires Python ≥ 3.14.
 
 ```bash
 git clone <repo-url> okama-mcp
