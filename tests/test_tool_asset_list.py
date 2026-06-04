@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
@@ -140,6 +140,49 @@ class TestGetCorrelations:
         assert "USD.INFL" not in out["correlations"]["columns"]
 
 
+class TestRollingRisk:
+    def test_returns_dataframe_payload(self) -> None:
+        idx = pd.period_range("2021-01", periods=4, freq="M")
+        al = SimpleNamespace()
+        al.get_rolling_risk_annual = MagicMock(return_value=pd.DataFrame(
+            {"SPY.US": [0.15, 0.16, 0.14, 0.15], "BND.US": [0.05, 0.05, 0.06, 0.05]},
+            index=idx))
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=al):
+            out = al_tool.get_rolling_risk(["SPY.US", "BND.US"], "USD", window_months=24)
+
+        al.get_rolling_risk_annual.assert_called_once_with(window=24)
+        assert out["window_months"] == 24
+        assert out["rolling_risk_annual"]["columns"] == ["SPY.US", "BND.US"]
+
+    def test_empty_symbols_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            al_tool.get_rolling_risk([], "USD")
+
+
+class TestDividendInfo:
+    def test_returns_compact_dividend_summary(self) -> None:
+        idx = pd.period_range("2024-01", periods=3, freq="M")
+        al = SimpleNamespace()
+        al.dividend_yield = pd.DataFrame(
+            {"SPY.US": [0.013, 0.0125, 0.012], "VNQ.US": [0.039, 0.0385, 0.0385]},
+            index=idx)
+        al.get_dividend_mean_yield = MagicMock(return_value=pd.Series(
+            {"SPY.US": 0.0140, "VNQ.US": 0.0364}))
+        years_idx = [2023, 2024]
+        al.dividend_paying_years = pd.DataFrame(
+            {"SPY.US": [9, 10], "VNQ.US": [9, 10]}, index=years_idx)
+        al.dividend_growing_years = pd.DataFrame(
+            {"SPY.US": [8, 9], "VNQ.US": [2, 0]}, index=years_idx)
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=al):
+            out = al_tool.get_dividend_info(["SPY.US", "VNQ.US"], "USD")
+
+        assert out["ltm_dividend_yield"] == {"SPY.US": 0.012, "VNQ.US": 0.0385}
+        assert out["mean_yield_5y"] == {"SPY.US": 0.0140, "VNQ.US": 0.0364}
+        assert out["paying_years_streak"] == {"SPY.US": 10, "VNQ.US": 10}
+        assert out["growing_years_streak"] == {"SPY.US": 9, "VNQ.US": 0}
+        al.get_dividend_mean_yield.assert_called_once_with(period=5)
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase3_tools_registered(self) -> None:
@@ -150,3 +193,5 @@ class TestServerRegistration:
         assert "get_asset_history" in names
         assert "compare_assets" in names
         assert "get_correlations" in names
+        assert "get_rolling_risk" in names
+        assert "get_dividend_info" in names

@@ -100,7 +100,56 @@ def get_correlations(
     }
 
 
+@translates_okama_errors
+def get_rolling_risk(
+    symbols: list[str],
+    ccy: str,
+    window_months: int = 12,
+    first_date: str | None = None,
+    last_date: str | None = None,
+) -> dict[str, Any]:
+    """Rolling annualized risk (std of monthly returns) for each asset."""
+    if window_months < 1:
+        raise OkamaMcpError("window_months must be a positive number of months")
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation=False)
+    df = al.get_rolling_risk_annual(window=window_months)
+    return {
+        "currency": ccy,
+        "window_months": window_months,
+        "rolling_risk_annual": dataframe_to_json(df),
+    }
+
+
+@translates_okama_errors
+def get_dividend_info(
+    symbols: list[str],
+    ccy: str,
+    first_date: str | None = None,
+    last_date: str | None = None,
+) -> dict[str, Any]:
+    """Dividend summary per asset: current LTM yield, 5-year mean yield,
+    and the current streaks of dividend-paying / dividend-growing years."""
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation=False)
+    ltm = al.dividend_yield.iloc[-1]
+    mean5 = al.get_dividend_mean_yield(period=5)
+    paying = al.dividend_paying_years.iloc[-1]
+    growing = al.dividend_growing_years.iloc[-1]
+
+    def _series_dict(s: Any) -> dict[str, Any]:
+        return {str(k): value_to_json(v) for k, v in s.items()}
+
+    return {
+        "currency": ccy,
+        "ltm_dividend_yield": _series_dict(ltm),
+        "mean_yield_5y": _series_dict(mean5),
+        "paying_years_streak": {str(k): int(v) for k, v in paying.items()},
+        "growing_years_streak": {str(k): int(v) for k, v in growing.items()},
+    }
+
+
 def register(mcp: FastMCP) -> None:
     """Register asset-list tools with the FastMCP server."""
     mcp.tool(compare_assets)
     mcp.tool(get_correlations)
+    mcp.tool(get_rolling_risk)
+    mcp.tool(get_dividend_info)
