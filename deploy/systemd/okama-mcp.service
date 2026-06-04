@@ -1,0 +1,31 @@
+[Unit]
+Description=okama-mcp MCP server (streamable HTTP)
+Documentation=https://github.com/mbk-dev/okama-mcp
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=okama_mcp
+Group=okama_mcp
+WorkingDirectory=/var/www/okama-mcp/app
+Environment=PYTHONUNBUFFERED=1
+Environment=MPLBACKEND=Agg
+ExecStart=/var/www/okama-mcp/app/.venv/bin/okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp
+Restart=on-failure
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/okama-mcp
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
