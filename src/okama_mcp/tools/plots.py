@@ -15,6 +15,7 @@ from fastmcp.utilities.types import Image
 
 from okama_mcp.errors import translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
+from okama_mcp.tools.frontier import _get_frontier
 from okama_mcp.tools.portfolio import _get_portfolio
 
 
@@ -68,7 +69,39 @@ def plot_drawdowns(
     return _png(fig)
 
 
+@translates_okama_errors
+def plot_efficient_frontier(
+    frontier: dict[str, Any], width: int = 1500, height: int = 900
+) -> Image:
+    """Efficient-frontier curve (Risk vs Mean return) with individual asset points.
+
+    ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    """
+    spec, ef = _get_frontier(frontier)
+    points = ef.ef_points
+    fig, ax = make_figure(width, height)
+    ax.plot(
+        points["Risk"].astype(float).values,
+        points["Mean return"].astype(float).values,
+        marker="o", markersize=3, label="Efficient frontier",
+    )
+    # Individual assets: risk/return Series may include inflation — keep symbols only.
+    risks = ef.risk_annual
+    returns = ef.mean_return
+    for symbol in ef.symbols:
+        if symbol in risks.index and symbol in returns.index:
+            ax.scatter(float(risks[symbol]), float(returns[symbol]), zorder=3)
+            ax.annotate(symbol, (float(risks[symbol]), float(returns[symbol])),
+                        textcoords="offset points", xytext=(6, 4), fontsize=9)
+    ax.set_title(f"Efficient frontier — {', '.join(spec.assets)} ({spec.ccy})")
+    ax.set_xlabel("Risk (annualized std)")
+    ax.set_ylabel("Mean return (annualized)")
+    ax.legend()
+    return _png(fig)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
     mcp.tool(plot_drawdowns)
+    mcp.tool(plot_efficient_frontier)
