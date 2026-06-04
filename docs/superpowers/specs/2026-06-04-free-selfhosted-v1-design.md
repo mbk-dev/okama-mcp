@@ -56,6 +56,10 @@ Four milestones, in order:
    - `release.yml` — on tag `v*`: build and publish to PyPI via Trusted
      Publishing.
 3. Live-integration tests (hit `api.okama.io`) stay manual/local — not in CI.
+4. **Post-release docs update:** once the package is live on PyPI, switch the README's
+   primary install path to `uvx` / `pipx` (including the client config snippets) and
+   update the mcp.okama.io landing page with the same instructions; redeploy the
+   landing to secondvds.
 
 ### M3 — Graphics tools (v1.0.0)
 
