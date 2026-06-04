@@ -1,5 +1,7 @@
 # okama-mcp
 
+<!-- mcp-name: io.github.mbk-dev/okama-mcp -->
+
 MCP (Model Context Protocol) server that exposes the [okama](https://github.com/mbk-dev/okama)
 investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, and any
 other MCP-compatible client.

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "okama-mcp"
-version = "1.2.0"
+version = "1.2.1"
 description = "MCP (Model Context Protocol) server exposing the okama investment portfolio toolkit to AI assistants"
 authors = ["Sergey Kikevich <sergey@rostsber.ru>"]
 readme = "README.md"
