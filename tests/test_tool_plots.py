@@ -206,6 +206,27 @@ class TestSavePath:
 
         assert isinstance(out, Image)
 
+    @pytest.mark.asyncio
+    async def test_save_path_yields_image_and_text_blocks_over_mcp(self, tmp_path) -> None:
+        """Lock the FastMCP conversion contract: [Image, str] -> image + text blocks."""
+        from fastmcp import Client
+
+        from okama_mcp.server import mcp
+
+        pf = _make_portfolio_mock()
+        target = tmp_path / "wealth.png"
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            async with Client(mcp) as client:
+                result = await client.call_tool(
+                    "plot_wealth_index",
+                    {"portfolio": VALID_SPEC, "save_path": str(target)},
+                )
+
+        assert [c.type for c in result.content] == ["image", "text"]
+        assert str(target) in result.content[1].text
+        assert target.read_bytes().startswith(PNG_MAGIC)
+
 
 class TestServerRegistration:
     @pytest.mark.asyncio

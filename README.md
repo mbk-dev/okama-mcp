@@ -182,7 +182,8 @@ optional `width` / `height` (pixels, 300–4000) for custom sizes and aspect rat
 and an optional `save_path` — the chart is then also written to that file and the
 path reported back. Use `save_path` in clients that don't render MCP images in
 their UI (e.g. Claude Code's terminal): ask for a chart "saved to /tmp/chart.png"
-and open the file reference.
+and open the file reference. Note: in self-hosted (streamable-http) deployments
+`save_path` is written on the **server's** filesystem, not the client's machine.
 
 | Tool | Chart |
 |---|---|
