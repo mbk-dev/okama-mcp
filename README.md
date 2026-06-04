@@ -25,7 +25,7 @@ yourself, locally or on your own server.
 Requires Python ≥ 3.11 (same floor as okama itself).
 
 ```bash
-git clone <repo-url> okama-mcp
+git clone https://github.com/mbk-dev/okama-mcp
 cd okama-mcp
 poetry install
 ```
