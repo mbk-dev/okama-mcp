@@ -13,3 +13,4 @@ build/
 .coverage
 htmlcov/
 *.log
+poetry.lock

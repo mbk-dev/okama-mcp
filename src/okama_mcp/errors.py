@@ -13,7 +13,7 @@ else passes through with its original message preserved.
 from __future__ import annotations
 
 import functools
-from typing import Any
+from typing import Any, TypeVar
 from collections.abc import Callable
 
 
@@ -80,7 +80,10 @@ def translate_exception(exc: Exception) -> OkamaMcpError:
     return OkamaMcpError(original)
 
 
-def translates_okama_errors[T](func: Callable[..., T]) -> Callable[..., T]:
+T = TypeVar("T")
+
+
+def translates_okama_errors(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator that catches exceptions inside a tool and re-raises as :class:`OkamaMcpError`."""
 
     @functools.wraps(func)
