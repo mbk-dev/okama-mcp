@@ -4,6 +4,15 @@ version = "0.1.0"
 description = "MCP (Model Context Protocol) server exposing the okama investment portfolio toolkit to AI assistants"
 authors = ["Sergey Kikevich <sergey@rostsber.ru>"]
 readme = "README.md"
+license = "MIT"
+homepage = "https://mcp.okama.io"
+repository = "https://github.com/mbk-dev/okama-mcp"
+keywords = ["mcp", "okama", "investments", "portfolio", "finance", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
 packages = [{ include = "okama_mcp", from = "src" }]
 
 [tool.poetry.dependencies]
