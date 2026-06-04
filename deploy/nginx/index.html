@@ -117,8 +117,8 @@
       AI assistants — Claude Desktop, Claude Code, Cursor, and any other MCP-compatible client.
     </p>
     <p>
-      Public MCP endpoint: <span class="endpoint">https://mcp.okama.io/mcp</span>
-      (streamable-http transport).
+      Free and open source — no hosted service, no registration.
+      You run it yourself: locally or on your own server.
     </p>
   </header>
 
@@ -136,34 +136,29 @@
   </section>
 
   <section>
-    <h2>Connect a remote client</h2>
-    <p>Point your MCP-compatible client at the public endpoint:</p>
-    <pre><code>{
-  "mcpServers": {
-    "okama": {
-      "type": "http",
-      "url": "https://mcp.okama.io/mcp"
-    }
-  }
-}</code></pre>
-    <p>The server is open and requires no authentication in v1.</p>
-  </section>
-
-  <section>
-    <h2>Run locally instead</h2>
-    <p>Prefer to run your own instance? Requires Python ≥ 3.14 and Poetry.</p>
+    <h2>Install &amp; run locally</h2>
+    <p>Requires Python ≥ 3.11 and Poetry.</p>
     <pre><code>git clone https://github.com/mbk-dev/okama-mcp
 cd okama-mcp
 poetry install
 
 # stdio — for Claude Desktop, Claude Code, Cursor
-poetry run okama-mcp stdio
-
-# streamable HTTP
-poetry run okama-mcp http --host 127.0.0.1 --port 8765</code></pre>
+poetry run okama-mcp stdio</code></pre>
     <p>
       Full setup guide and client configurations (Claude Desktop, Claude Code, Cursor):
       see the <a href="https://github.com/mbk-dev/okama-mcp#readme">README on GitHub</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Self-host on your server</h2>
+    <p>
+      Share one instance across your MCP clients with the streamable-http transport:
+    </p>
+    <pre><code>poetry run okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp</code></pre>
+    <p>
+      Ready-made nginx and systemd examples are in the
+      <a href="https://github.com/mbk-dev/okama-mcp/tree/main/deploy">deploy/</a> directory.
     </p>
   </section>
 
