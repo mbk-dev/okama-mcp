@@ -16,11 +16,13 @@ With okama-mcp installed, you can ask an AI things like:
 …and the AI uses the MCP tools to call okama directly — no Python code needed.
 
 Built on [FastMCP](https://github.com/jlowin/fastmcp). Single codebase, two transports:
-`stdio` (for local clients) and `streamable-http` (for remote deployment).
+`stdio` (for local clients) and `streamable-http` (for self-hosting on your own server).
+okama-mcp is free and open source — no hosted service, no registration; you run it
+yourself, locally or on your own server.
 
 ## Install
 
-Requires Python ≥ 3.14.
+Requires Python ≥ 3.11 (same floor as okama itself).
 
 ```bash
 git clone <repo-url> okama-mcp
@@ -89,15 +91,22 @@ Open *Settings → MCP*, click *Add new MCP Server*, and use:
 - Command: `poetry run okama-mcp stdio`
 - Working dir: this project's root
 
-### Remote (streamable HTTP)
+### Self-hosting (streamable HTTP)
+
+Run okama-mcp on your own server and share it across your MCP clients:
 
 ```bash
-# server
-poetry run okama-mcp http --host 0.0.0.0 --port 8765 --path /mcp
+poetry run okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp
 ```
 
-Then point your MCP client at `http://<server>:8765/mcp`. For production put nginx + TLS
-in front and add bearer-token auth (TODO: bearer-token support is on the roadmap).
+Then point your MCP client at `http://<your-server>:8765/mcp`. For a production
+setup put nginx + TLS in front; ready-made examples live in `deploy/`:
+
+- `deploy/systemd/okama-mcp.service` — systemd unit (hardened, runs as a dedicated user)
+- `deploy/nginx/self-hosted.conf` — nginx vhost: TLS, SSE-friendly proxying of `/mcp`
+
+The server is open by design — free to run, no registration. If your instance must
+not be public, restrict access at the nginx level (allow-list, VPN, or HTTP basic auth).
 
 ## Tool catalog
 
