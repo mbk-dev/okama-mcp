@@ -143,6 +143,8 @@ hash, so repeated calls on the same spec are fast.
 | `get_asset_history(symbol, kind, first_date?, last_date?)` | Time series for one asset. `kind` ∈ {`close_monthly`, `close_daily`, `adj_close`, `ror`, `dividends`}. |
 | `compare_assets(symbols, ccy, first_date?, last_date?, inflation)` | Side-by-side statistics (`describe()` table: CAGR, risk, drawdowns by period). |
 | `get_correlations(symbols, ccy, ...)` | Correlation matrix of monthly returns. |
+| `get_rolling_risk(symbols, ccy, window_months=12)` | Rolling annualized risk per asset. |
+| `get_dividend_info(symbols, ccy, ...)` | LTM dividend yield, 5y mean yield, paying/growing streaks per asset. |
 
 ### Portfolio backtest
 
@@ -152,6 +154,8 @@ hash, so repeated calls on the same spec are fast.
 | `get_portfolio_drawdowns(portfolio)` | Drawdown time series + max drawdown / recovery period. |
 | `get_portfolio_var_cvar(portfolio, time_frame=12, level=1)` | Historical Value at Risk and CVaR. |
 | `get_portfolio_wealth_index(portfolio, full=False)` | Wealth-index series (cumulative growth of 1000). |
+| `get_rolling_cagr(portfolio, window_months=12, real=False)` | Rolling CAGR time series (optionally inflation-adjusted). |
+| `get_cagr_probability(portfolio, years, cagr_target)` | Historical probability of CAGR below a target (e.g. of a loss) over N-year periods. |
 
 ### Monte Carlo DCF
 

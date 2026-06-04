@@ -159,3 +159,35 @@ async def test_plot_efficient_frontier_live(server) -> None:
     image = result.content[0]
     assert image.type == "image"
     assert image.mimeType == "image/png"
+
+
+async def test_rolling_cagr_and_probability_live(server) -> None:
+    spec = {
+        "assets": ["SPY.US", "BND.US"],
+        "weights": [0.6, 0.4],
+        "ccy": "USD",
+        "first_date": "2010-01",
+        "last_date": "2024-12",
+        "rebalancing_period": "year",
+        "inflation": True,
+    }
+    async with Client(server) as client:
+        rolling = (await client.call_tool(
+            "get_rolling_cagr", {"portfolio": spec, "window_months": 36})).data
+        prob = (await client.call_tool(
+            "get_cagr_probability", {"portfolio": spec, "years": 3, "cagr_target": 0.0})).data
+    assert rolling["rolling_cagr"]["columns"]
+    assert len(rolling["rolling_cagr"]["index"]) > 50
+    assert 0.0 <= prob["percentile_rank"] <= 100.0
+
+
+async def test_dividend_info_live(server) -> None:
+    async with Client(server) as client:
+        result = await client.call_tool(
+            "get_dividend_info",
+            {"symbols": ["SPY.US", "VNQ.US"], "ccy": "USD",
+             "first_date": "2015-01", "last_date": "2024-12"},
+        )
+        payload = result.data
+    assert 0.0 < payload["ltm_dividend_yield"]["VNQ.US"] < 0.15
+    assert payload["paying_years_streak"]["SPY.US"] >= 1
