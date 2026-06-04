@@ -138,13 +138,9 @@
 
   <section>
     <h2>Install &amp; run locally</h2>
-    <p>Requires Python ≥ 3.11 and Poetry.</p>
-    <pre><code>git clone https://github.com/mbk-dev/okama-mcp
-cd okama-mcp
-poetry install
-
-# stdio — for Claude Desktop, Claude Code, Cursor
-poetry run okama-mcp stdio</code></pre>
+    <pre><code># run straight from PyPI — no clone needed
+uvx okama-mcp stdio</code></pre>
+    <p>Requires Python ≥ 3.11. Easiest with <a href="https://docs.astral.sh/uv/">uv</a>; installing from source (git + Poetry) is covered in the README.</p>
     <p>
       Full setup guide and client configurations (Claude Desktop, Claude Code, Cursor):
       see the <a href="https://github.com/mbk-dev/okama-mcp#readme">README on GitHub</a>.
@@ -156,7 +152,7 @@ poetry run okama-mcp stdio</code></pre>
     <p>
       Share one instance across your MCP clients with the streamable-http transport:
     </p>
-    <pre><code>poetry run okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp</code></pre>
+    <pre><code>okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp</code></pre>
     <p>
       Ready-made nginx and systemd examples are in the
       <a href="https://github.com/mbk-dev/okama-mcp/tree/main/deploy">deploy/</a> directory.

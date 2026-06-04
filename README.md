@@ -24,6 +24,16 @@ yourself, locally or on your own server.
 
 Requires Python ≥ 3.11 (same floor as okama itself).
 
+The easiest way — no clone, no venv — is [uv](https://docs.astral.sh/uv/) or pipx:
+
+```bash
+uvx okama-mcp stdio          # run straight from PyPI
+# or
+pipx install okama-mcp
+```
+
+To work on the code, install from source instead:
+
 ```bash
 git clone https://github.com/mbk-dev/okama-mcp
 cd okama-mcp
@@ -34,11 +44,13 @@ poetry install
 
 ```bash
 # stdio — for Claude Desktop, Claude Code, Cursor (local IPC)
-poetry run okama-mcp stdio
+okama-mcp stdio
 
 # streamable HTTP — for self-hosting on your own server
-poetry run okama-mcp http --host 127.0.0.1 --port 8765
+okama-mcp http --host 127.0.0.1 --port 8765
 ```
+
+When running from a source checkout, prefix each command with `poetry run`.
 
 ## Connect a client
 
@@ -51,9 +63,8 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 {
   "mcpServers": {
     "okama": {
-      "command": "poetry",
-      "args": ["run", "okama-mcp", "stdio"],
-      "cwd": "/absolute/path/to/okama-mcp"
+      "command": "uvx",
+      "args": ["okama-mcp", "stdio"]
     }
   }
 }
@@ -63,19 +74,13 @@ Restart Claude Desktop; the server appears in the tools menu.
 
 ### Claude Code
 
-From the project root — registers the server for this project only (`claude` must be
-launched from this directory to see it):
+To make the server available in **every** project (works from any directory):
 
 ```bash
-claude mcp add okama poetry run okama-mcp stdio
+claude mcp add --scope user okama -- uvx okama-mcp stdio
 ```
 
-To make the server available in **every** project (user scope), register the absolute
-path of the venv binary — `poetry run` would not work outside the project directory:
-
-```bash
-claude mcp add --scope user okama -- "$(poetry env info -p)/bin/okama-mcp" stdio
-```
+Developers running from a source checkout can use `claude mcp add okama poetry run okama-mcp stdio` from the project root instead.
 
 Or commit a `.claude/mcp.json` so the whole team picks it up:
 
@@ -83,8 +88,8 @@ Or commit a `.claude/mcp.json` so the whole team picks it up:
 {
   "mcpServers": {
     "okama": {
-      "command": "poetry",
-      "args": ["run", "okama-mcp", "stdio"]
+      "command": "uvx",
+      "args": ["okama-mcp", "stdio"]
     }
   }
 }
@@ -96,16 +101,17 @@ Open *Settings → MCP*, click *Add new MCP Server*, and use:
 
 - Name: `okama`
 - Type: `stdio`
-- Command: `poetry run okama-mcp stdio`
-- Working dir: this project's root
+- Command: `uvx okama-mcp stdio`
 
 ### Self-hosting (streamable HTTP)
 
 Run okama-mcp on your own server and share it across your MCP clients:
 
 ```bash
-poetry run okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp
+okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp
 ```
+
+(From source: `poetry run okama-mcp http ...`)
 
 Then point your MCP client at `http://<your-server>:8765/mcp`. For a production
 setup put nginx + TLS in front; ready-made examples live in `deploy/`:
