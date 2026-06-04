@@ -15,6 +15,7 @@ from fastmcp.utilities.types import Image
 
 from okama_mcp.errors import translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
+from okama_mcp.tools.asset_list import _build_asset_list
 from okama_mcp.tools.frontier import _get_frontier
 from okama_mcp.tools.monte_carlo import _prepare_dcf
 from okama_mcp.tools.portfolio import _get_portfolio
@@ -134,9 +135,36 @@ def plot_monte_carlo(
     return _png(fig)
 
 
+@translates_okama_errors
+def plot_assets(
+    symbols: list[str],
+    ccy: str,
+    first_date: str | None = None,
+    last_date: str | None = None,
+    inflation: bool = False,
+    width: int = 1500,
+    height: int = 900,
+) -> Image:
+    """Wealth-index comparison chart for individual assets (growth of 1000 each).
+
+    ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    """
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation)
+    wi = al.wealth_indexes
+    fig, ax = make_figure(width, height)
+    x = _plot_index_values(wi.index)
+    for col in wi.columns:
+        ax.plot(x, wi[col].astype(float).values, label=str(col))
+    ax.set_title(f"Wealth indexes — {', '.join(symbols)} ({ccy})")
+    ax.set_ylabel(f"Wealth ({ccy})")
+    ax.legend()
+    return _png(fig)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
     mcp.tool(plot_drawdowns)
     mcp.tool(plot_efficient_frontier)
     mcp.tool(plot_monte_carlo)
+    mcp.tool(plot_assets)

@@ -160,3 +160,23 @@ class TestPlotMonteCarlo:
 
         assert isinstance(out, Image)
         assert out.data.startswith(PNG_MAGIC)
+
+
+class TestPlotAssets:
+    def test_returns_png_image(self) -> None:
+        idx = pd.period_range("2020-01", periods=6, freq="M")
+        al = SimpleNamespace()
+        al.wealth_indexes = pd.DataFrame(
+            {"SPY.US": [1000, 1020, 1040, 1030, 1060, 1100],
+             "GLD.US": [1000, 990, 1010, 1030, 1020, 1050]},
+            index=idx, dtype=float,
+        )
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=al):
+            out = plots_tool.plot_assets(["SPY.US", "GLD.US"], "USD")
+
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)
+
+    def test_empty_symbols_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            plots_tool.plot_assets([], "USD")
