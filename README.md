@@ -16,7 +16,7 @@ With okama-mcp installed, you can ask an AI things like:
 …and the AI uses the MCP tools to call okama directly — no Python code needed.
 
 Built on [FastMCP](https://github.com/jlowin/fastmcp). Single codebase, two transports:
-`stdio` (for local clients) and `streamable-http` (for self-hosting on your own server).
+`stdio` (for local clients) and `streamable-http` (for self-hosting).
 okama-mcp is free and open source — no hosted service, no registration; you run it
 yourself, locally or on your own server.
 
@@ -36,7 +36,7 @@ poetry install
 # stdio — for Claude Desktop, Claude Code, Cursor (local IPC)
 poetry run okama-mcp stdio
 
-# streamable HTTP — for remote/multi-client deployments
+# streamable HTTP — for self-hosting on your own server
 poetry run okama-mcp http --host 127.0.0.1 --port 8765
 ```
 
