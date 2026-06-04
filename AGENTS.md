@@ -29,6 +29,11 @@ Cycle: **RED → verify RED → GREEN → verify GREEN → REFACTOR**.
 
 - **Minimum supported Python version is taken from `pyproject.toml`** (the `python = "..."`
   constraint under `[tool.poetry.dependencies]`). All code must run unchanged on that minimum.
+- **Keep the Python version floor aligned with the `okama` library.** Whenever you set or change
+  the `python` constraint in `pyproject.toml`, check okama's own `python` constraint (its
+  `pyproject.toml` / PyPI metadata) and keep the floors identical — okama-mcp must not claim
+  support for Python versions okama itself does not support, nor require a higher floor without
+  a documented reason.
 - Write new code with modern syntax and avoid legacy forms:
   - Use built-in generics: `list[int]`, `dict[str, Any]`, `tuple[int, ...]` instead of
     `typing.List` / `Dict` / `Tuple`.
