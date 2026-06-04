@@ -24,6 +24,11 @@ Cycle: **RED → verify RED → GREEN → verify GREEN → REFACTOR**.
 5) Before finishing any code change, run `poetry run ruff check .` and fix every reported issue.
    If a warning is truly unavoidable, silence it with a targeted `# noqa: <CODE>` comment on the
    offending line and include a brief rationale. Never disable rules globally or use a bare `# noqa`.
+6) After completing any **significant** change (new or changed tools, schema changes, transport or
+   deployment changes, behavior changes — as opposed to docs/comment edits), proactively offer the
+   user a **manual hands-on test**: give the exact command/config to connect (stdio or http), and a
+   short checklist of what specifically to try and what correct behavior looks like — including the
+   paths most affected by the change. Don't wait to be asked.
 
 ## Python style & modernization
 
