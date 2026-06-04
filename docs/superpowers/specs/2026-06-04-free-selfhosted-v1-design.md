@@ -88,10 +88,13 @@ Design constraints:
 - **Thread-safety check (to resolve in the plan):** pyplot holds global state
   and is not thread-safe — either use the OO API (`Figure` without pyplot) or
   guard rendering with a lock, depending on how okama builds its own plots.
-- Fixed render defaults: `figsize=(10, 6)` inches at `dpi=150` → 1500×900 px PNG.
+- Render defaults: 1500×900 px (`figsize=(10, 6)` inches at fixed `dpi=150`).
   Rationale: matplotlib's defaults (6.4×4.8 in @ 100 dpi = 640×480 px) were confirmed
   too small in manual testing on 2026-06-04; okama's own plot methods default
-  `figsize=None` and inherit those rcParams. No size parameters on the tools (YAGNI).
+  `figsize=None` and inherit those rcParams.
+- Every plot tool accepts optional `width` / `height` parameters (pixels, validated
+  bounds 300–4000) so an MCP user can request a custom size or aspect ratio
+  (e.g. a square 1200×1200 chart). DPI stays fixed; only the canvas size varies.
 - Existing data tools are **not** modified; tool count grows ~16 → ~21.
 - TDD: unit tests assert a valid PNG (magic bytes, non-zero size) on mocks;
   live rendering covered in the integration suite.
