@@ -73,6 +73,10 @@ def _make_portfolio_mock(
                                                      index=["CAGR (inception)"]))
     pf.get_var_historic = MagicMock(return_value=var)
     pf.get_cvar_historic = MagicMock(return_value=cvar)
+    idx_roll = pd.period_range("2011-01", periods=4, freq="M")
+    pf.get_rolling_cagr = MagicMock(return_value=pd.DataFrame(
+        {"pf": [0.05, 0.06, 0.055, 0.07]}, index=idx_roll))
+    pf.percentile_inverse_cagr = MagicMock(return_value=8.4)
     return pf
 
 
@@ -203,6 +207,38 @@ class TestPortfolioWealthIndex:
         assert out["wealth_index"]["data"][-1] == [1050.0, 1010.1]
 
 
+class TestRollingCagr:
+    def test_returns_dataframe_payload(self) -> None:
+        pf = _make_portfolio_mock()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = pf_tool.get_rolling_cagr(VALID_SPEC, window_months=24, real=True)
+
+        pf.get_rolling_cagr.assert_called_once_with(window=24, real=True)
+        assert out["window_months"] == 24
+        assert out["real"] is True
+        assert out["rolling_cagr"]["columns"] == ["pf"]
+        assert out["rolling_cagr"]["data"][0] == [0.05]
+
+    def test_invalid_window_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            pf_tool.get_rolling_cagr(VALID_SPEC, window_months=0)
+
+
+class TestCagrProbability:
+    def test_returns_percentile_rank(self) -> None:
+        pf = _make_portfolio_mock()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = pf_tool.get_cagr_probability(VALID_SPEC, years=3, cagr_target=0.0)
+
+        pf.percentile_inverse_cagr.assert_called_once_with(years=3, score=0.0)
+        assert out["percentile_rank"] == 8.4
+        assert out["years"] == 3
+        assert out["cagr_target"] == 0.0
+        assert "8.4" in out["interpretation"]
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase4_tools_registered(self) -> None:
@@ -214,3 +250,5 @@ class TestServerRegistration:
         assert "get_portfolio_drawdowns" in names
         assert "get_portfolio_var_cvar" in names
         assert "get_portfolio_wealth_index" in names
+        assert "get_rolling_cagr" in names
+        assert "get_cagr_probability" in names

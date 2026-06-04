@@ -214,6 +214,56 @@ def get_portfolio_wealth_index(
     }
 
 
+@translates_okama_errors
+def get_rolling_cagr(
+    portfolio: dict[str, Any],
+    window_months: int = 12,
+    real: bool = False,
+) -> dict[str, Any]:
+    """Rolling CAGR time series for the portfolio.
+
+    ``window_months`` is the rolling window size (≥ 12 recommended by okama);
+    ``real=True`` computes inflation-adjusted (real) CAGR — requires the spec
+    to have ``inflation: true``.
+    """
+    if window_months < 1:
+        raise OkamaMcpError("window_months must be a positive number of months")
+    _spec, pf = _get_portfolio(portfolio)
+    df = pf.get_rolling_cagr(window=window_months, real=real)
+    return {
+        "window_months": window_months,
+        "real": real,
+        "rolling_cagr": dataframe_to_json(df),
+    }
+
+
+@translates_okama_errors
+def get_cagr_probability(
+    portfolio: dict[str, Any],
+    years: int = 1,
+    cagr_target: float = 0.0,
+) -> dict[str, Any]:
+    """Percentile rank of a CAGR target in the portfolio's historical distribution.
+
+    Answers "what share of historical ``years``-long periods ended with CAGR
+    below ``cagr_target``" — e.g. with ``cagr_target=0`` this is the historical
+    probability (in percent) of losing money over ``years`` years.
+    """
+    if years < 1:
+        raise OkamaMcpError("years must be a positive integer")
+    _spec, pf = _get_portfolio(portfolio)
+    rank = float(pf.percentile_inverse_cagr(years=years, score=cagr_target))
+    return {
+        "years": years,
+        "cagr_target": cagr_target,
+        "percentile_rank": rank,
+        "interpretation": (
+            f"{rank:g}% of historical {years}-year periods had CAGR below "
+            f"{cagr_target:.2%}"
+        ),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
@@ -225,3 +275,5 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(get_portfolio_drawdowns)
     mcp.tool(get_portfolio_var_cvar)
     mcp.tool(get_portfolio_wealth_index)
+    mcp.tool(get_rolling_cagr)
+    mcp.tool(get_cagr_probability)
