@@ -95,6 +95,10 @@ Design constraints:
 - Every plot tool accepts optional `width` / `height` parameters (pixels, validated
   bounds 300–4000) so an MCP user can request a custom size or aspect ratio
   (e.g. a square 1200×1200 chart). DPI stays fixed; only the canvas size varies.
+- Every plot tool also accepts optional `save_path` (added post-v1.0.0): the PNG is
+  additionally written to that file and the path reported as a text block. Rationale:
+  Claude Code's terminal UI shows MCP image content only to the model, not the user —
+  a saved file gives the user an openable reference. (Claude Desktop renders inline.)
 - Existing data tools are **not** modified; tool count grows ~16 → ~21.
 - TDD: unit tests assert a valid PNG (magic bytes, non-zero size) on mocks;
   live rendering covered in the integration suite.

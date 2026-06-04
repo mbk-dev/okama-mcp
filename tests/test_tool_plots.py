@@ -182,6 +182,31 @@ class TestPlotAssets:
             plots_tool.plot_assets([], "USD")
 
 
+class TestSavePath:
+    def test_save_path_writes_png_and_reports_path(self, tmp_path) -> None:
+        pf = _make_portfolio_mock()
+        target = tmp_path / "charts" / "wealth.png"  # parent dir doesn't exist yet
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = plots_tool.plot_wealth_index(VALID_SPEC, save_path=str(target))
+
+        assert isinstance(out, list) and len(out) == 2
+        image, message = out
+        assert isinstance(image, Image)
+        assert image.data.startswith(PNG_MAGIC)
+        assert str(target) in message
+        assert target.read_bytes().startswith(PNG_MAGIC)
+        assert target.read_bytes() == image.data
+
+    def test_without_save_path_returns_bare_image(self) -> None:
+        pf = _make_portfolio_mock()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = plots_tool.plot_wealth_index(VALID_SPEC)
+
+        assert isinstance(out, Image)
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_plot_tools_registered(self) -> None:

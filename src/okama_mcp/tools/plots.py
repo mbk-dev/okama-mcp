@@ -7,6 +7,7 @@ the thread-safe OO matplotlib helpers from `okama_mcp.rendering`.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -21,8 +22,21 @@ from okama_mcp.tools.monte_carlo import _prepare_dcf
 from okama_mcp.tools.portfolio import _get_portfolio
 
 
-def _png(fig: Any) -> Image:
-    return Image(data=fig_to_png(fig), format="png")
+def _render(fig: Any, save_path: str | None) -> Image | list[Image | str]:
+    """Return the chart as MCP image content; optionally also write it to disk.
+
+    ``save_path`` exists for clients that don't render MCP images in their UI
+    (e.g. terminal clients like Claude Code): the tool writes the PNG to the
+    given path and reports it, so the user gets an openable file reference.
+    """
+    png = fig_to_png(fig)
+    image = Image(data=png, format="png")
+    if save_path is None:
+        return image
+    path = Path(save_path).expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(png)
+    return [image, f"Chart saved to {path}"]
 
 
 def _plot_index_values(index: pd.Index) -> pd.Index:
@@ -32,13 +46,15 @@ def _plot_index_values(index: pd.Index) -> pd.Index:
 
 @translates_okama_errors
 def plot_wealth_index(
-    portfolio: dict[str, Any], width: int = 1500, height: int = 900
-) -> Image:
+    portfolio: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
+) -> Image | list[Image | str]:
     """Line chart of the portfolio wealth index (growth of 1000 units).
 
     Includes the accumulated-inflation line when the spec has ``inflation: true``.
     ``width``/``height`` set the PNG size in pixels (300-4000) — use them when the
     user asks for a specific size or aspect ratio.
+    ``save_path``: optional file path — also write the PNG there and report it
+    (for clients that don't render MCP images inline, e.g. terminal clients).
     """
     spec, pf = _get_portfolio(portfolio)
     wi = pf.wealth_index
@@ -49,16 +65,18 @@ def plot_wealth_index(
     ax.set_title(f"Wealth index — {', '.join(spec.assets)} ({spec.ccy})")
     ax.set_ylabel(f"Wealth ({spec.ccy})")
     ax.legend()
-    return _png(fig)
+    return _render(fig, save_path)
 
 
 @translates_okama_errors
 def plot_drawdowns(
-    portfolio: dict[str, Any], width: int = 1500, height: int = 900
-) -> Image:
+    portfolio: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
+) -> Image | list[Image | str]:
     """Drawdown chart for the portfolio (percentage decline from previous peak).
 
     ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    ``save_path``: optional file path — also write the PNG there and report it
+    (for clients that don't render MCP images inline, e.g. terminal clients).
     """
     spec, pf = _get_portfolio(portfolio)
     dd = pf.drawdowns.astype(float)
@@ -68,16 +86,18 @@ def plot_drawdowns(
     ax.fill_between(x, dd.values, 0.0, color="tab:red", alpha=0.25)
     ax.set_title(f"Drawdowns — {', '.join(spec.assets)} ({spec.ccy})")
     ax.set_ylabel("Drawdown")
-    return _png(fig)
+    return _render(fig, save_path)
 
 
 @translates_okama_errors
 def plot_efficient_frontier(
-    frontier: dict[str, Any], width: int = 1500, height: int = 900
-) -> Image:
+    frontier: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
+) -> Image | list[Image | str]:
     """Efficient-frontier curve (Risk vs Mean return) with individual asset points.
 
     ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    ``save_path``: optional file path — also write the PNG there and report it
+    (for clients that don't render MCP images inline, e.g. terminal clients).
     """
     spec, ef = _get_frontier(frontier)
     points = ef.ef_points
@@ -99,7 +119,7 @@ def plot_efficient_frontier(
     ax.set_xlabel("Risk (annualized std)")
     ax.set_ylabel("Mean return (annualized)")
     ax.legend()
-    return _png(fig)
+    return _render(fig, save_path)
 
 
 @translates_okama_errors
@@ -109,10 +129,13 @@ def plot_monte_carlo(
     cashflow: dict[str, Any],
     width: int = 1500,
     height: int = 900,
-) -> Image:
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
     """Monte Carlo forecast fan: percentile bands of future wealth over time.
 
     ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    ``save_path``: optional file path — also write the PNG there and report it
+    (for clients that don't render MCP images inline, e.g. terminal clients).
     """
     pf, mc_spec = _prepare_dcf(portfolio, mc, cashflow)
     mc_wealth = pf.dcf.monte_carlo_wealth(discounting="fv", include_negative_values=True)
@@ -132,7 +155,7 @@ def plot_monte_carlo(
     )
     ax.set_ylabel(f"Wealth ({getattr(pf, 'currency', '')})")
     ax.legend()
-    return _png(fig)
+    return _render(fig, save_path)
 
 
 @translates_okama_errors
@@ -144,10 +167,13 @@ def plot_assets(
     inflation: bool = False,
     width: int = 1500,
     height: int = 900,
-) -> Image:
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
     """Wealth-index comparison chart for individual assets (growth of 1000 each).
 
     ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    ``save_path``: optional file path — also write the PNG there and report it
+    (for clients that don't render MCP images inline, e.g. terminal clients).
     """
     al = _build_asset_list(symbols, ccy, first_date, last_date, inflation)
     wi = al.wealth_indexes
@@ -158,7 +184,7 @@ def plot_assets(
     ax.set_title(f"Wealth indexes — {', '.join(symbols)} ({ccy})")
     ax.set_ylabel(f"Wealth ({ccy})")
     ax.legend()
-    return _png(fig)
+    return _render(fig, save_path)
 
 
 def register(mcp: FastMCP) -> None:
