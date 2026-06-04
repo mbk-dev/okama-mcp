@@ -63,10 +63,18 @@ Restart Claude Desktop; the server appears in the tools menu.
 
 ### Claude Code
 
-From the project root:
+From the project root — registers the server for this project only (`claude` must be
+launched from this directory to see it):
 
 ```bash
 claude mcp add okama poetry run okama-mcp stdio
+```
+
+To make the server available in **every** project (user scope), register the absolute
+path of the venv binary — `poetry run` would not work outside the project directory:
+
+```bash
+claude mcp add --scope user okama -- "$(poetry env info -p)/bin/okama-mcp" stdio
 ```
 
 Or commit a `.claude/mcp.json` so the whole team picks it up:
