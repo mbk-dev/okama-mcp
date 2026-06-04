@@ -126,3 +126,36 @@ async def test_monte_carlo_retirement_forecast_live(server) -> None:
     assert payload["wealth_paths"]["n_scenarios"] == 100
     survival_pct = payload["survival"]["scenarios_above_zero_pct"]
     assert 0 <= survival_pct <= 100
+
+
+async def test_plot_wealth_index_live(server) -> None:
+    """Chart tools return real PNG image content from live okama data."""
+    spec = {
+        "assets": ["GLD.US", "VNQ.US"],
+        "weights": [0.3, 0.7],
+        "ccy": "USD",
+        "first_date": "2015-01",
+        "last_date": "2024-12",
+        "rebalancing_period": "year",
+        "inflation": True,
+    }
+    async with Client(server) as client:
+        result = await client.call_tool("plot_wealth_index", {"portfolio": spec})
+    image = result.content[0]
+    assert image.type == "image"
+    assert image.mimeType == "image/png"
+
+
+async def test_plot_efficient_frontier_live(server) -> None:
+    spec = {
+        "assets": ["SPY.US", "BND.US", "GLD.US"],
+        "ccy": "USD",
+        "n_points": 10,
+        "rebalancing_period": "year",
+        "inflation": False,
+    }
+    async with Client(server) as client:
+        result = await client.call_tool("plot_efficient_frontier", {"frontier": spec})
+    image = result.content[0]
+    assert image.type == "image"
+    assert image.mimeType == "image/png"

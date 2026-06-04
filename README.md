@@ -174,6 +174,20 @@ hash, so repeated calls on the same spec are fast.
 | `get_inflation(currency, first_date?, last_date?, include_cumulative?)` | Inflation series for a currency (`USD`, `EUR`, `RUB`, …). |
 | `get_central_bank_rate(country, first_date?, last_date?)` | Central-bank policy rate (`US`, `ECB`, `RUS`, …). |
 
+### Charts
+
+Each tool renders a PNG (default 1500×900) and returns it as MCP image content —
+clients like Claude Desktop display it inline. Every chart tool also accepts
+optional `width` / `height` (pixels, 300–4000) for custom sizes and aspect ratios.
+
+| Tool | Chart |
+|---|---|
+| `plot_wealth_index(portfolio)` | Portfolio wealth index (+ inflation line). |
+| `plot_drawdowns(portfolio)` | Drawdown depth over time. |
+| `plot_monte_carlo(portfolio, mc, cashflow)` | Monte Carlo forecast fan (percentile bands). |
+| `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
+| `plot_assets(symbols, ccy, ...)` | Wealth-index comparison of individual assets. |
+
 ## Spec shapes
 
 The complex tools take typed dicts validated by pydantic. The full schemas live in

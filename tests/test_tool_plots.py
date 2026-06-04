@@ -180,3 +180,15 @@ class TestPlotAssets:
     def test_empty_symbols_raises(self) -> None:
         with pytest.raises(OkamaMcpError):
             plots_tool.plot_assets([], "USD")
+
+
+class TestServerRegistration:
+    @pytest.mark.asyncio
+    async def test_plot_tools_registered(self) -> None:
+        from okama_mcp.server import mcp
+
+        tools = await mcp.list_tools()
+        names = {t.name for t in tools}
+        for tool in ("plot_wealth_index", "plot_drawdowns", "plot_efficient_frontier",
+                     "plot_monte_carlo", "plot_assets"):
+            assert tool in names
