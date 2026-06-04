@@ -125,3 +125,38 @@ class TestPlotEfficientFrontier:
 
         assert isinstance(out, Image)
         assert out.data.startswith(PNG_MAGIC)
+
+
+MC_SPEC: dict = {"distribution": "norm", "period_years": 2, "scenarios": 20,
+                 "percentiles": [10, 50, 90], "random_seed": 42}
+CASHFLOW_SPEC: dict = {"type": "indexation", "initial_investment": 100000,
+                       "frequency": "year", "amount": -4000, "indexation": "inflation"}
+
+
+def _make_mc_portfolio_mock() -> SimpleNamespace:
+    pf = _make_portfolio_mock()
+    n_periods, n_scenarios = 24, 20
+    idx = pd.period_range("2025-01", periods=n_periods, freq="M")
+    rng_matrix = {
+        f"s{i}": [100000.0 * (1 + 0.001 * i + 0.002 * t) for t in range(n_periods)]
+        for i in range(n_scenarios)
+    }
+    mc_wealth = pd.DataFrame(rng_matrix, index=idx)
+    pf.dcf = SimpleNamespace(
+        set_mc_parameters=lambda **kw: None,
+        monte_carlo_wealth=lambda **kw: mc_wealth,
+    )
+    return pf
+
+
+class TestPlotMonteCarlo:
+    def test_returns_png_image(self) -> None:
+        pf = _make_mc_portfolio_mock()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"), \
+             patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy",
+                   return_value=SimpleNamespace()):
+            out = plots_tool.plot_monte_carlo(VALID_SPEC, MC_SPEC, CASHFLOW_SPEC)
+
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)

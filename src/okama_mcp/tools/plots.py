@@ -16,6 +16,7 @@ from fastmcp.utilities.types import Image
 from okama_mcp.errors import translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
 from okama_mcp.tools.frontier import _get_frontier
+from okama_mcp.tools.monte_carlo import _prepare_dcf
 from okama_mcp.tools.portfolio import _get_portfolio
 
 
@@ -100,8 +101,42 @@ def plot_efficient_frontier(
     return _png(fig)
 
 
+@translates_okama_errors
+def plot_monte_carlo(
+    portfolio: dict[str, Any],
+    mc: dict[str, Any],
+    cashflow: dict[str, Any],
+    width: int = 1500,
+    height: int = 900,
+) -> Image:
+    """Monte Carlo forecast fan: percentile bands of future wealth over time.
+
+    ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    """
+    pf, mc_spec = _prepare_dcf(portfolio, mc, cashflow)
+    mc_wealth = pf.dcf.monte_carlo_wealth(discounting="fv", include_negative_values=True)
+
+    fig, ax = make_figure(width, height)
+    x = _plot_index_values(mc_wealth.index)
+    percentiles = sorted(mc_spec.percentiles)
+    bands = {p: mc_wealth.quantile(p / 100.0, axis=1) for p in percentiles}
+    for p, series in bands.items():
+        ax.plot(x, series.values, label=f"p{p}")
+    if len(percentiles) >= 2:
+        ax.fill_between(x, bands[percentiles[0]].values, bands[percentiles[-1]].values,
+                        alpha=0.15)
+    ax.set_title(
+        f"Monte Carlo forecast — {mc_spec.scenarios} scenarios, "
+        f"{mc_spec.period_years}y ({mc_spec.distribution})"
+    )
+    ax.set_ylabel(f"Wealth ({getattr(pf, 'currency', '')})")
+    ax.legend()
+    return _png(fig)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
     mcp.tool(plot_drawdowns)
     mcp.tool(plot_efficient_frontier)
+    mcp.tool(plot_monte_carlo)

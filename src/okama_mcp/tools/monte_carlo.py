@@ -157,6 +157,27 @@ def _mc_index_iso(mc_wealth: pd.DataFrame) -> list[str]:
     return [str(v) for v in idx]
 
 
+def _prepare_dcf(
+    portfolio: dict[str, Any], mc: dict[str, Any], cashflow: dict[str, Any]
+) -> tuple[Any, MCSpec]:
+    """Validate specs and return (Portfolio configured for MC, validated MCSpec)."""
+    mc_spec = _validate_mc(mc)
+    cashflow_spec = _validate_cashflow(cashflow)
+    _, pf = _get_portfolio(portfolio)
+
+    if mc_spec.random_seed is not None:
+        np.random.seed(mc_spec.random_seed)
+
+    pf.dcf.set_mc_parameters(
+        distribution=mc_spec.distribution,
+        period=mc_spec.period_years,
+        mc_number=mc_spec.scenarios,
+    )
+    strategy = _build_cashflow_strategy(pf, cashflow_spec)
+    pf.dcf.cashflow_parameters = strategy
+    return pf, mc_spec
+
+
 # ---------------------------------------------------------------------------
 # Tool
 # ---------------------------------------------------------------------------
@@ -187,20 +208,7 @@ def monte_carlo_forecast(
     (distribution stats of final values), and ``survival`` (% of scenarios with
     positive terminal wealth, plus survival-period quantiles in years).
     """
-    mc_spec = _validate_mc(mc)
-    cashflow_spec = _validate_cashflow(cashflow)
-    _, pf = _get_portfolio(portfolio)
-
-    if mc_spec.random_seed is not None:
-        np.random.seed(mc_spec.random_seed)
-
-    pf.dcf.set_mc_parameters(
-        distribution=mc_spec.distribution,
-        period=mc_spec.period_years,
-        mc_number=mc_spec.scenarios,
-    )
-    strategy = _build_cashflow_strategy(pf, cashflow_spec)
-    pf.dcf.cashflow_parameters = strategy
+    pf, mc_spec = _prepare_dcf(portfolio, mc, cashflow)
 
     mc_wealth = pf.dcf.monte_carlo_wealth(discounting="fv", include_negative_values=True)
     survival = pf.dcf.monte_carlo_survival_period(threshold=0)
@@ -208,7 +216,7 @@ def monte_carlo_forecast(
     return {
         "portfolio_spec": portfolio,
         "mc_spec": mc_spec.model_dump(),
-        "cashflow_spec": cashflow_spec.model_dump(),
+        "cashflow_spec": _validate_cashflow(cashflow).model_dump(),
         "wealth_paths": {
             "index": _mc_index_iso(mc_wealth),
             "percentiles": _percentile_bands(mc_wealth, mc_spec.percentiles),
