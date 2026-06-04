@@ -201,12 +201,16 @@ def get_portfolio_wealth_index(
     portfolio: dict[str, Any],
     full: bool = False,
 ) -> dict[str, Any]:
-    """Wealth-index time series for the portfolio (cumulative growth of 1000)."""
+    """Wealth-index time series for the portfolio (cumulative growth of 1000).
+
+    okama returns a DataFrame: the portfolio column plus an accumulated-inflation
+    column when the spec has ``inflation: true``.
+    """
     _spec, pf = _get_portfolio(portfolio)
     wi = pf.wealth_index
     return {
         "currency": getattr(pf, "currency", None),
-        "wealth_index": series_to_json(wi, full=full),
+        "wealth_index": dataframe_to_json(wi, full=full),
     }
 
 

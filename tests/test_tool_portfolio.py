@@ -37,8 +37,16 @@ def _make_portfolio_mock(
     cvar=0.123,
 ) -> SimpleNamespace:
     idx = pd.period_range("2010-01", periods=6, freq="M")
-    wealth = wealth if wealth is not None else pd.Series([1000, 1010, 1020, 1015, 1030, 1050],
-                                                       index=idx, dtype=float, name="pf")
+    # Real okama Portfolio.wealth_index is ALWAYS a DataFrame: the portfolio column
+    # plus an accumulated-inflation column when inflation=True (see okama
+    # portfolios/core.py, _make_df_if_series).
+    wealth = wealth if wealth is not None else pd.DataFrame(
+        {
+            "pf.PF": [1000.0, 1010.0, 1020.0, 1015.0, 1030.0, 1050.0],
+            "USD.INFL": [1000.0, 1002.0, 1004.5, 1006.0, 1008.2, 1010.1],
+        },
+        index=idx,
+    )
     drawdowns = drawdowns if drawdowns is not None else pd.Series(
         [0.0, 0.0, 0.0, -0.005, 0.0, 0.0], index=idx, name="dd")
     recovery = recovery if recovery is not None else pd.Series(
@@ -183,14 +191,16 @@ class TestPortfolioVarCvar:
 
 
 class TestPortfolioWealthIndex:
-    def test_returns_series(self) -> None:
+    def test_returns_dataframe_with_portfolio_and_inflation_columns(self) -> None:
         pf = _make_portfolio_mock()
         with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
              patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
             out = pf_tool.get_portfolio_wealth_index(VALID_SPEC)
 
-        assert out["wealth_index"]["values"] == [1000.0, 1010.0, 1020.0, 1015.0, 1030.0, 1050.0]
+        assert out["wealth_index"]["columns"] == ["pf.PF", "USD.INFL"]
         assert out["wealth_index"]["index"][0] == "2010-01-31"
+        assert out["wealth_index"]["data"][0] == [1000.0, 1000.0]
+        assert out["wealth_index"]["data"][-1] == [1050.0, 1010.1]
 
 
 class TestServerRegistration:

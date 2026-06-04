@@ -65,6 +65,32 @@ async def test_analyze_portfolio_gold_real_estate_live(server) -> None:
     assert -0.10 < payload["metrics"]["cagr"] < 0.30
 
 
+async def test_portfolio_wealth_index_live(server) -> None:
+    """Regression for the 2026-06-04 bug: okama wealth_index is a DataFrame
+    (portfolio + accumulated inflation), not a Series."""
+    spec = {
+        "assets": ["GLD.US", "VNQ.US"],
+        "weights": [0.3, 0.7],
+        "ccy": "USD",
+        "first_date": "2010-01",
+        "last_date": "2024-12",
+        "rebalancing_period": "year",
+        "inflation": True,
+    }
+    async with Client(server) as client:
+        result = await client.call_tool("get_portfolio_wealth_index", {"portfolio": spec})
+        payload = result.data
+    wi = payload["wealth_index"]
+    # Two columns: the portfolio itself and accumulated USD inflation.
+    assert len(wi["columns"]) == 2
+    assert "USD.INFL" in wi["columns"]
+    # ~15 years of monthly rows (below the 500-row truncation threshold).
+    assert len(wi["index"]) > 100
+    assert len(wi["data"]) == len(wi["index"])
+    # Wealth index starts at the initial 1000 units for both columns.
+    assert wi["data"][0] == [1000.0, 1000.0]
+
+
 async def test_monte_carlo_retirement_forecast_live(server) -> None:
     """User example #2: $1k/month indexed-to-inflation withdrawal, 25y horizon."""
     portfolio_spec = {
