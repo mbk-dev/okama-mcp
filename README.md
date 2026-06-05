@@ -134,6 +134,26 @@ it global):
 }
 ```
 
+### Codex (CLI & Desktop)
+
+Add the server with one command:
+
+```bash
+codex mcp add okama -- uvx okama-mcp stdio
+```
+
+Or declare it in `~/.codex/config.toml` (or a project-scoped `.codex/config.toml`
+in trusted projects):
+
+```toml
+[mcp_servers.okama]
+command = "uvx"
+args = ["okama-mcp", "stdio"]
+```
+
+The Codex CLI, desktop app, and IDE extension share this configuration — set it up
+once and it works in all three.
+
 ### Self-hosting (streamable HTTP)
 
 Run okama-mcp on your own server and share it across your MCP clients:
@@ -154,6 +174,14 @@ The server is open by design — free to run, no registration. If your instance 
 not be public, restrict access at the nginx level (allow-list, VPN, or HTTP basic auth).
 
 ## Tool catalog
+
+A Monte Carlo retirement forecast (30% gold / 70% real estate, withdrawing $1,000/month
+indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD — the
+exact examples from the top of this page:
+
+![Monte Carlo forecast fan — percentile bands of future wealth](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/monte-carlo-forecast.png)
+
+![Efficient frontier — SPY.US, BND.US, GLD.US (USD)](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/efficient-frontier.png)
 
 All tools are **stateless** — pass the full portfolio specification with every call.
 The server caches expensive okama objects (`Portfolio`, `EfficientFrontier`) by content
@@ -229,14 +257,6 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_irr_distribution(portfolio, mc, cashflow)` | Histogram of IRR across Monte Carlo scenarios (percentile markers). |
 | `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
 | `plot_assets(symbols, ccy, ...)` | Wealth-index comparison of individual assets. |
-
-A Monte Carlo retirement forecast (30% gold / 70% real estate, withdrawing $1,000/month
-indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD — the
-exact examples from the top of this page:
-
-![Monte Carlo forecast fan — percentile bands of future wealth](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/monte-carlo-forecast.png)
-
-![Efficient frontier — SPY.US, BND.US, GLD.US (USD)](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/efficient-frontier.png)
 
 ## Spec shapes
 
