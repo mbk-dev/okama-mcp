@@ -2,6 +2,11 @@
 
 <!-- mcp-name: io.github.mbk-dev/okama-mcp -->
 
+[![PyPI](https://img.shields.io/pypi/v/okama-mcp)](https://pypi.org/project/okama-mcp/)
+[![CI](https://github.com/mbk-dev/okama-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/mbk-dev/okama-mcp/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/pypi/pyversions/okama-mcp)](https://pypi.org/project/okama-mcp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 MCP (Model Context Protocol) server that exposes the [okama](https://github.com/mbk-dev/okama)
 investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, and any
 other MCP-compatible client.
