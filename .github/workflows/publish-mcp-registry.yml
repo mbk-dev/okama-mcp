@@ -29,6 +29,18 @@ jobs:
           test "$TAG_VERSION" = "$PYPROJECT_VERSION" || { echo "::error::pyproject.toml version differs from tag"; exit 1; }
           test "$TAG_VERSION" = "$SERVER_VERSION"    || { echo "::error::server.json version differs from tag"; exit 1; }
           test "$TAG_VERSION" = "$PKG_VERSION"       || { echo "::error::server.json packages[0].version differs from tag"; exit 1; }
+      - name: Wait for the PyPI release to appear
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/okama-mcp/${VERSION}/json")
+            [ "$code" = "200" ] && echo "PyPI serves ${VERSION}" && exit 0
+            echo "attempt $i: PyPI returned ${code}, waiting 10s..."
+            sleep 10
+          done
+          echo "::error::PyPI never served ${VERSION} (registry validation would fail)"
+          exit 1
       - name: Install mcp-publisher
         run: |
           curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
