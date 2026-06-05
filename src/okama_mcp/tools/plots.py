@@ -187,6 +187,45 @@ def plot_assets(
     return _render(fig, save_path)
 
 
+@translates_okama_errors
+def plot_irr_distribution(
+    portfolio: dict[str, Any],
+    mc: dict[str, Any],
+    cashflow: dict[str, Any],
+    width: int = 1500,
+    height: int = 900,
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
+    """Histogram of money-weighted IRR across Monte Carlo scenarios.
+
+    Shows the distribution of the investor's annualized return for the given
+    cash-flow plan, with markers at the requested percentiles. Requires
+    okama >= 2.2.0. ``width``/``height``: PNG size in pixels (300-4000);
+    ``save_path``: optionally also write the PNG to a file and report the path.
+    """
+    pf, mc_spec = _prepare_dcf(portfolio, mc, cashflow)
+    irr = pf.dcf.monte_carlo_irr().astype(float)
+
+    fig, ax = make_figure(width, height)
+    ax.hist(irr.values, bins=28, color="tab:blue", alpha=0.8, edgecolor="white")
+    ymax = ax.get_ylim()[1]
+    for p in sorted(mc_spec.percentiles):
+        q = float(irr.quantile(p / 100.0))
+        ax.axvline(q, color="#1e293b", linestyle="-" if p == 50 else ":",
+                   linewidth=1.5, ymax=0.82)
+        ax.annotate(f"p{p}\n{q:.1%}", (q, ymax * 0.84), ha="center", va="bottom",
+                    fontsize=10, color="#1e293b")
+    ax.set_ylim(0, ymax * 1.02)
+    ax.set_title(
+        f"IRR distribution — {mc_spec.scenarios} scenarios, "
+        f"{mc_spec.period_years}y ({mc_spec.distribution})"
+    )
+    ax.set_xlabel("Money-weighted return (IRR)")
+    ax.set_ylabel("Scenarios")
+    ax.xaxis.set_major_formatter(lambda x, _: f"{x:.0%}")
+    return _render(fig, save_path)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
@@ -194,3 +233,4 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(plot_efficient_frontier)
     mcp.tool(plot_monte_carlo)
     mcp.tool(plot_assets)
+    mcp.tool(plot_irr_distribution)

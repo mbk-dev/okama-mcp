@@ -29,7 +29,7 @@ yourself, locally or on your own server.
 
 ## Install
 
-Requires Python ≥ 3.11 (same floor as okama itself).
+Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 2.2.0 is installed automatically.
 
 The easiest way — no clone, no venv — is [uv](https://docs.astral.sh/uv/) or pipx:
 
@@ -168,7 +168,8 @@ hash, so repeated calls on the same spec are fast.
 
 | Tool | Purpose |
 |---|---|
-| `monte_carlo_forecast(portfolio, mc, cashflow)` | Forward simulation with one of five cash-flow strategies (`indexation`, `percentage`, `time_series`, `vanguard`, `cut_if_drawdown`). Returns percentile wealth bands, terminal-wealth stats, and survival metrics. |
+| `monte_carlo_forecast(portfolio, mc, cashflow)` | Forward simulation with one of five cash-flow strategies (`indexation`, `percentage`, `time_series`, `vanguard`, `cut_if_drawdown`). Returns percentile wealth bands, terminal-wealth stats, survival metrics. Includes the money-weighted IRR distribution (percentiles + mean). |
+| `get_portfolio_irr(portfolio, cashflow)` | Historical money-weighted return (IRR) for a contribution/withdrawal plan. |
 
 ### Efficient Frontier
 
@@ -201,6 +202,7 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_wealth_index(portfolio)` | Portfolio wealth index (+ inflation line). |
 | `plot_drawdowns(portfolio)` | Drawdown depth over time. |
 | `plot_monte_carlo(portfolio, mc, cashflow)` | Monte Carlo forecast fan (percentile bands). |
+| `plot_irr_distribution(portfolio, mc, cashflow)` | Histogram of IRR across Monte Carlo scenarios (percentile markers). |
 | `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
 | `plot_assets(symbols, ccy, ...)` | Wealth-index comparison of individual assets. |
 

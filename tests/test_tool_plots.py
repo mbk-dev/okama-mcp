@@ -145,6 +145,7 @@ def _make_mc_portfolio_mock() -> SimpleNamespace:
     pf.dcf = SimpleNamespace(
         set_mc_parameters=lambda **kw: None,
         monte_carlo_wealth=lambda **kw: mc_wealth,
+        monte_carlo_irr=lambda: pd.Series([0.02, 0.05, 0.071, 0.08, 0.11] * 4),
     )
     return pf
 
@@ -157,6 +158,19 @@ class TestPlotMonteCarlo:
              patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy",
                    return_value=SimpleNamespace()):
             out = plots_tool.plot_monte_carlo(VALID_SPEC, MC_SPEC, CASHFLOW_SPEC)
+
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)
+
+
+class TestPlotIrrDistribution:
+    def test_returns_png_image(self) -> None:
+        pf = _make_mc_portfolio_mock()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"), \
+             patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy",
+                   return_value=SimpleNamespace()):
+            out = plots_tool.plot_irr_distribution(VALID_SPEC, MC_SPEC, CASHFLOW_SPEC)
 
         assert isinstance(out, Image)
         assert out.data.startswith(PNG_MAGIC)
@@ -236,5 +250,5 @@ class TestServerRegistration:
         tools = await mcp.list_tools()
         names = {t.name for t in tools}
         for tool in ("plot_wealth_index", "plot_drawdowns", "plot_efficient_frontier",
-                     "plot_monte_carlo", "plot_assets"):
+                     "plot_monte_carlo", "plot_assets", "plot_irr_distribution"):
             assert tool in names
