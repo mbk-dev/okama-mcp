@@ -15,7 +15,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import okama as ok
 import pandas as pd
 from fastmcp import FastMCP
@@ -165,13 +164,11 @@ def _prepare_dcf(
     cashflow_spec = _validate_cashflow(cashflow)
     _, pf = _get_portfolio(portfolio)
 
-    if mc_spec.random_seed is not None:
-        np.random.seed(mc_spec.random_seed)
-
     pf.dcf.set_mc_parameters(
         distribution=mc_spec.distribution,
         period=mc_spec.period_years,
         mc_number=mc_spec.scenarios,
+        seed=mc_spec.random_seed,
     )
     strategy = _build_cashflow_strategy(pf, cashflow_spec)
     pf.dcf.cashflow_parameters = strategy
@@ -179,8 +176,41 @@ def _prepare_dcf(
 
 
 # ---------------------------------------------------------------------------
-# Tool
+# Tools
 # ---------------------------------------------------------------------------
+
+
+@translates_okama_errors
+def get_portfolio_irr(
+    portfolio: dict[str, Any],
+    cashflow: dict[str, Any],
+) -> dict[str, Any]:
+    """Historical money-weighted return (IRR) of the portfolio with a cash-flow plan.
+
+    Unlike CAGR (time-weighted), IRR reflects the investor's actual experience with
+    the given contributions/withdrawals schedule. Returns null when the cash flow
+    has no sign change (IRR undefined). Requires okama >= 2.2.0.
+
+    Parameters
+    ----------
+    portfolio : dict
+        :class:`PortfolioSpec` — assets + weights + dates + base currency.
+    cashflow : dict
+        :class:`CashflowSpec` — one of indexation / percentage / time_series /
+        vanguard / cut_if_drawdown. The ``type`` field discriminates.
+
+    Returns
+    -------
+    dict with ``irr`` (float or None) and ``cashflow_spec``.
+    """
+    cashflow_spec = _validate_cashflow(cashflow)
+    _, pf = _get_portfolio(portfolio)
+    strategy = _build_cashflow_strategy(pf, cashflow_spec)
+    pf.dcf.cashflow_parameters = strategy
+    return {
+        "cashflow_spec": cashflow_spec.model_dump(),
+        "irr": value_to_json(float(pf.dcf.irr())),
+    }
 
 
 @translates_okama_errors
@@ -212,6 +242,7 @@ def monte_carlo_forecast(
 
     mc_wealth = pf.dcf.monte_carlo_wealth(discounting="fv", include_negative_values=True)
     survival = pf.dcf.monte_carlo_survival_period(threshold=0)
+    irr_series = pf.dcf.monte_carlo_irr()
 
     return {
         "portfolio_spec": portfolio,
@@ -225,6 +256,13 @@ def monte_carlo_forecast(
         },
         "terminal_wealth": _terminal_stats(mc_wealth),
         "survival": _survival_stats(mc_wealth, survival),
+        "irr": {
+            "percentiles": {
+                str(p): value_to_json(float(irr_series.quantile(p / 100.0)))
+                for p in sorted(mc_spec.percentiles)
+            },
+            "mean": value_to_json(float(irr_series.mean())),
+        },
     }
 
 
@@ -235,4 +273,5 @@ def monte_carlo_forecast(
 
 def register(mcp: FastMCP) -> None:
     """Register Phase 5 Monte Carlo tools with the FastMCP server."""
+    mcp.tool(get_portfolio_irr)
     mcp.tool(monte_carlo_forecast)

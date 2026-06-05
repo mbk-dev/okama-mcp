@@ -33,7 +33,7 @@ def _make_mc_wealth(n_months: int = 12, n_scenarios: int = 4) -> pd.DataFrame:
     return pd.DataFrame(data, index=idx)
 
 
-def _make_pf_mock(*, mc_wealth=None, survival=None) -> SimpleNamespace:
+def _make_pf_mock(*, mc_wealth=None, survival=None, mc_irr=None) -> SimpleNamespace:
     pf = SimpleNamespace()
     pf.symbol = "pf.PF"
     pf.symbols = ["GLD.US", "VNQ.US"]
@@ -66,6 +66,11 @@ def _make_pf_mock(*, mc_wealth=None, survival=None) -> SimpleNamespace:
         return_value=survival
         if survival is not None
         else pd.Series([23.5, 24.0, 25.0, 25.0])
+    )
+    dcf.monte_carlo_irr = MagicMock(
+        return_value=mc_irr
+        if mc_irr is not None
+        else pd.Series([0.05, 0.07, 0.06, 0.08])
     )
     dcf.discount_rate = 0.04
     pf.dcf = dcf
@@ -123,15 +128,18 @@ class TestIndexationCashflowForecast:
 
         # MC parameters were set on the portfolio's dcf.
         pf.dcf.set_mc_parameters.assert_called_once_with(
-            distribution="norm", period=25, mc_number=4
+            distribution="norm", period=25, mc_number=4, seed=None
         )
 
-        # The output has wealth percentile bands + terminal & survival stats.
+        # The output has wealth percentile bands + terminal & survival stats + IRR block.
         assert set(out["wealth_paths"]["percentiles"].keys()) == {"5", "50", "95"}
         assert out["wealth_paths"]["index"][0] == "2025-01-31"
         assert "terminal_wealth" in out
         assert "survival" in out
         assert 0 <= out["survival"]["scenarios_above_zero_pct"] <= 100
+        assert "irr" in out
+        assert "percentiles" in out["irr"]
+        assert "mean" in out["irr"]
 
 
 class TestPercentageCashflow:
@@ -268,18 +276,99 @@ class TestSurvivalCalculations:
         assert out["survival"]["min_survival_years"] == 12.0
 
 
+class TestIrrBlock:
+    def test_irr_percentiles_and_mean_computed(self) -> None:
+        irr_series = pd.Series([0.03, 0.05, 0.06, 0.07, 0.08, 0.10])
+        pf = _make_pf_mock(mc_irr=irr_series)
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            out = mc_tool.monte_carlo_forecast(
+                VALID_PF_SPEC, VALID_MC_SPEC, VALID_INDEXATION_CASHFLOW
+            )
+
+        assert "irr" in out
+        assert set(out["irr"]["percentiles"].keys()) == {"5", "50", "95"}
+        # p5 = irr_series.quantile(0.05) ~ 0.035, p50 = 0.065, p95 = 0.094
+        assert 0.03 <= out["irr"]["percentiles"]["5"] <= 0.04
+        assert 0.06 <= out["irr"]["percentiles"]["50"] <= 0.07
+        assert 0.09 <= out["irr"]["percentiles"]["95"] <= 0.10
+        assert 0.06 <= out["irr"]["mean"] <= 0.07
+
+    def test_irr_nan_becomes_none(self) -> None:
+        irr_series = pd.Series([0.05, float("nan"), 0.07, 0.06])
+        pf = _make_pf_mock(mc_irr=irr_series)
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            out = mc_tool.monte_carlo_forecast(
+                VALID_PF_SPEC, VALID_MC_SPEC, VALID_INDEXATION_CASHFLOW
+            )
+
+        # quantile ignores NaN; mean also excludes it => real values still present
+        assert out["irr"]["mean"] is not None
+
+
 class TestRandomSeed:
-    def test_seed_is_applied(self) -> None:
+    def test_seed_is_passed_to_set_mc_parameters(self) -> None:
         pf = _make_pf_mock()
         spec_with_seed = dict(VALID_MC_SPEC, random_seed=42)
         with (
             patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
             patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
-            patch("okama_mcp.tools.monte_carlo.np.random.seed") as seed_mock,
         ):
             mc_tool.monte_carlo_forecast(VALID_PF_SPEC, spec_with_seed, VALID_INDEXATION_CASHFLOW)
-        seed_mock.assert_called_once_with(42)
+
+        pf.dcf.set_mc_parameters.assert_called_once_with(
+            distribution="norm", period=25, mc_number=4, seed=42
+        )
+
+    def test_seed_none_is_passed_as_none(self) -> None:
+        pf = _make_pf_mock()
+        spec_no_seed = dict(VALID_MC_SPEC)
+        spec_no_seed.pop("random_seed", None)
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            mc_tool.monte_carlo_forecast(VALID_PF_SPEC, spec_no_seed, VALID_INDEXATION_CASHFLOW)
+
+        pf.dcf.set_mc_parameters.assert_called_once_with(
+            distribution="norm", period=25, mc_number=4, seed=None
+        )
+
+
+class TestGetPortfolioIrr:
+    def test_historical_irr_with_cashflow(self) -> None:
+        pf = _make_pf_mock()
+        pf.dcf.irr = MagicMock(return_value=0.071)
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            out = mc_tool.get_portfolio_irr(VALID_PF_SPEC, VALID_INDEXATION_CASHFLOW)
+
+        assert out["irr"] == 0.071
+        assert "cashflow_spec" in out
+
+    def test_nan_irr_becomes_none(self) -> None:
+        pf = _make_pf_mock()
+        pf.dcf.irr = MagicMock(return_value=float("nan"))
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            out = mc_tool.get_portfolio_irr(VALID_PF_SPEC, VALID_INDEXATION_CASHFLOW)
+
+        assert out["irr"] is None
 
 
 class TestServerRegistration:
@@ -290,3 +379,4 @@ class TestServerRegistration:
         tools = await mcp.list_tools()
         names = {t.name for t in tools}
         assert "monte_carlo_forecast" in names
+        assert "get_portfolio_irr" in names
