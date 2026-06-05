@@ -5,6 +5,10 @@
 - New dependencies must be added in `pyproject.toml` and additionally to `requirements.txt`.
 - Use interpreter in poetry env (`poetry run python ...`).
 - Always use `poetry add` instead of `pip install`.
+- **All temporary files (including generated images, screenshots, scratch scripts, data
+  dumps) go into the gitignored `tmp/` directory at the project root** — never into the
+  repo root, `/tmp`, or source directories. Clean it up freely; nothing in `tmp/` is
+  precious.
 
 ## Test-Driven Development (TDD)
 Any change to production code (new feature, bugfix, refactor, behavior change) must follow TDD:

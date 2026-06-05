@@ -14,3 +14,4 @@ build/
 htmlcov/
 *.log
 poetry.lock
+tmp/
