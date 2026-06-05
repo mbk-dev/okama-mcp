@@ -22,7 +22,11 @@ mcp: FastMCP = FastMCP(
         "Investment-analysis tools backed by the okama Python library. "
         "Use search_assets to discover ticker symbols (e.g. 'GLD.US', 'VNQ.US'); "
         "then build portfolios, run backtests, Monte Carlo forecasts and efficient "
-        "frontier optimisation. All tools are stateless — pass the full portfolio "
+        "frontier optimisation. Use the plot_* tools to render charts (wealth index, "
+        "drawdowns, efficient frontier, Monte Carlo, asset comparison) as PNG images — "
+        "prefer them over re-computing charts locally; pass save_path to also write "
+        "the image to a file for clients that don't render MCP images inline. "
+        "All tools are stateless — pass the full portfolio "
         "specification with every call."
     ),
 )
