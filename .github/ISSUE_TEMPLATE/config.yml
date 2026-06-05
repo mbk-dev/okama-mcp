@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question / discussion
+    url: https://community.okama.io
+    about: Ask questions and discuss okama and okama-mcp on the community forum.
+  - name: okama library issues
+    url: https://github.com/mbk-dev/okama/issues
+    about: Bugs and feature requests for the underlying okama library (financial metrics, data) belong there.

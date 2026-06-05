@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest a new tool or improvement for okama-mcp
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Note that okama-mcp is a thin MCP
+        wrapper around the [okama](https://github.com/mbk-dev/okama) library —
+        requests for new *financial analytics* (new metrics, new data) usually
+        belong in the okama repository, while requests for new *MCP tools, schemas,
+        transports, or client integrations* belong here.
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I have searched the existing issues and this feature has not been requested yet.
+          required: true
+        - label: This is a request for okama-mcp (MCP tools / schemas / transport), not for the underlying okama library.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to do that is currently hard or impossible?
+      placeholder: "When I ask the AI to ..., there is no tool that ..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: |
+        What you would like to happen. If you propose a new tool, sketch its
+        signature and what it should return.
+      placeholder: |
+        A new tool `get_xyz(portfolio, ...)` that returns ...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative designs you have considered.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else — links, screenshots, example prompts.
