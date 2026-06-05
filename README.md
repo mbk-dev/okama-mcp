@@ -7,6 +7,8 @@
 [![Python](https://img.shields.io/pypi/pyversions/okama-mcp)](https://pypi.org/project/okama-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+![okama-mcp — investment analytics for AI assistants](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/announce-en.png)
+
 MCP (Model Context Protocol) server that exposes the [okama](https://github.com/mbk-dev/okama)
 investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, and any
 other MCP-compatible client.
