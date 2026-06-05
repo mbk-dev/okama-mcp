@@ -103,9 +103,9 @@ To make the server available in **every** project (works from any directory):
 claude mcp add --scope user okama -- uvx okama-mcp stdio
 ```
 
-Developers running from a source checkout can use `claude mcp add okama poetry run okama-mcp stdio` from the project root instead.
+Developers running from a source checkout can use `claude mcp add okama -- poetry run okama-mcp stdio` from the project root instead.
 
-Or commit a `.claude/mcp.json` so the whole team picks it up:
+Or commit a `.mcp.json` at the project root so the whole team picks it up:
 
 ```json
 {
@@ -120,11 +120,19 @@ Or commit a `.claude/mcp.json` so the whole team picks it up:
 
 ### Cursor
 
-Open *Settings → MCP*, click *Add new MCP Server*, and use:
+Add the server to `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` to make
+it global):
 
-- Name: `okama`
-- Type: `stdio`
-- Command: `uvx okama-mcp stdio`
+```json
+{
+  "mcpServers": {
+    "okama": {
+      "command": "uvx",
+      "args": ["okama-mcp", "stdio"]
+    }
+  }
+}
+```
 
 ### Self-hosting (streamable HTTP)
 
@@ -222,6 +230,14 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
 | `plot_assets(symbols, ccy, ...)` | Wealth-index comparison of individual assets. |
 
+A Monte Carlo retirement forecast (30% gold / 70% real estate, withdrawing $1,000/month
+indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD — the
+exact examples from the top of this page:
+
+![Monte Carlo forecast fan — percentile bands of future wealth](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/monte-carlo-forecast.png)
+
+![Efficient frontier — SPY.US, BND.US, GLD.US (USD)](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/efficient-frontier.png)
+
 ## Spec shapes
 
 The complex tools take typed dicts validated by pydantic. The full schemas live in
@@ -296,8 +312,9 @@ src/okama_mcp/
     ├── search.py, asset.py, asset_list.py
     ├── portfolio.py, monte_carlo.py
     ├── frontier.py, macro.py
+    └── plots.py
 ```
 
 ## License
 
-Same as okama itself: MIT.
+[MIT](LICENSE) — same license as okama itself.
