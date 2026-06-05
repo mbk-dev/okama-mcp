@@ -41,6 +41,20 @@ uvx okama-mcp stdio          # run straight from PyPI
 pipx install okama-mcp
 ```
 
+Plain pip works too:
+
+```bash
+pip install okama-mcp
+```
+
+> [!WARNING]
+> <sub>With pip, prefer a dedicated virtual environment: on most modern Linux distros the
+> system Python is marked externally managed (PEP 668), so `pip install` outside a venv
+> fails, and a shared environment risks dependency conflicts. In your MCP client config,
+> point `command` at the absolute path of the `okama-mcp` script inside the venv — GUI
+> clients don't see your shell `PATH`. `uvx` and `pipx` avoid all of this by isolating
+> the install automatically.</sub>
+
 To work on the code, install from source instead:
 
 ```bash
