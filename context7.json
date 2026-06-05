@@ -1,0 +1,12 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "okama-mcp",
+  "description": "MCP server that exposes the okama investment portfolio toolkit (backtesting, Monte Carlo forecasts, efficient frontier, asset search) to AI assistants such as Claude Desktop, Claude Code, and Cursor",
+  "folders": [],
+  "excludeFolders": ["src", "tests", "dist", "deploy", "tmp", "docs/superpowers"],
+  "excludeFiles": ["CLAUDE.md", "AGENTS.md", "CODE_OF_CONDUCT.md"],
+  "rules": [
+    "Install with 'uvx okama-mcp stdio' or 'pipx install okama-mcp'; requires Python >= 3.11",
+    "Use the stdio transport for local MCP clients (Claude Desktop, Claude Code, Cursor) and streamable-http for self-hosting"
+  ]
+}
