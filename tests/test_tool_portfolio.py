@@ -86,7 +86,7 @@ VALID_SPEC: dict = {
     "ccy": "USD",
     "first_date": "2010-01",
     "last_date": "2024-12",
-    "rebalancing_period": "year",
+    "rebalancing_strategy": {"period": "year"},
     "inflation": True,
 }
 
@@ -95,10 +95,11 @@ class TestAnalyzePortfolio:
     def test_returns_metrics_and_describe(self) -> None:
         pf = _make_portfolio_mock()
         with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf) as m, \
-             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB") as reb:
             out = pf_tool.analyze_portfolio(VALID_SPEC)
 
         m.assert_called_once()
+        reb.assert_called_once_with(period="year", abs_deviation=None, rel_deviation=None)
         kwargs = m.call_args.kwargs
         assert kwargs["assets"] == ["GLD.US", "VNQ.US"]
         assert kwargs["weights"] == [0.3, 0.7]
@@ -115,6 +116,22 @@ class TestAnalyzePortfolio:
         assert out["metrics"]["mean_return_annual"] == 0.085
         assert out["describe"]["columns"] == ["pf"]
         assert out["period_years"] == 15.0
+
+    def test_rebalancing_deviations_passed_to_okama(self) -> None:
+        pf = _make_portfolio_mock()
+        spec = dict(
+            VALID_SPEC,
+            rebalancing_strategy={
+                "period": "quarter",
+                "abs_deviation": 0.05,
+                "rel_deviation": 0.1,
+            },
+        )
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB") as reb:
+            pf_tool.analyze_portfolio(spec)
+
+        reb.assert_called_once_with(period="quarter", abs_deviation=0.05, rel_deviation=0.1)
 
     def test_spec_validation_failure_is_translated(self) -> None:
         bad = dict(VALID_SPEC, weights=[0.3, 0.3])  # sum 0.6

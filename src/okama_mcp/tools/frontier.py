@@ -52,7 +52,11 @@ def _build_frontier(spec: FrontierSpec) -> Any:
         inflation=spec.inflation,
         full_frontier=spec.full_frontier,
         n_points=spec.n_points,
-        rebalancing_strategy=ok.Rebalance(period=spec.rebalancing_period),
+        rebalancing_strategy=ok.Rebalance(
+            period=spec.rebalancing_strategy.period,
+            abs_deviation=spec.rebalancing_strategy.abs_deviation,
+            rel_deviation=spec.rebalancing_strategy.rel_deviation,
+        ),
     )
 
 
@@ -81,7 +85,7 @@ def build_efficient_frontier(frontier: dict[str, Any]) -> dict[str, Any]:
 
     ``frontier`` is a :class:`FrontierSpec` dict: ``assets`` (≥2), ``ccy``,
     optional ``first_date``/``last_date``, optional ``bounds`` as
-    ``[[min, max], ...]``, ``n_points`` (default 20), ``rebalancing_period``,
+    ``[[min, max], ...]``, ``n_points`` (default 20), ``rebalancing_strategy``,
     ``inflation``.
     """
     spec, ef = _get_frontier(frontier)

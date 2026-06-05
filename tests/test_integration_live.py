@@ -53,7 +53,7 @@ async def test_analyze_portfolio_gold_real_estate_live(server) -> None:
         "ccy": "USD",
         "first_date": "2010-01",
         "last_date": "2024-12",
-        "rebalancing_period": "year",
+        "rebalancing_strategy": {"period": "year"},
         "inflation": True,
     }
     async with Client(server) as client:
@@ -74,7 +74,7 @@ async def test_portfolio_wealth_index_live(server) -> None:
         "ccy": "USD",
         "first_date": "2010-01",
         "last_date": "2024-12",
-        "rebalancing_period": "year",
+        "rebalancing_strategy": {"period": "year"},
         "inflation": True,
     }
     async with Client(server) as client:
@@ -99,7 +99,7 @@ async def test_monte_carlo_retirement_forecast_live(server) -> None:
         "ccy": "USD",
         "first_date": "2010-01",
         "last_date": "2024-12",
-        "rebalancing_period": "year",
+        "rebalancing_strategy": {"period": "year"},
         "inflation": True,
     }
     mc_spec = {
@@ -136,7 +136,7 @@ async def test_plot_wealth_index_live(server) -> None:
         "ccy": "USD",
         "first_date": "2015-01",
         "last_date": "2024-12",
-        "rebalancing_period": "year",
+        "rebalancing_strategy": {"period": "year"},
         "inflation": True,
     }
     async with Client(server) as client:
@@ -151,7 +151,7 @@ async def test_plot_efficient_frontier_live(server) -> None:
         "assets": ["SPY.US", "BND.US", "GLD.US"],
         "ccy": "USD",
         "n_points": 10,
-        "rebalancing_period": "year",
+        "rebalancing_strategy": {"period": "year"},
         "inflation": False,
     }
     async with Client(server) as client:
@@ -168,7 +168,7 @@ async def test_rolling_cagr_and_probability_live(server) -> None:
         "ccy": "USD",
         "first_date": "2010-01",
         "last_date": "2024-12",
-        "rebalancing_period": "year",
+        "rebalancing_strategy": {"period": "year"},
         "inflation": True,
     }
     async with Client(server) as client:

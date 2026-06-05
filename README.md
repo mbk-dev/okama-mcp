@@ -271,7 +271,11 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
   "ccy":      "USD",
   "first_date": "2010-01",
   "last_date":  "2024-12",
-  "rebalancing_period": "year",       // month | quarter | half-year | year | none
+  "rebalancing_strategy": {            // mirrors okama.Rebalance
+    "period": "year",                  // month | quarter | half-year | year | none
+    "abs_deviation": 0.05,             // optional, |actual - target| threshold, 0 < x <= 1
+    "rel_deviation": 0.1               // optional, |actual / target - 1| threshold, > 0
+  },
   "inflation": true
 }
 
@@ -298,7 +302,7 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
   "ccy":      "USD",
   "bounds":   [[0.0, 0.7], [0.1, 1.0], [0.0, 0.3]],   // optional
   "n_points": 20,
-  "rebalancing_period": "year",
+  "rebalancing_strategy": { "period": "year" },
   "inflation": false
 }
 ```

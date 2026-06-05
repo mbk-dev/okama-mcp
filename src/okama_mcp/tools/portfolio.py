@@ -54,7 +54,11 @@ def _validate(spec: dict[str, Any]) -> PortfolioSpec:
 
 
 def _build_portfolio(spec: PortfolioSpec) -> Any:
-    rebalance = ok.Rebalance(period=spec.rebalancing_period)
+    rebalance = ok.Rebalance(
+        period=spec.rebalancing_strategy.period,
+        abs_deviation=spec.rebalancing_strategy.abs_deviation,
+        rel_deviation=spec.rebalancing_strategy.rel_deviation,
+    )
     return ok.Portfolio(
         assets=list(spec.assets),
         weights=list(spec.weights) if spec.weights is not None else None,
@@ -119,7 +123,9 @@ def analyze_portfolio(portfolio: dict[str, Any]) -> dict[str, Any]:
 
     ``portfolio`` must match :class:`PortfolioSpec`: ``assets`` plus optional
     ``weights`` (must sum to 1.0), ``ccy``, ``first_date``, ``last_date``,
-    ``rebalancing_period`` (default 'year'), ``inflation`` (default True).
+    ``rebalancing_strategy`` (object with ``period`` (default 'year') and
+    optional ``abs_deviation``/``rel_deviation`` thresholds), ``inflation``
+    (default True).
     """
     spec, pf = _get_portfolio(portfolio)
     return {

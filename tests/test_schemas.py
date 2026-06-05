@@ -22,7 +22,9 @@ class TestPortfolioSpec:
         spec = PortfolioSpec(assets=["SPY.US", "GLD.US"])
         assert spec.assets == ["SPY.US", "GLD.US"]
         assert spec.ccy == "USD"
-        assert spec.rebalancing_period == "year"
+        assert spec.rebalancing_strategy.period == "year"
+        assert spec.rebalancing_strategy.abs_deviation is None
+        assert spec.rebalancing_strategy.rel_deviation is None
         assert spec.inflation is True
         assert spec.weights is None
 
@@ -48,7 +50,39 @@ class TestPortfolioSpec:
 
     def test_invalid_rebalancing_period(self) -> None:
         with pytest.raises(ValidationError):
-            PortfolioSpec(assets=["A"], rebalancing_period="weekly")
+            PortfolioSpec(assets=["A"], rebalancing_strategy={"period": "weekly"})
+
+    def test_legacy_rebalancing_period_field_rejected(self) -> None:
+        # The old flat field was replaced by rebalancing_strategy; extra="forbid"
+        # must reject it so the LLM gets a clear validation error.
+        with pytest.raises(ValidationError):
+            PortfolioSpec(assets=["A"], rebalancing_period="year")
+
+    def test_rebalancing_strategy_with_deviations(self) -> None:
+        spec = PortfolioSpec(
+            assets=["A"],
+            rebalancing_strategy={
+                "period": "quarter",
+                "abs_deviation": 0.05,
+                "rel_deviation": 0.1,
+            },
+        )
+        assert spec.rebalancing_strategy.period == "quarter"
+        assert spec.rebalancing_strategy.abs_deviation == 0.05
+        assert spec.rebalancing_strategy.rel_deviation == 0.1
+
+    def test_abs_deviation_must_be_in_zero_one(self) -> None:
+        with pytest.raises(ValidationError):
+            PortfolioSpec(assets=["A"], rebalancing_strategy={"abs_deviation": 0.0})
+        with pytest.raises(ValidationError):
+            PortfolioSpec(assets=["A"], rebalancing_strategy={"abs_deviation": 1.5})
+        PortfolioSpec(assets=["A"], rebalancing_strategy={"abs_deviation": 1.0})
+
+    def test_rel_deviation_must_be_positive(self) -> None:
+        with pytest.raises(ValidationError):
+            PortfolioSpec(assets=["A"], rebalancing_strategy={"rel_deviation": 0.0})
+        with pytest.raises(ValidationError):
+            PortfolioSpec(assets=["A"], rebalancing_strategy={"rel_deviation": -0.1})
 
     def test_full_spec(self) -> None:
         spec = PortfolioSpec(
@@ -57,7 +91,7 @@ class TestPortfolioSpec:
             ccy="USD",
             first_date="2010-01",
             last_date="2024-12",
-            rebalancing_period="year",
+            rebalancing_strategy={"period": "year"},
             inflation=True,
             symbol="gold_re.PF",
         )

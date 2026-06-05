@@ -36,6 +36,33 @@ Distribution = Literal["norm", "lognorm", "t"]
 # ---------------------------------------------------------------------------
 
 
+class RebalanceSpec(BaseModel):
+    """Rebalancing strategy, mirrors ``okama.Rebalance``.
+
+    Rebalancing happens at predetermined ``period`` intervals; optionally only
+    when an asset weight drifts beyond ``abs_deviation`` / ``rel_deviation``
+    thresholds (okama ignores a threshold set to None).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    period: RebalancingPeriod = Field(
+        default="year",
+        description="Rebalancing frequency; 'none' means weights are never rebalanced",
+    )
+    abs_deviation: float | None = Field(
+        default=None,
+        gt=0,
+        le=1,
+        description="Max allowed |actual_weight - target_weight| before rebalancing; None to ignore",
+    )
+    rel_deviation: float | None = Field(
+        default=None,
+        gt=0,
+        description="Max allowed |actual_weight / target_weight - 1| before rebalancing; None to ignore",
+    )
+
+
 class PortfolioSpec(BaseModel):
     """Specification of an investment portfolio passed to okama.Portfolio."""
 
@@ -49,7 +76,10 @@ class PortfolioSpec(BaseModel):
     ccy: str = Field(default="USD", description="Base currency for portfolio metrics")
     first_date: str | None = Field(default=None, description="ISO YYYY-MM start date (inclusive)")
     last_date: str | None = Field(default=None, description="ISO YYYY-MM end date (inclusive)")
-    rebalancing_period: RebalancingPeriod = Field(default="year")
+    rebalancing_strategy: RebalanceSpec = Field(
+        default_factory=RebalanceSpec,
+        description="Rebalancing strategy (period and optional deviation thresholds)",
+    )
     inflation: bool = Field(default=True, description="Include inflation series (limits date range by ~1 month)")
     symbol: str | None = Field(default=None, description="Optional portfolio label, e.g. 'gold_re.PF'")
 
@@ -201,7 +231,10 @@ class FrontierSpec(BaseModel):
         description="Per-asset (min, max) weight bounds, e.g. [[0.0, 0.5], [0.1, 0.3]]",
     )
     n_points: int = Field(default=20, ge=2, le=200, description="Resolution of the EF curve")
-    rebalancing_period: RebalancingPeriod = "year"
+    rebalancing_strategy: RebalanceSpec = Field(
+        default_factory=RebalanceSpec,
+        description="Rebalancing strategy (period and optional deviation thresholds)",
+    )
     inflation: bool = False
     full_frontier: bool = True
 
