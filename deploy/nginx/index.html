@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>okama-mcp — MCP server for investment analysis</title>
-  <meta name="description" content="MCP (Model Context Protocol) server that exposes the okama investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, and any other MCP-compatible client." />
+  <meta name="description" content="MCP (Model Context Protocol) server that exposes the okama investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, Codex, and any other MCP-compatible client." />
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <style>
     :root {
@@ -99,6 +99,20 @@
       color: var(--muted);
       margin-right: 6px;
     }
+    figure {
+      margin: 16px 0;
+    }
+    figure img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    figure figcaption {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
     footer {
       margin-top: 48px;
       padding-top: 20px;
@@ -115,7 +129,7 @@
     <p class="tagline">
       A Model Context Protocol (MCP) server that exposes the
       <a href="https://github.com/mbk-dev/okama">okama</a> investment-portfolio toolkit to
-      AI assistants — Claude Desktop, Claude Code, Cursor, and any other MCP-compatible client.
+      AI assistants — Claude Desktop, Claude Code, Cursor, Codex, and any other MCP-compatible client.
     </p>
     <p>
       Free and open source — no hosted service, no registration.
@@ -138,12 +152,30 @@
   </section>
 
   <section>
+    <h2>Charts</h2>
+    <p>
+      Chart tools render PNG images that MCP clients like Claude Desktop display inline.
+      Here are the Monte Carlo forecast and the efficient frontier from the examples above:
+    </p>
+    <figure>
+      <img src="/monte-carlo-forecast.png" alt="Monte Carlo forecast fan — percentile bands of future wealth"
+           width="1500" height="900" loading="lazy" />
+      <figcaption>Monte Carlo retirement forecast — percentile bands of future wealth.</figcaption>
+    </figure>
+    <figure>
+      <img src="/efficient-frontier.png" alt="Efficient frontier — SPY.US, BND.US, GLD.US (USD)"
+           width="1500" height="900" loading="lazy" />
+      <figcaption>Efficient frontier of SPY / BND / GLD with individual asset points.</figcaption>
+    </figure>
+  </section>
+
+  <section>
     <h2>Install &amp; run locally</h2>
     <pre><code># run straight from PyPI — no clone needed
 uvx okama-mcp stdio</code></pre>
-    <p>Requires Python ≥ 3.11. Easiest with <a href="https://docs.astral.sh/uv/">uv</a>; installing from source (git + Poetry) is covered in the README.</p>
+    <p>Requires Python ≥ 3.11. Easiest with <a href="https://docs.astral.sh/uv/">uv</a> or pipx; plain pip and source installs (git + Poetry) are covered in the README.</p>
     <p>
-      Full setup guide and client configurations (Claude Desktop, Claude Code, Cursor):
+      Full setup guide and client configurations (Claude Desktop, Claude Code, Cursor, Codex):
       see the <a href="https://github.com/mbk-dev/okama-mcp#readme">README on GitHub</a>.
     </p>
   </section>
