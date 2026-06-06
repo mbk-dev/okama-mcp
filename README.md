@@ -10,8 +10,8 @@
 ![okama-mcp — investment analytics for AI assistants](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/announce-en.png)
 
 MCP (Model Context Protocol) server that exposes the [okama](https://github.com/mbk-dev/okama)
-investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, and any
-other MCP-compatible client.
+investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, Codex,
+and any other MCP-compatible client.
 
 With okama-mcp installed, you can ask an AI things like:
 
