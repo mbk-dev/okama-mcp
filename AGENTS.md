@@ -60,6 +60,23 @@ Cycle: **RED → verify RED → GREEN → verify GREEN → REFACTOR**.
 - Use type hints for all function parameters and return types.
 - Use f-string formatting for all logging and print messages.
 
+## Release: sync the landing page with the README
+
+The public landing page at https://mcp.okama.io/ is `deploy/nginx/index.html`, served as a
+static file from `secondvds:/var/www/okama-mcp/public/` (nginx vhost: `deploy/nginx/okama-mcp.conf`).
+
+- **On every release, check whether `README.md` changed since the landing page was last touched**
+  (`git log $(git log -1 --format=%H -- deploy/nginx/index.html)..HEAD -- README.md`) and sync the
+  landing with it: supported clients, install/run commands, feature highlights (e.g. example
+  charts) must not contradict the README. The landing is a short teaser linking to the README —
+  do **not** mirror the full tool catalog or spec shapes.
+- Deploy after changes: copy `deploy/nginx/index.html` (plus any images it references) to
+  `secondvds:/var/www/okama-mcp/public/`, first backing up the current file on the server as
+  `index.html.bak.<YYYY-MM-DD>`. The directory is owned by `okama_mcp` and not writable by
+  `chilango`, so install new files via `sudo cp` (then `sudo chown chilango:chilango`, mode 644).
+- Verify the live page is byte-identical to the repo file:
+  `curl -s https://mcp.okama.io/ | diff - deploy/nginx/index.html`.
+
 ## Project-specific guidance
 
 - This is a thin MCP wrapper around the `okama` Python library. Do **not** re-implement HTTP
