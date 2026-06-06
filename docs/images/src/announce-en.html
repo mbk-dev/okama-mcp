@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1200px; height: 630px;
+    background: linear-gradient(160deg, #ffffff 0%, #eef2f7 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+    display: flex; flex-direction: column;
+    padding: 36px 48px 30px;
+    overflow: hidden;
+  }
+  .head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+  .wordmark { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+  .wordmark .accent { color: #2563eb; }
+  .tagline { font-size: 17px; color: #5a6472; }
+  .chat {
+    flex: 1; display: flex; gap: 22px; min-height: 0;
+  }
+  .bubbles { flex: 1.05; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+  .bubble {
+    border-radius: 14px; padding: 14px 18px; font-size: 18px; line-height: 1.45;
+    max-width: 95%;
+  }
+  .user {
+    background: #2563eb; color: #fff; align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  }
+  .assistant {
+    background: #ffffff; border: 1px solid #e5e7eb; align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+    color: #1f2937;
+  }
+  .assistant b { color: #111827; }
+  .who { font-size: 12.5px; color: #94a3b8; margin: 0 0 3px 6px; }
+  .chartcard {
+    flex: 1.25; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+    padding: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .chartcard img { width: 100%; height: auto; border-radius: 8px; }
+  .foot {
+    margin-top: 22px; display: flex; align-items: center; gap: 22px;
+  }
+  .chip {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 19px; background: #0f1115; color: #e5e7eb;
+    padding: 11px 20px; border-radius: 10px;
+  }
+  .chip .prompt { color: #60a5fa; }
+  .meta { font-size: 15.5px; color: #5a6472; }
+  .meta b { color: #1f2937; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="wordmark">okama<span class="accent">-mcp</span></div>
+    <div class="tagline">investment analytics for AI assistants — free and open source</div>
+  </div>
+
+  <div class="chat">
+    <div class="bubbles">
+      <div>
+        <div class="who">You</div>
+        <div class="bubble user">
+          What happens to a 60/40 portfolio with 4%/yr withdrawals,
+          cut during drawdowns? Show the IRR.
+        </div>
+      </div>
+      <div>
+        <div class="who">AI assistant · via okama-mcp</div>
+        <div class="bubble assistant">
+          Across 500 Monte Carlo scenarios the median return net of withdrawals is
+          <b>8.0% per year</b>; 90% of outcomes fall between <b>4.7%</b> and <b>11.9%</b>.
+          Cutting withdrawals in drawdowns keeps even the worst scenarios
+          positive &rarr;
+        </div>
+      </div>
+    </div>
+    <div class="chartcard">
+      <img src="irr_cwd_distribution_en.png" alt="IRR distribution" />
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="chip"><span class="prompt">$</span> uvx okama-mcp stdio</div>
+    <div class="meta"><b>27 tools</b> · backtests · Monte Carlo · efficient frontier · charts<br/>
+      Works with Claude Desktop, Claude Code, Cursor, Codex — any MCP client</div>
+  </div>
+</body>
+</html>
