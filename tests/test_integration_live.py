@@ -191,3 +191,125 @@ async def test_dividend_info_live(server) -> None:
         payload = result.data
     assert 0.0 < payload["ltm_dividend_yield"]["VNQ.US"] < 0.15
     assert payload["paying_years_streak"]["SPY.US"] >= 1
+
+
+async def test_compare_assets_with_nested_portfolio_live(server) -> None:
+    """Nesting end-to-end: a portfolio used as a single component in compare_assets,
+    plus the Sharpe/Sortino enrichment."""
+    nested = {
+        "assets": ["SPY.US", "AGG.US"],
+        "weights": [0.6, 0.4],
+        "symbol": "bench6040.PF",
+        "inflation": False,
+    }
+    async with Client(server) as client:
+        result = await client.call_tool(
+            "compare_assets",
+            {
+                "symbols": ["GLD.US"],
+                "portfolios": [nested],
+                "ccy": "USD",
+                "first_date": "2015-01",
+                "last_date": "2020-01",
+                "inflation": False,
+            },
+        )
+        payload = result.data
+    assert "GLD.US" in payload["symbols"]
+    assert "bench6040.PF" in payload["symbols"]
+    assert "bench6040.PF" in payload["sharpe_ratio"]
+    assert "GLD.US" in payload["sortino_ratio"]
+
+
+async def test_analyze_portfolio_nested_and_risk_adjusted_live(server) -> None:
+    """A portfolio nested inside another portfolio, with Sharpe/Sortino metrics."""
+    spec = {
+        "assets": [
+            "GLD.US",
+            {"assets": ["SPY.US", "AGG.US"], "weights": [0.6, 0.4], "symbol": "core.PF",
+             "inflation": False},
+        ],
+        "weights": [0.3, 0.7],
+        "ccy": "USD",
+        "first_date": "2015-01",
+        "last_date": "2020-01",
+        "inflation": False,
+    }
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "analyze_portfolio", {"portfolio": spec, "rf_return": 0.02})).data
+    assert set(payload["weights"]) == {"GLD.US", "core.PF"}
+    assert payload["metrics"]["sharpe_ratio"] is not None
+    assert payload["metrics"]["sortino_ratio"] is not None
+
+
+async def test_most_diversified_portfolio_live(server) -> None:
+    spec = {"assets": ["SPY.US", "BND.US", "GLD.US"], "ccy": "USD",
+            "n_points": 10, "inflation": False}
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "get_most_diversified_portfolio", {"frontier": spec})).data
+    assert set(payload["weights"]) == {"SPY.US", "BND.US", "GLD.US"}
+    assert abs(sum(payload["weights"].values()) - 1.0) < 0.02
+    assert payload["diversification_ratio"] is not None
+
+
+async def test_benchmark_metrics_live(server) -> None:
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "get_benchmark_metrics",
+            {"benchmark": "SPY.US", "symbols": ["AGG.US", "GLD.US"], "ccy": "USD",
+             "first_date": "2015-01", "last_date": "2020-01"})).data
+    assert payload["benchmark"] == "SPY.US"
+    # The benchmark column is dropped by okama; only the compared assets remain.
+    assert "AGG.US" in payload["beta"]
+    assert "GLD.US" in payload["correlation"]
+    assert "AGG.US" in payload["tracking_error"]
+
+
+async def test_asset_returns_live(server) -> None:
+    async with Client(server) as client:
+        ret = (await client.call_tool(
+            "get_asset_returns",
+            {"symbols": ["SPY.US", "GLD.US"], "ccy": "USD",
+             "first_date": "2015-01", "last_date": "2020-01"})).data
+        roll = (await client.call_tool(
+            "get_rolling_returns",
+            {"symbols": ["SPY.US"], "ccy": "USD", "window_months": 24,
+             "first_date": "2015-01", "last_date": "2020-01"})).data
+    assert "SPY.US" in ret["cagr"]
+    assert "SPY.US" in ret["mean_return"]
+    assert ret["annual_returns"]["columns"]
+    assert roll["rolling_cagr"]["columns"]
+    assert len(roll["rolling_cagr"]["index"]) > 1
+
+
+async def test_plot_transition_map_live(server) -> None:
+    spec = {"assets": ["SPY.US", "BND.US", "GLD.US"], "ccy": "USD",
+            "n_points": 8, "inflation": False}
+    async with Client(server) as client:
+        result = await client.call_tool("plot_transition_map", {"frontier": spec})
+    image = result.content[0]
+    assert image.type == "image"
+    assert image.mimeType == "image/png"
+
+
+async def test_largest_withdrawals_size_live(server) -> None:
+    """Slowest live test: the solver runs Monte Carlo iteratively (bounded iter_max)."""
+    portfolio_spec = {
+        "assets": ["SPY.US", "BND.US"], "weights": [0.6, 0.4], "ccy": "USD",
+        "first_date": "2010-01", "last_date": "2024-12", "inflation": True,
+    }
+    mc_spec = {"distribution": "norm", "period_years": 20, "scenarios": 100,
+               "percentiles": [50], "random_seed": 42}
+    cashflow_spec = {"type": "percentage", "initial_investment": 1_000_000.0,
+                     "frequency": "year", "percentage": -0.04}
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "find_the_largest_withdrawals_size",
+            {"portfolio": portfolio_spec, "mc": mc_spec, "cashflow": cashflow_spec,
+             "goal": "survival_period", "target_survival_period": 15,
+             "percentile": 25, "iter_max": 8})).data
+    assert payload["goal"] == "survival_period"
+    assert isinstance(payload["success"], bool)
+    assert payload["withdrawal_rel"] is not None
