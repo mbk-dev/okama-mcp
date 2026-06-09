@@ -24,6 +24,8 @@ def _make_asset_list_mock(*, describe_df, ror_df, symbols, ccy="USD",
     mock.describe = lambda: describe_df
     if inflation_attr:
         mock.inflation = inflation_attr
+    mock.get_sharpe_ratio = MagicMock(return_value=pd.Series({s: 0.4 for s in symbols}))  # noqa: C420 — need constant value, not None
+    mock.get_sortino_ratio = MagicMock(return_value=pd.Series({s: 0.5 for s in symbols}))  # noqa: C420 — need constant value, not None
     return mock
 
 
@@ -208,6 +210,18 @@ def test_compare_assets_passes_portfolios_through() -> None:
         )
     assert almock.call_args.args[0] == ["GLD.US", "PFOBJ"]
     assert out["symbols"] == ["GLD.US", "b.PF"]
+
+
+class TestCompareAssetsRiskAdjusted:
+    def test_includes_sharpe_and_sortino(self) -> None:
+        describe = pd.DataFrame({"GLD.US": [0.08], "VNQ.US": [0.07]}, index=["CAGR"])
+        ror = pd.DataFrame({"GLD.US": [0.01], "VNQ.US": [0.02]},
+                           index=pd.period_range("2024-01", periods=1, freq="M"))
+        mock = _make_asset_list_mock(describe_df=describe, ror_df=ror, symbols=["GLD.US", "VNQ.US"])
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=mock):
+            out = al_tool.compare_assets(["GLD.US", "VNQ.US"], ccy="USD")
+        assert out["sharpe_ratio"] == {"GLD.US": 0.4, "VNQ.US": 0.4}
+        assert out["sortino_ratio"] == {"GLD.US": 0.5, "VNQ.US": 0.5}
 
 
 class TestServerRegistration:

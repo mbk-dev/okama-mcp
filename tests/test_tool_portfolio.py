@@ -77,6 +77,8 @@ def _make_portfolio_mock(
     pf.get_rolling_cagr = MagicMock(return_value=pd.DataFrame(
         {"pf": [0.05, 0.06, 0.055, 0.07]}, index=idx_roll))
     pf.percentile_inverse_cagr = MagicMock(return_value=8.4)
+    pf.get_sharpe_ratio = MagicMock(return_value=0.42)
+    pf.get_sortino_ratio = MagicMock(return_value=0.55)
     return pf
 
 
@@ -254,6 +256,18 @@ class TestCagrProbability:
         assert out["years"] == 3
         assert out["cagr_target"] == 0.0
         assert "8.4" in out["interpretation"]
+
+
+class TestAnalyzePortfolioRiskAdjusted:
+    def test_includes_sharpe_and_sortino(self) -> None:
+        pf = _make_portfolio_mock()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = pf_tool.analyze_portfolio(VALID_SPEC, rf_return=0.02, t_return=0.0)
+        assert out["metrics"]["sharpe_ratio"] == 0.42
+        assert out["metrics"]["sortino_ratio"] == 0.55
+        pf.get_sharpe_ratio.assert_called_once_with(rf_return=0.02)
+        pf.get_sortino_ratio.assert_called_once_with(t_return=0.0)
 
 
 def test_resolve_assets_builds_nested_portfolio() -> None:

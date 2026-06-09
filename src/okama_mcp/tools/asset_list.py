@@ -54,12 +54,14 @@ def compare_assets(
     last_date: str | None = None,
     inflation: bool = True,
     portfolios: list[dict[str, Any]] | None = None,
+    rf_return: float = 0.0,
+    t_return: float = 0.0,
 ) -> dict[str, Any]:
     """Compare several assets side-by-side.
 
     Returns okama's ``describe()`` table (CAGR, risk, drawdowns over 1/5/10-year
     windows and since inception) plus the joint date range and the chosen base
-    currency.
+    currency. ``rf_return`` and ``t_return`` control the Sharpe and Sortino ratios.
 
     Parameters
     ----------
@@ -76,12 +78,16 @@ def compare_assets(
     """
     al = _build_asset_list(symbols, ccy, first_date, last_date, inflation, portfolios=portfolios)
     desc = al.describe()
+    sharpe = al.get_sharpe_ratio(rf_return=rf_return)
+    sortino = al.get_sortino_ratio(t_return=t_return)
     return {
         "symbols": list(getattr(al, "symbols", symbols)),
         "ccy": getattr(al, "currency", ccy),
         "first_date": value_to_json(getattr(al, "first_date", None)),
         "last_date": value_to_json(getattr(al, "last_date", None)),
         "describe": dataframe_to_json(desc),
+        "sharpe_ratio": {str(k): value_to_json(v) for k, v in sharpe.items()},
+        "sortino_ratio": {str(k): value_to_json(v) for k, v in sortino.items()},
     }
 
 

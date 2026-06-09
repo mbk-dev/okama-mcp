@@ -138,14 +138,17 @@ def _scalar_cagr(pf: Any) -> float | None:
 
 
 @translates_okama_errors
-def analyze_portfolio(portfolio: dict[str, Any]) -> dict[str, Any]:
+def analyze_portfolio(
+    portfolio: dict[str, Any],
+    rf_return: float = 0.0,
+    t_return: float = 0.0,
+) -> dict[str, Any]:
     """Backtest summary for a portfolio: CAGR, risk, drawdowns, describe table.
 
-    ``portfolio`` must match :class:`PortfolioSpec`: ``assets`` plus optional
-    ``weights`` (must sum to 1.0), ``ccy``, ``first_date``, ``last_date``,
-    ``rebalancing_strategy`` (object with ``period`` (default 'year') and
-    optional ``abs_deviation``/``rel_deviation`` thresholds), ``inflation``
-    (default True).
+    ``rf_return`` is the risk-free rate for the Sharpe ratio; ``t_return`` the
+    target return for the Sortino ratio. ``portfolio`` must match
+    :class:`PortfolioSpec` (``assets`` entries may be tickers or nested portfolio
+    objects).
     """
     spec, pf = _get_portfolio(portfolio)
     return {
@@ -161,6 +164,8 @@ def analyze_portfolio(portfolio: dict[str, Any]) -> dict[str, Any]:
                 _scalar_last(getattr(pf, "mean_return_annual", None))
             ),
             "risk_annual": value_to_json(_scalar_last(getattr(pf, "risk_annual", None))),
+            "sharpe_ratio": value_to_json(float(pf.get_sharpe_ratio(rf_return=rf_return))),
+            "sortino_ratio": value_to_json(float(pf.get_sortino_ratio(t_return=t_return))),
         },
         "describe": dataframe_to_json(pf.describe()),
     }
