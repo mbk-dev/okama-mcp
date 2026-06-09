@@ -253,6 +253,56 @@ class TestBenchmarkMetrics:
             al_tool.get_benchmark_metrics("", ["GLD.US"])
 
 
+class TestAssetReturns:
+    def _mock(self):
+        idx = pd.period_range("2015-01", periods=3, freq="M")
+        years = pd.period_range("2015", periods=2, freq="Y")
+        mock = SimpleNamespace()
+        mock.symbols = ["SPY.US", "GLD.US"]
+        mock.currency = "USD"
+        mock.get_cagr = MagicMock(return_value=pd.DataFrame(
+            {"SPY.US": [0.10, 0.11, 0.12], "GLD.US": [0.04, 0.05, 0.06]}, index=idx))
+        mock.get_cumulative_return = MagicMock(return_value=pd.DataFrame(
+            {"SPY.US": [0.30, 0.33, 0.36], "GLD.US": [0.12, 0.15, 0.18]}, index=idx))
+        mock.mean_return = pd.Series({"SPY.US": 0.11, "GLD.US": 0.05})
+        mock.real_mean_return = pd.Series({"SPY.US": 0.08, "GLD.US": 0.02})
+        mock.get_monthly_geometric_mean_return = MagicMock(
+            return_value=pd.Series({"SPY.US": 0.009, "GLD.US": 0.004}))
+        mock.annual_return_ts = pd.DataFrame(
+            {"SPY.US": [0.12, 0.10], "GLD.US": [0.05, 0.06]}, index=years)
+        return mock
+
+    def test_scalar_metrics_use_last_row(self) -> None:
+        mock = self._mock()
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=mock):
+            out = al_tool.get_asset_returns(["SPY.US", "GLD.US"], ccy="USD")
+        assert out["cagr"] == {"SPY.US": 0.12, "GLD.US": 0.06}
+        assert out["cumulative_return"] == {"SPY.US": 0.36, "GLD.US": 0.18}
+        assert out["mean_return"] == {"SPY.US": 0.11, "GLD.US": 0.05}
+        assert out["real_mean_return"] == {"SPY.US": 0.08, "GLD.US": 0.02}
+        assert out["monthly_geom_mean"] == {"SPY.US": 0.009, "GLD.US": 0.004}
+        assert out["annual_returns"]["columns"] == ["SPY.US", "GLD.US"]
+
+
+class TestRollingReturns:
+    def test_returns_rolling_frames(self) -> None:
+        idx = pd.period_range("2016-01", periods=2, freq="M")
+        rc = pd.DataFrame({"SPY.US": [0.09, 0.10]}, index=idx)
+        rcr = pd.DataFrame({"SPY.US": [0.20, 0.22]}, index=idx)
+        mock = SimpleNamespace()
+        mock.symbols = ["SPY.US"]
+        mock.currency = "USD"
+        mock.get_rolling_cagr = MagicMock(return_value=rc)
+        mock.get_rolling_cumulative_return = MagicMock(return_value=rcr)
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=mock):
+            out = al_tool.get_rolling_returns(["SPY.US"], ccy="USD", window_months=12)
+        assert out["window_months"] == 12
+        assert out["rolling_cagr"]["columns"] == ["SPY.US"]
+        assert out["rolling_cumulative_return"]["columns"] == ["SPY.US"]
+        mock.get_rolling_cagr.assert_called_once_with(window=12, real=False)
+        mock.get_rolling_cumulative_return.assert_called_once_with(window=12, real=False)
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase3_tools_registered(self) -> None:

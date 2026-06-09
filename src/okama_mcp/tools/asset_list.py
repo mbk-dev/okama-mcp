@@ -222,6 +222,78 @@ def get_benchmark_metrics(
     }
 
 
+@translates_okama_errors
+def get_asset_returns(
+    symbols: list[str],
+    ccy: str = "USD",
+    first_date: str | None = None,
+    last_date: str | None = None,
+    inflation: bool = True,
+    portfolios: list[dict[str, Any]] | None = None,
+    period: int | None = None,
+    real: bool = False,
+) -> dict[str, Any]:
+    """Return metrics for each asset (and any nested ``portfolios``).
+
+    Scalar metrics are the latest (since-inception) value: ``cagr`` and
+    ``cumulative_return`` are the last row of okama's expanding series;
+    ``mean_return``/``real_mean_return``/``monthly_geom_mean`` are annualized
+    per-asset values. ``annual_returns`` is the per-calendar-year return table.
+    ``real=True`` returns inflation-adjusted CAGR/cumulative return (needs
+    ``inflation=True``); ``period`` limits CAGR to the last N years.
+    """
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation, portfolios=portfolios)
+
+    def _last_row(df: Any) -> dict[str, Any]:
+        if df is None or len(df) == 0:
+            return {}
+        return {str(k): value_to_json(v) for k, v in df.iloc[-1].items()}
+
+    def _series(s: Any) -> dict[str, Any]:
+        return {str(k): value_to_json(v) for k, v in s.items()}
+
+    return {
+        "ccy": getattr(al, "currency", ccy),
+        "period": period,
+        "real": real,
+        "cagr": _last_row(al.get_cagr(period=period, real=real)),
+        "cumulative_return": _last_row(al.get_cumulative_return(real=real)),
+        "mean_return": _series(al.mean_return),
+        "real_mean_return": _series(al.real_mean_return),
+        "monthly_geom_mean": _series(al.get_monthly_geometric_mean_return()),
+        "annual_returns": dataframe_to_json(al.annual_return_ts),
+    }
+
+
+@translates_okama_errors
+def get_rolling_returns(
+    symbols: list[str],
+    ccy: str = "USD",
+    window_months: int = 12,
+    real: bool = False,
+    first_date: str | None = None,
+    last_date: str | None = None,
+    portfolios: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Rolling CAGR and rolling cumulative return for each asset.
+
+    ``window_months`` is the moving-window size (okama recommends >= 12).
+    ``real=True`` computes inflation-adjusted values (needs ``inflation`` data).
+    """
+    if window_months < 1:
+        raise OkamaMcpError("window_months must be a positive number of months")
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation=real, portfolios=portfolios)
+    return {
+        "ccy": getattr(al, "currency", ccy),
+        "window_months": window_months,
+        "real": real,
+        "rolling_cagr": dataframe_to_json(al.get_rolling_cagr(window=window_months, real=real)),
+        "rolling_cumulative_return": dataframe_to_json(
+            al.get_rolling_cumulative_return(window=window_months, real=real)
+        ),
+    }
+
+
 def register(mcp: FastMCP) -> None:
     """Register asset-list tools with the FastMCP server."""
     mcp.tool(compare_assets)
@@ -229,3 +301,5 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(get_rolling_risk)
     mcp.tool(get_dividend_info)
     mcp.tool(get_benchmark_metrics)
+    mcp.tool(get_asset_returns)
+    mcp.tool(get_rolling_returns)
