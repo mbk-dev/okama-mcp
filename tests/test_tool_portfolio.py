@@ -256,6 +256,31 @@ class TestCagrProbability:
         assert "8.4" in out["interpretation"]
 
 
+def test_resolve_assets_builds_nested_portfolio() -> None:
+    from okama_mcp.schemas import PortfolioSpec
+
+    spec = PortfolioSpec(
+        assets=["GLD.US", {"assets": ["A.US", "B.US"], "weights": [0.6, 0.4]}],
+        weights=[0.3, 0.7],
+    )
+    with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value="PFOBJ"), \
+         patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+        resolved = pf_tool._resolve_assets(spec.assets)
+    assert resolved == ["GLD.US", "PFOBJ"]
+
+
+def test_weights_dict_labels_from_pf_symbols_under_nesting() -> None:
+    from types import SimpleNamespace as NS
+    from okama_mcp.schemas import PortfolioSpec
+
+    spec = PortfolioSpec(
+        assets=["GLD.US", {"assets": ["A.US", "B.US"], "weights": [0.6, 0.4], "symbol": "b.PF"}],
+        weights=[0.3, 0.7],
+    )
+    pf = NS(symbols=["GLD.US", "b.PF"], weights=[0.3, 0.7])
+    assert pf_tool._weights_dict(pf, spec) == {"GLD.US": 0.3, "b.PF": 0.7}
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase4_tools_registered(self) -> None:

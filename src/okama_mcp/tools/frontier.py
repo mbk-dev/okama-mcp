@@ -18,6 +18,7 @@ from okama_mcp.cache import SpecCache, make_key
 from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.schemas import FrontierSpec
 from okama_mcp.serialization import dataframe_to_json, value_to_json
+from okama_mcp.tools.portfolio import _resolve_assets
 
 _VALID_ROR_KINDS = ("cagr", "mean_return")
 
@@ -44,7 +45,7 @@ def _bounds_for_okama(bounds: list[list[float]] | None) -> tuple[tuple[float, fl
 
 def _build_frontier(spec: FrontierSpec) -> Any:
     return ok.EfficientFrontier(
-        assets=list(spec.assets),
+        assets=_resolve_assets(spec.assets),
         ccy=spec.ccy,
         first_date=spec.first_date,
         last_date=spec.last_date,

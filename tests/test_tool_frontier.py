@@ -193,6 +193,18 @@ class TestGetMinVariancePortfolio:
         assert gmv["risk"] <= tangency["risk"]
 
 
+def test_build_frontier_resolves_nested_portfolio() -> None:
+    from okama_mcp.schemas import FrontierSpec
+
+    spec = FrontierSpec(assets=["GLD.US", {"assets": ["A.US", "B.US"]}])
+    with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value="PFOBJ"), \
+         patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"), \
+         patch("okama_mcp.tools.frontier.ok.Rebalance", return_value="REB"), \
+         patch("okama_mcp.tools.frontier.ok.EfficientFrontier", return_value="EF") as efmock:
+        fr_tool._build_frontier(spec)
+    assert efmock.call_args.kwargs["assets"] == ["GLD.US", "PFOBJ"]
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase6_tools_registered(self) -> None:

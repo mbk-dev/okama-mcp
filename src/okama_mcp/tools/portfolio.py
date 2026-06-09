@@ -53,6 +53,22 @@ def _validate(spec: dict[str, Any]) -> PortfolioSpec:
         raise OkamaMcpError(f"Invalid portfolio spec: {exc.errors()}") from exc
 
 
+def _resolve_assets(assets: list[Any]) -> list[Any]:
+    """Map a spec assets list to okama-ready elements.
+
+    A ticker string passes through unchanged; a nested ``PortfolioSpec`` is built
+    into an ``okama.Portfolio`` object, which okama accepts as an asset-like
+    component (it has ``.symbol`` and ``.ror``).
+    """
+    resolved: list[Any] = []
+    for item in assets:
+        if isinstance(item, PortfolioSpec):
+            resolved.append(_build_portfolio(item))
+        else:
+            resolved.append(item)
+    return resolved
+
+
 def _build_portfolio(spec: PortfolioSpec) -> Any:
     rebalance = ok.Rebalance(
         period=spec.rebalancing_strategy.period,
@@ -60,7 +76,7 @@ def _build_portfolio(spec: PortfolioSpec) -> Any:
         rel_deviation=spec.rebalancing_strategy.rel_deviation,
     )
     return ok.Portfolio(
-        assets=list(spec.assets),
+        assets=_resolve_assets(spec.assets),
         weights=list(spec.weights) if spec.weights is not None else None,
         ccy=spec.ccy,
         first_date=spec.first_date,
@@ -90,7 +106,11 @@ def _weights_dict(pf: Any, spec: PortfolioSpec) -> dict[str, float]:
     else:
         n = len(spec.assets)
         weights = [1.0 / n] * n
-    return {symbol: value_to_json(w) for symbol, w in zip(spec.assets, weights, strict=False)}
+    # Labels come from the resolved symbols (a nested portfolio contributes its
+    # .PF symbol); spec.assets may contain nested specs that are not valid keys.
+    syms = getattr(pf, "symbols", None)
+    labels = list(syms) if syms is not None else [a for a in spec.assets if isinstance(a, str)]
+    return {str(symbol): value_to_json(w) for symbol, w in zip(labels, weights, strict=False)}
 
 
 def _scalar_cagr(pf: Any) -> float | None:
