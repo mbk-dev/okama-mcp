@@ -187,6 +187,12 @@ All tools are **stateless** — pass the full portfolio specification with every
 The server caches expensive okama objects (`Portfolio`, `EfficientFrontier`) by content
 hash, so repeated calls on the same spec are fast.
 
+**Nested portfolios.** Wherever a list of assets is accepted — the `assets` field of
+`PortfolioSpec`/`FrontierSpec`, or the `portfolios` argument on the comparison tools —
+an entry may be a ticker string **or a nested portfolio object** (the same spec shape).
+This lets you treat a whole portfolio as a single component: e.g. compare a 60/40
+portfolio against gold, or put a sub-portfolio on the efficient frontier.
+
 ### Search & metadata
 
 | Tool | Purpose |
@@ -200,16 +206,19 @@ hash, so repeated calls on the same spec are fast.
 | Tool | Purpose |
 |---|---|
 | `get_asset_history(symbol, kind, first_date?, last_date?)` | Time series for one asset. `kind` ∈ {`close_monthly`, `close_daily`, `adj_close`, `ror`, `dividends`}. |
-| `compare_assets(symbols, ccy, first_date?, last_date?, inflation)` | Side-by-side statistics (`describe()` table: CAGR, risk, drawdowns by period). |
-| `get_correlations(symbols, ccy, ...)` | Correlation matrix of monthly returns. |
-| `get_rolling_risk(symbols, ccy, window_months=12)` | Rolling annualized risk per asset. |
+| `compare_assets(symbols, ccy, ..., portfolios?, rf_return?, t_return?)` | Side-by-side statistics (`describe()` table: CAGR, risk, drawdowns by period) plus Sharpe & Sortino per asset. |
+| `get_correlations(symbols, ccy, ..., portfolios?)` | Correlation matrix of monthly returns. |
+| `get_rolling_risk(symbols, ccy, window_months=12, ..., portfolios?)` | Rolling annualized risk per asset. |
+| `get_asset_returns(symbols, ccy, ..., portfolios?, period?, real=False)` | Return metrics per asset: CAGR, cumulative return, mean / real mean return, monthly geometric mean, annual returns table. |
+| `get_rolling_returns(symbols, ccy, window_months=12, real=False, ..., portfolios?)` | Rolling CAGR and rolling cumulative return per asset. |
+| `get_benchmark_metrics(benchmark, symbols, ccy, ..., portfolios?, rolling_window?)` | Beta, correlation, annualized tracking difference and tracking error of each asset vs a benchmark/index. |
 | `get_dividend_info(symbols, ccy, ...)` | LTM dividend yield, 5y mean yield, paying/growing streaks per asset. |
 
 ### Portfolio backtest
 
 | Tool | Purpose |
 |---|---|
-| `analyze_portfolio(portfolio)` | Headline metrics + full `describe()` for a `PortfolioSpec`. |
+| `analyze_portfolio(portfolio, rf_return=0, t_return=0)` | Headline metrics (CAGR, annual mean/risk, **Sharpe, Sortino**) + full `describe()` for a `PortfolioSpec`. |
 | `get_portfolio_drawdowns(portfolio)` | Drawdown time series + max drawdown / recovery period. |
 | `get_portfolio_var_cvar(portfolio, time_frame=12, level=1)` | Historical Value at Risk and CVaR. |
 | `get_portfolio_wealth_index(portfolio, full=False)` | Wealth-index series (cumulative growth of 1000). |
@@ -222,6 +231,7 @@ hash, so repeated calls on the same spec are fast.
 |---|---|
 | `monte_carlo_forecast(portfolio, mc, cashflow)` | Forward simulation with one of five cash-flow strategies (`indexation`, `percentage`, `time_series`, `vanguard`, `cut_if_drawdown`). Returns percentile wealth bands, terminal-wealth stats, survival metrics. Includes the money-weighted IRR distribution (percentiles + mean). |
 | `get_portfolio_irr(portfolio, cashflow)` | Historical money-weighted return (IRR) for a contribution/withdrawal plan. |
+| `find_the_largest_withdrawals_size(portfolio, mc, cashflow, goal, ...)` | Largest sustainable withdrawal (Monte Carlo) for a `goal`: keep real purchasing power, keep nominal balance, or survive N years. |
 
 ### Efficient Frontier
 
@@ -230,6 +240,7 @@ hash, so repeated calls on the same spec are fast.
 | `build_efficient_frontier(frontier)` | Full EF point table (Risk / Mean return / CAGR + per-asset weights). |
 | `get_tangency_portfolio(frontier, rf_return, rate_of_return)` | Max-Sharpe portfolio on the EF. |
 | `get_min_variance_portfolio(frontier)` | Global Minimum Variance portfolio. |
+| `get_most_diversified_portfolio(frontier, target_return?)` | Most Diversified Portfolio (maximises the diversification ratio) on the EF. |
 
 ### Macro
 
@@ -256,7 +267,8 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_monte_carlo(portfolio, mc, cashflow)` | Monte Carlo forecast fan (percentile bands). |
 | `plot_irr_distribution(portfolio, mc, cashflow)` | Histogram of IRR across Monte Carlo scenarios (percentile markers). |
 | `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
-| `plot_assets(symbols, ccy, ...)` | Wealth-index comparison of individual assets. |
+| `plot_transition_map(frontier, x_axe="risk")` | Transition map: asset weights along the efficient frontier (x-axis = risk or CAGR). |
+| `plot_assets(symbols, ccy, ..., portfolios?)` | Wealth-index comparison of individual assets. |
 
 ## Spec shapes
 
@@ -266,7 +278,7 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
 ```jsonc
 // PortfolioSpec
 {
-  "assets":   ["GLD.US", "VNQ.US"],
+  "assets":   ["GLD.US", "VNQ.US"],  // each entry: a ticker OR a nested PortfolioSpec
   "weights":  [0.3, 0.7],            // optional, must sum to 1.0
   "ccy":      "USD",
   "first_date": "2010-01",
@@ -304,6 +316,16 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
   "n_points": 20,
   "rebalancing_strategy": { "period": "year" },
   "inflation": false
+}
+
+// Nesting — a portfolio used as a single component (works in PortfolioSpec /
+// FrontierSpec `assets`, and the `portfolios` argument of the comparison tools):
+{
+  "assets": [
+    "GLD.US",
+    { "assets": ["SPY.US", "AGG.US"], "weights": [0.6, 0.4], "symbol": "bench6040.PF" }
+  ],
+  "weights": [0.3, 0.7]              // one weight per top-level entry
 }
 ```
 
