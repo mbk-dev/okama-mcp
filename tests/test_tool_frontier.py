@@ -235,3 +235,4 @@ class TestServerRegistration:
         assert "build_efficient_frontier" in names
         assert "get_tangency_portfolio" in names
         assert "get_min_variance_portfolio" in names
+        assert "get_most_diversified_portfolio" in names

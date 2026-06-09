@@ -424,3 +424,4 @@ class TestServerRegistration:
         names = {t.name for t in tools}
         assert "monte_carlo_forecast" in names
         assert "get_portfolio_irr" in names
+        assert "find_the_largest_withdrawals_size" in names

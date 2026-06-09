@@ -315,3 +315,6 @@ class TestServerRegistration:
         assert "get_correlations" in names
         assert "get_rolling_risk" in names
         assert "get_dividend_info" in names
+        assert "get_benchmark_metrics" in names
+        assert "get_asset_returns" in names
+        assert "get_rolling_returns" in names

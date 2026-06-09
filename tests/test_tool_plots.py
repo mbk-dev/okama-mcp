@@ -288,5 +288,6 @@ class TestServerRegistration:
         tools = await mcp.list_tools()
         names = {t.name for t in tools}
         for tool in ("plot_wealth_index", "plot_drawdowns", "plot_efficient_frontier",
-                     "plot_monte_carlo", "plot_assets", "plot_irr_distribution"):
+                     "plot_monte_carlo", "plot_assets", "plot_irr_distribution",
+                     "plot_transition_map"):
             assert tool in names
