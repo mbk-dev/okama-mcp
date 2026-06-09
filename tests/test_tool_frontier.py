@@ -55,6 +55,12 @@ def _make_ef_mock(
     ef.gmv_annual_weights = gmv_weights
     ef.gmv_annual_values = gmv_values
     ef.get_tangency_portfolio = MagicMock(return_value=tangency)
+    ef.get_most_diversified_portfolio = MagicMock(
+        return_value={
+            "SPY.US": 0.30, "GLD.US": 0.30, "BND.US": 0.40,
+            "CAGR": 0.071, "Risk": 0.092, "Diversification ratio": 1.42,
+        }
+    )
     return ef
 
 
@@ -191,6 +197,20 @@ class TestGetMinVariancePortfolio:
             gmv = fr_tool.get_min_variance_portfolio(VALID_FRONTIER_SPEC)
             tangency = fr_tool.get_tangency_portfolio(VALID_FRONTIER_SPEC, rf_return=0.02)
         assert gmv["risk"] <= tangency["risk"]
+
+
+class TestMostDiversifiedPortfolio:
+    def test_returns_weights_and_metrics(self) -> None:
+        ef = _make_ef_mock()
+        with patch("okama_mcp.tools.frontier.ok.EfficientFrontier", return_value=ef), \
+             patch("okama_mcp.tools.frontier.ok.Rebalance", return_value="REB"):
+            out = fr_tool.get_most_diversified_portfolio(
+                {"assets": ["SPY.US", "GLD.US", "BND.US"], "ccy": "USD"}
+            )
+        assert out["weights"] == {"SPY.US": 0.30, "GLD.US": 0.30, "BND.US": 0.40}
+        assert out["cagr"] == 0.071
+        assert out["risk"] == 0.092
+        assert out["diversification_ratio"] == 1.42
 
 
 def test_build_frontier_resolves_nested_portfolio() -> None:

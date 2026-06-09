@@ -21,6 +21,7 @@ from okama_mcp.serialization import dataframe_to_json, value_to_json
 from okama_mcp.tools.portfolio import _resolve_assets
 
 _VALID_ROR_KINDS = ("cagr", "mean_return")
+_MDP_METRIC_KEYS = ("CAGR", "Risk", "Diversification ratio")
 
 _frontier_cache: SpecCache = SpecCache(max_size=32, ttl_seconds=3600.0)
 
@@ -155,6 +156,34 @@ def get_min_variance_portfolio(frontier: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+@translates_okama_errors
+def get_most_diversified_portfolio(
+    frontier: dict[str, Any],
+    target_return: float | None = None,
+) -> dict[str, Any]:
+    """Most Diversified Portfolio (MDP) on the Efficient Frontier.
+
+    Maximises the diversification ratio (weighted average asset volatility over
+    portfolio volatility). Optionally constrained to a ``target_return`` (CAGR).
+    Returns the asset weights plus the portfolio CAGR, Risk, and diversification
+    ratio. ``frontier`` is a :class:`FrontierSpec` dict.
+    """
+    spec, ef = _get_frontier(frontier)
+    raw = ef.get_most_diversified_portfolio(target_return=target_return)
+    weights = {
+        str(k): value_to_json(float(v))
+        for k, v in raw.items()
+        if k not in _MDP_METRIC_KEYS
+    }
+    return {
+        "weights": weights,
+        "cagr": value_to_json(float(raw["CAGR"])),
+        "risk": value_to_json(float(raw["Risk"])),
+        "diversification_ratio": value_to_json(float(raw["Diversification ratio"])),
+        "target_return": value_to_json(target_return),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
@@ -165,3 +194,4 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(build_efficient_frontier)
     mcp.tool(get_tangency_portfolio)
     mcp.tool(get_min_variance_portfolio)
+    mcp.tool(get_most_diversified_portfolio)
