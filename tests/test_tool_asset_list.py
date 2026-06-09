@@ -24,8 +24,8 @@ def _make_asset_list_mock(*, describe_df, ror_df, symbols, ccy="USD",
     mock.describe = lambda: describe_df
     if inflation_attr:
         mock.inflation = inflation_attr
-    mock.get_sharpe_ratio = MagicMock(return_value=pd.Series({s: 0.4 for s in symbols}))  # noqa: C420 — need constant value, not None
-    mock.get_sortino_ratio = MagicMock(return_value=pd.Series({s: 0.5 for s in symbols}))  # noqa: C420 — need constant value, not None
+    mock.get_sharpe_ratio = MagicMock(return_value=pd.Series(dict.fromkeys(symbols, 0.4)))
+    mock.get_sortino_ratio = MagicMock(return_value=pd.Series(dict.fromkeys(symbols, 0.5)))
     return mock
 
 
