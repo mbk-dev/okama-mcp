@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from okama_mcp.schemas import (
     CashflowAdapter,
     CutIfDrawdownCashflow,
+    FrontierSpec,
     IndexationCashflow,
     MCSpec,
     PercentageCashflow,
@@ -216,3 +217,30 @@ class TestCashflowDiscriminator:
             CashflowAdapter.validate_python(
                 {"type": "lottery", "initial_investment": 1}
             )
+
+
+class TestNestedSpecs:
+    def test_portfolio_accepts_nested_portfolio(self) -> None:
+        spec = PortfolioSpec(
+            assets=["GLD.US", {"assets": ["SPY.US", "AGG.US"], "weights": [0.6, 0.4], "symbol": "b.PF"}],
+            weights=[0.3, 0.7],
+        )
+        assert isinstance(spec.assets[1], PortfolioSpec)
+        assert spec.assets[1].symbol == "b.PF"
+
+    def test_weights_count_top_level_elements(self) -> None:
+        with pytest.raises(ValidationError):
+            PortfolioSpec(
+                assets=["GLD.US", {"assets": ["A", "B"], "weights": [0.5, 0.5]}],
+                weights=[0.3, 0.3, 0.4],
+            )
+
+    def test_invalid_nested_spec_rejected(self) -> None:
+        # nested weights do not sum to 1.0 -> nested validator fires
+        with pytest.raises(ValidationError):
+            PortfolioSpec(assets=[{"assets": ["A", "B"], "weights": [0.5, 0.3]}])
+
+    def test_frontier_accepts_nested_portfolio(self) -> None:
+        spec = FrontierSpec(assets=["GLD.US", {"assets": ["SPY.US", "AGG.US"]}])
+        assert isinstance(spec.assets[1], PortfolioSpec)
+        assert spec.assets[0] == "GLD.US"

@@ -68,7 +68,13 @@ class PortfolioSpec(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    assets: list[str] = Field(min_length=1, description="Asset tickers, e.g. ['GLD.US', 'VNQ.US']")
+    assets: list[Union[str, "PortfolioSpec"]] = Field(  # noqa: UP007, UP037 — self-reference
+        min_length=1,
+        description=(
+            "Assets: each entry is a ticker string (e.g. 'GLD.US') OR a nested "
+            "portfolio object (same shape as this spec) used as a single component."
+        ),
+    )
     weights: list[float] | None = Field(
         default=None,
         description="Asset weights, must sum to 1.0. If omitted, okama uses equal weights.",
@@ -95,6 +101,9 @@ class PortfolioSpec(BaseModel):
         if abs(total - 1.0) > 1e-6:
             raise ValueError(f"weights must sum to 1.0 (got {total})")
         return self
+
+
+PortfolioSpec.model_rebuild()
 
 
 # ---------------------------------------------------------------------------
@@ -222,7 +231,13 @@ class FrontierSpec(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    assets: list[str] = Field(min_length=2, description="At least two asset tickers")
+    assets: list[str | PortfolioSpec] = Field(
+        min_length=2,
+        description=(
+            "At least two entries; each is a ticker string OR a nested portfolio "
+            "object used as a single component."
+        ),
+    )
     ccy: str = "USD"
     first_date: str | None = None
     last_date: str | None = None
