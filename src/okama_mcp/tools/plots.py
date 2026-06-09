@@ -14,12 +14,14 @@ import pandas as pd
 from fastmcp import FastMCP
 from fastmcp.utilities.types import Image
 
-from okama_mcp.errors import translates_okama_errors
+from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
 from okama_mcp.tools.asset_list import _build_asset_list
 from okama_mcp.tools.frontier import _get_frontier
 from okama_mcp.tools.monte_carlo import _prepare_dcf
 from okama_mcp.tools.portfolio import _get_portfolio
+
+_TM_NON_WEIGHT_COLS = {"Risk", "Mean return", "CAGR", "Weights", "iterations", "init_guess"}
 
 
 def _render(fig: Any, save_path: str | None) -> Image | list[Image | str]:
@@ -44,6 +46,17 @@ def _plot_index_values(index: pd.Index) -> pd.Index:
     return index.to_timestamp() if isinstance(index, pd.PeriodIndex) else index
 
 
+def _join_symbols(obj: Any, spec: Any) -> str:
+    """Comma-joined resolved symbols for chart titles (nesting-safe).
+
+    Prefer the built object's ``.symbols`` (resolved, incl. nested-portfolio
+    ``.PF`` labels); fall back to the spec's string tickers only.
+    """
+    syms = getattr(obj, "symbols", None)
+    items = list(syms) if syms is not None else [a for a in spec.assets if isinstance(a, str)]
+    return ", ".join(str(s) for s in items)
+
+
 @translates_okama_errors
 def plot_wealth_index(
     portfolio: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
@@ -62,7 +75,7 @@ def plot_wealth_index(
     x = _plot_index_values(wi.index)
     for col in wi.columns:
         ax.plot(x, wi[col].astype(float).values, label=str(col))
-    ax.set_title(f"Wealth index — {', '.join(spec.assets)} ({spec.ccy})")
+    ax.set_title(f"Wealth index — {_join_symbols(pf, spec)} ({spec.ccy})")
     ax.set_ylabel(f"Wealth ({spec.ccy})")
     ax.legend()
     return _render(fig, save_path)
@@ -84,7 +97,7 @@ def plot_drawdowns(
     x = _plot_index_values(dd.index)
     ax.plot(x, dd.values, color="tab:red")
     ax.fill_between(x, dd.values, 0.0, color="tab:red", alpha=0.25)
-    ax.set_title(f"Drawdowns — {', '.join(spec.assets)} ({spec.ccy})")
+    ax.set_title(f"Drawdowns — {_join_symbols(pf, spec)} ({spec.ccy})")
     ax.set_ylabel("Drawdown")
     return _render(fig, save_path)
 
@@ -115,7 +128,7 @@ def plot_efficient_frontier(
             ax.scatter(float(risks[symbol]), float(returns[symbol]), zorder=3)
             ax.annotate(symbol, (float(risks[symbol]), float(returns[symbol])),
                         textcoords="offset points", xytext=(6, 4), fontsize=9)
-    ax.set_title(f"Efficient frontier — {', '.join(spec.assets)} ({spec.ccy})")
+    ax.set_title(f"Efficient frontier — {_join_symbols(ef, spec)} ({spec.ccy})")
     ax.set_xlabel("Risk (annualized std)")
     ax.set_ylabel("Mean return (annualized)")
     ax.legend()
@@ -165,6 +178,7 @@ def plot_assets(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = False,
+    portfolios: list[dict[str, Any]] | None = None,
     width: int = 1500,
     height: int = 900,
     save_path: str | None = None,
@@ -175,7 +189,7 @@ def plot_assets(
     ``save_path``: optional file path — also write the PNG there and report it
     (for clients that don't render MCP images inline, e.g. terminal clients).
     """
-    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation)
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation, portfolios=portfolios)
     wi = al.wealth_indexes
     fig, ax = make_figure(width, height)
     x = _plot_index_values(wi.index)
@@ -226,11 +240,47 @@ def plot_irr_distribution(
     return _render(fig, save_path)
 
 
+@translates_okama_errors
+def plot_transition_map(
+    frontier: dict[str, Any],
+    x_axe: str = "risk",
+    width: int = 1500,
+    height: int = 900,
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
+    """Transition map: asset weights along the Efficient Frontier.
+
+    ``x_axe`` is 'risk' or 'cagr' (the x-axis quantity). Rendered with the
+    thread-safe OO matplotlib API from ``ef.ef_points`` (okama's own
+    ``plot_transition_map`` uses global pyplot and is not used here).
+    ``width``/``height``: PNG size in pixels (300-4000); ``save_path``: optionally
+    also write the PNG and report the path.
+    """
+    if x_axe.lower() not in ("risk", "cagr"):
+        raise OkamaMcpError("x_axe must be 'risk' or 'cagr'")
+    spec, ef = _get_frontier(frontier)
+    points = ef.ef_points
+    x_col = "Risk" if x_axe.lower() == "risk" else "CAGR"
+    fig, ax = make_figure(width, height)
+    x = points[x_col].astype(float).values
+    for col in points.columns:
+        if col in _TM_NON_WEIGHT_COLS:
+            continue
+        ax.plot(x, points[col].astype(float).values, label=str(col))
+    ax.set_xlim(float(points[x_col].min()), float(points[x_col].max()))
+    ax.set_xlabel("Risk (volatility)" if x_col == "Risk" else "CAGR")
+    ax.set_ylabel("Weights of assets")
+    ax.set_title(f"Transition map — {_join_symbols(ef, spec)} ({spec.ccy})")
+    ax.legend(loc="upper left")
+    return _render(fig, save_path)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
     mcp.tool(plot_drawdowns)
     mcp.tool(plot_efficient_frontier)
+    mcp.tool(plot_transition_map)
     mcp.tool(plot_monte_carlo)
     mcp.tool(plot_assets)
     mcp.tool(plot_irr_distribution)

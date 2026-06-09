@@ -242,6 +242,44 @@ class TestSavePath:
         assert target.read_bytes().startswith(PNG_MAGIC)
 
 
+def _make_ef_mock_for_tm() -> SimpleNamespace:
+    ef = SimpleNamespace()
+    ef.symbols = ["SPY.US", "GLD.US", "BND.US"]
+    ef.currency = "USD"
+    ef.ef_points = pd.DataFrame(
+        {
+            "Risk": [0.05, 0.08, 0.12, 0.18],
+            "Mean return": [0.04, 0.07, 0.09, 0.11],
+            "CAGR": [0.038, 0.067, 0.085, 0.105],
+            "SPY.US": [0.10, 0.30, 0.60, 1.00],
+            "GLD.US": [0.20, 0.30, 0.30, 0.00],
+            "BND.US": [0.70, 0.40, 0.10, 0.00],
+        }
+    )
+    return ef
+
+
+VALID_FRONTIER_SPEC: dict = {
+    "assets": ["SPY.US", "GLD.US", "BND.US"],
+    "ccy": "USD",
+    "n_points": 4,
+}
+
+
+class TestPlotTransitionMap:
+    def test_returns_png_image(self) -> None:
+        ef = _make_ef_mock_for_tm()
+        with patch("okama_mcp.tools.frontier.ok.EfficientFrontier", return_value=ef), \
+             patch("okama_mcp.tools.frontier.ok.Rebalance", return_value="REB"):
+            out = plots_tool.plot_transition_map(VALID_FRONTIER_SPEC)
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)
+
+    def test_invalid_x_axe_rejected(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            plots_tool.plot_transition_map(VALID_FRONTIER_SPEC, x_axe="time")
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_plot_tools_registered(self) -> None:
