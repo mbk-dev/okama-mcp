@@ -12,9 +12,12 @@ from typing import Any
 
 import okama as ok
 from fastmcp import FastMCP
+from pydantic import ValidationError
 
 from okama_mcp.errors import OkamaMcpError, translates_okama_errors
+from okama_mcp.schemas import PortfolioSpec
 from okama_mcp.serialization import dataframe_to_json, value_to_json
+from okama_mcp.tools.portfolio import _build_portfolio
 
 
 def _build_asset_list(
@@ -23,11 +26,19 @@ def _build_asset_list(
     first_date: str | None,
     last_date: str | None,
     inflation: bool,
+    portfolios: list[dict[str, Any]] | None = None,
 ) -> Any:
-    if not symbols:
+    resolved: list[Any] = list(symbols)
+    for raw in portfolios or []:
+        try:
+            p_spec = PortfolioSpec.model_validate(raw)
+        except ValidationError as exc:
+            raise OkamaMcpError(f"Invalid portfolio spec: {exc.errors()}") from exc
+        resolved.append(_build_portfolio(p_spec))
+    if not resolved:
         raise OkamaMcpError("symbols must be a non-empty list of okama tickers")
     return ok.AssetList(
-        symbols,
+        resolved,
         ccy=ccy,
         first_date=first_date,
         last_date=last_date,
@@ -42,6 +53,7 @@ def compare_assets(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = True,
+    portfolios: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Compare several assets side-by-side.
 
@@ -59,8 +71,10 @@ def compare_assets(
         ISO 'YYYY-MM' bounds.
     inflation : bool, default True
         Include the inflation series in ``describe()`` (limits date range by ~1 month).
+    portfolios : list[dict], optional
+        Optional list of portfolio specs to include as components alongside ``symbols``.
     """
-    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation)
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation, portfolios=portfolios)
     desc = al.describe()
     return {
         "symbols": list(getattr(al, "symbols", symbols)),
@@ -78,14 +92,20 @@ def get_correlations(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = True,
+    portfolios: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Return the correlation matrix of monthly returns for the given assets.
 
     The inflation series, if present, is dropped before computing correlations —
     correlations between returns and inflation are rarely actionable, and
     including it pollutes the matrix with a single near-constant series.
+
+    Parameters
+    ----------
+    portfolios : list[dict], optional
+        Optional list of portfolio specs to include as components alongside ``symbols``.
     """
-    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation)
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation, portfolios=portfolios)
     ror = al.assets_ror
 
     inflation_label = getattr(al, "inflation", None)
@@ -107,11 +127,18 @@ def get_rolling_risk(
     window_months: int = 12,
     first_date: str | None = None,
     last_date: str | None = None,
+    portfolios: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Rolling annualized risk (std of monthly returns) for each asset."""
+    """Rolling annualized risk (std of monthly returns) for each asset.
+
+    Parameters
+    ----------
+    portfolios : list[dict], optional
+        Optional list of portfolio specs to include as components alongside ``symbols``.
+    """
     if window_months < 1:
         raise OkamaMcpError("window_months must be a positive number of months")
-    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation=False)
+    al = _build_asset_list(symbols, ccy, first_date, last_date, inflation=False, portfolios=portfolios)
     df = al.get_rolling_risk_annual(window=window_months)
     return {
         "currency": ccy,

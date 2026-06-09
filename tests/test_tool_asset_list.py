@@ -183,6 +183,33 @@ class TestDividendInfo:
         al.get_dividend_mean_yield.assert_called_once_with(period=5)
 
 
+def test_build_asset_list_appends_nested_portfolio() -> None:
+    with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value="PFOBJ"), \
+         patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"), \
+         patch("okama_mcp.tools.asset_list.ok.AssetList", return_value="AL") as almock:
+        al_tool._build_asset_list(
+            ["GLD.US"], "USD", None, None, False,
+            portfolios=[{"assets": ["A.US", "B.US"], "weights": [0.6, 0.4], "symbol": "b.PF"}],
+        )
+    assert almock.call_args.args[0] == ["GLD.US", "PFOBJ"]
+
+
+def test_compare_assets_passes_portfolios_through() -> None:
+    describe = pd.DataFrame({"GLD.US": [0.08], "b.PF": [0.07]}, index=["CAGR"])
+    ror = pd.DataFrame({"GLD.US": [0.01], "b.PF": [0.02]},
+                       index=pd.period_range("2024-01", periods=1, freq="M"))
+    mock = _make_asset_list_mock(describe_df=describe, ror_df=ror, symbols=["GLD.US", "b.PF"])
+    with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value="PFOBJ"), \
+         patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"), \
+         patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=mock) as almock:
+        out = al_tool.compare_assets(
+            ["GLD.US"], ccy="USD",
+            portfolios=[{"assets": ["A.US", "B.US"], "weights": [0.6, 0.4], "symbol": "b.PF"}],
+        )
+    assert almock.call_args.args[0] == ["GLD.US", "PFOBJ"]
+    assert out["symbols"] == ["GLD.US", "b.PF"]
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase3_tools_registered(self) -> None:
