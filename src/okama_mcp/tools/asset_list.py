@@ -180,9 +180,52 @@ def get_dividend_info(
     }
 
 
+@translates_okama_errors
+def get_benchmark_metrics(
+    benchmark: str,
+    symbols: list[str],
+    ccy: str = "USD",
+    first_date: str | None = None,
+    last_date: str | None = None,
+    portfolios: list[dict[str, Any]] | None = None,
+    rolling_window: int | None = None,
+) -> dict[str, Any]:
+    """Metrics of each asset relative to a benchmark/index.
+
+    Builds an AssetList with ``benchmark`` first (okama treats the first symbol as
+    the index), then ``symbols`` and any nested ``portfolios``. Returns the latest
+    value per asset of: beta, correlation with the index, annualized tracking
+    difference, and tracking error. ``rolling_window`` (months, >= 12) switches
+    okama to a moving window; the response still reports the most recent row.
+    """
+    if not benchmark:
+        raise OkamaMcpError("benchmark must be a non-empty okama ticker")
+    al = _build_asset_list(
+        [benchmark, *symbols], ccy, first_date, last_date, inflation=False, portfolios=portfolios
+    )
+
+    def _last_row(df: Any) -> dict[str, Any]:
+        if df is None or len(df) == 0:
+            return {}
+        return {str(k): value_to_json(v) for k, v in df.iloc[-1].items()}
+
+    return {
+        "benchmark": benchmark,
+        "ccy": getattr(al, "currency", ccy),
+        "rolling_window": rolling_window,
+        "beta": _last_row(al.index_beta(rolling_window=rolling_window)),
+        "correlation": _last_row(al.index_corr(rolling_window=rolling_window)),
+        "tracking_difference_annualized": _last_row(
+            al.tracking_difference_annualized(rolling_window=rolling_window)
+        ),
+        "tracking_error": _last_row(al.tracking_error(rolling_window=rolling_window)),
+    }
+
+
 def register(mcp: FastMCP) -> None:
     """Register asset-list tools with the FastMCP server."""
     mcp.tool(compare_assets)
     mcp.tool(get_correlations)
     mcp.tool(get_rolling_risk)
     mcp.tool(get_dividend_info)
+    mcp.tool(get_benchmark_metrics)

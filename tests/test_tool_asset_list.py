@@ -224,6 +224,35 @@ class TestCompareAssetsRiskAdjusted:
         assert out["sortino_ratio"] == {"GLD.US": 0.5, "VNQ.US": 0.5}
 
 
+class TestBenchmarkMetrics:
+    def test_returns_latest_beta_corr_tracking(self) -> None:
+        idx = pd.period_range("2024-01", periods=2, freq="M")
+        beta = pd.DataFrame({"GLD.US": [0.9, 0.95]}, index=idx)
+        corr = pd.DataFrame({"GLD.US": [0.7, 0.72]}, index=idx)
+        td = pd.DataFrame({"GLD.US": [0.01, 0.012]}, index=idx)
+        te = pd.DataFrame({"GLD.US": [0.05, 0.048]}, index=idx)
+        mock = SimpleNamespace()
+        mock.symbols = ["SP500TR.INDX", "GLD.US"]
+        mock.currency = "USD"
+        mock.index_beta = MagicMock(return_value=beta)
+        mock.index_corr = MagicMock(return_value=corr)
+        mock.tracking_difference_annualized = MagicMock(return_value=td)
+        mock.tracking_error = MagicMock(return_value=te)
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=mock) as m:
+            out = al_tool.get_benchmark_metrics("SP500TR.INDX", ["GLD.US"], ccy="USD")
+        # benchmark must be first in the AssetList
+        assert m.call_args.args[0] == ["SP500TR.INDX", "GLD.US"]
+        assert out["benchmark"] == "SP500TR.INDX"
+        assert out["beta"] == {"GLD.US": 0.95}
+        assert out["correlation"] == {"GLD.US": 0.72}
+        assert out["tracking_difference_annualized"] == {"GLD.US": 0.012}
+        assert out["tracking_error"] == {"GLD.US": 0.048}
+
+    def test_empty_benchmark_rejected(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            al_tool.get_benchmark_metrics("", ["GLD.US"])
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase3_tools_registered(self) -> None:
