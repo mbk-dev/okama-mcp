@@ -371,6 +371,50 @@ class TestGetPortfolioIrr:
         assert out["irr"] is None
 
 
+class TestLargestWithdrawalsSize:
+    def test_returns_withdrawal_result(self) -> None:
+        pf = _make_pf_mock()
+        pf.dcf.find_the_largest_withdrawals_size = MagicMock(
+            return_value=SimpleNamespace(
+                success=True,
+                withdrawal_abs=-12345.0,
+                withdrawal_rel=-0.04,
+                error_rel=0.02,
+                solutions=pd.DataFrame({"withdrawal_abs": [-1, -2, -3]}),
+            )
+        )
+        ind_mock = MagicMock(name="IndexationStrategy_instance")
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=ind_mock),
+        ):
+            out = mc_tool.find_the_largest_withdrawals_size(
+                portfolio=VALID_PF_SPEC,
+                mc=VALID_MC_SPEC,
+                cashflow=VALID_INDEXATION_CASHFLOW,
+                goal="survival_period",
+                target_survival_period=25,
+                percentile=20,
+            )
+        assert out["goal"] == "survival_period"
+        assert out["success"] is True
+        assert out["withdrawal_abs"] == -12345.0
+        assert out["withdrawal_rel"] == -0.04
+        assert out["error_rel"] == 0.02
+        assert out["n_evaluations"] == 3
+        pf.dcf.set_mc_parameters.assert_called_once()
+
+    def test_invalid_goal_rejected(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            mc_tool.find_the_largest_withdrawals_size(
+                portfolio=VALID_PF_SPEC,
+                mc=VALID_MC_SPEC,
+                cashflow=VALID_INDEXATION_CASHFLOW,
+                goal="not_a_goal",
+            )
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase5_tool_registered(self) -> None:

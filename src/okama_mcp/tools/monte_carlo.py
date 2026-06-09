@@ -33,6 +33,8 @@ from okama_mcp.schemas import (
 from okama_mcp.serialization import series_to_json, value_to_json
 from okama_mcp.tools.portfolio import _get_portfolio
 
+_WITHDRAWAL_GOALS = ("maintain_balance_pv", "maintain_balance_fv", "survival_period")
+
 
 def _validate_mc(spec: dict[str, Any]) -> MCSpec:
     try:
@@ -266,6 +268,53 @@ def monte_carlo_forecast(
     }
 
 
+@translates_okama_errors
+def find_the_largest_withdrawals_size(
+    portfolio: dict[str, Any],
+    mc: dict[str, Any],
+    cashflow: dict[str, Any],
+    goal: str,
+    withdrawals_range: tuple[float, float] = (0.0, 1.0),
+    target_survival_period: int = 25,
+    percentile: int = 20,
+    threshold: float = 0.0,
+    tolerance_rel: float = 0.1,
+    iter_max: int = 20,
+) -> dict[str, Any]:
+    """Largest sustainable withdrawal size for a Monte Carlo cash-flow plan.
+
+    ``goal`` is one of: ``maintain_balance_pv`` (keep real purchasing power),
+    ``maintain_balance_fv`` (keep nominal value), or ``survival_period`` (last at
+    least ``target_survival_period`` years). The ``cashflow`` strategy provides
+    the base withdrawal that gets scaled; ``percentile`` is the Monte Carlo
+    confidence percentile evaluated (e.g. 20 = pessimistic). Returns the found
+    withdrawal in absolute and relative terms plus the solver's relative error.
+    """
+    if goal not in _WITHDRAWAL_GOALS:
+        raise OkamaMcpError(f"goal must be one of {_WITHDRAWAL_GOALS}, got {goal!r}")
+    pf, mc_spec = _prepare_dcf(portfolio, mc, cashflow)
+    result = pf.dcf.find_the_largest_withdrawals_size(
+        goal=goal,
+        withdrawals_range=tuple(withdrawals_range),
+        target_survival_period=target_survival_period,
+        percentile=percentile,
+        threshold=threshold,
+        tolerance_rel=tolerance_rel,
+        iter_max=iter_max,
+    )
+    solutions = getattr(result, "solutions", None)
+    return {
+        "goal": goal,
+        "success": bool(getattr(result, "success", False)),
+        "withdrawal_abs": value_to_json(float(result.withdrawal_abs)),
+        "withdrawal_rel": value_to_json(float(result.withdrawal_rel)),
+        "error_rel": value_to_json(float(result.error_rel)),
+        "n_evaluations": int(len(solutions)) if solutions is not None else None,
+        "mc_spec": mc_spec.model_dump(),
+        "cashflow_spec": _validate_cashflow(cashflow).model_dump(),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
@@ -275,3 +324,4 @@ def register(mcp: FastMCP) -> None:
     """Register Phase 5 Monte Carlo tools with the FastMCP server."""
     mcp.tool(get_portfolio_irr)
     mcp.tool(monte_carlo_forecast)
+    mcp.tool(find_the_largest_withdrawals_size)
