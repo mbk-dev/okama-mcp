@@ -229,7 +229,7 @@ def monte_carlo_forecast(
         :class:`PortfolioSpec` — assets + weights + dates + base currency.
     mc : dict
         :class:`MCSpec` — distribution ('norm'/'lognorm'/'t'), ``period_years``,
-        ``scenarios`` (≤5000), reported percentiles, optional ``random_seed``.
+        ``scenarios`` (≥1), reported percentiles, optional ``random_seed``.
     cashflow : dict
         :class:`CashflowSpec` — one of indexation / percentage / time_series /
         vanguard / cut_if_drawdown. The ``type`` field discriminates.

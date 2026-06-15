@@ -295,7 +295,7 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
 {
   "distribution":  "norm",            // norm | lognorm | t
   "period_years":  25,
-  "scenarios":     500,                // ≤ 5000
+  "scenarios":     500,                // ≥ 1, no upper limit
   "percentiles":   [5, 50, 95],
   "random_seed":   42                  // optional, for reproducibility
 }

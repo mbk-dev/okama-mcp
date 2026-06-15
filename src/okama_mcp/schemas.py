@@ -2,8 +2,8 @@
 
 Every MCP tool that does non-trivial work accepts a typed spec object instead of
 a sprawl of parameters. That gives the LLM a single, well-described shape to
-fill in and gives us one place to validate (weights sum to 1, scenarios capped,
-cashflow types discriminated, etc.) before we ever touch okama.
+fill in and gives us one place to validate (weights sum to 1, percentiles in
+range, cashflow types discriminated, etc.) before we ever touch okama.
 
 The discriminated union ``CashflowSpec`` mirrors the five strategy classes in
 ``okama.portfolios.cashflow_strategies``: IndexationStrategy, PercentageStrategy,
@@ -118,7 +118,7 @@ class MCSpec(BaseModel):
 
     distribution: Distribution = "norm"
     period_years: int = Field(default=25, ge=1, le=200, description="Forecast horizon in years")
-    scenarios: int = Field(default=500, ge=1, le=5000, description="Number of Monte Carlo paths")
+    scenarios: int = Field(default=500, ge=1, description="Number of Monte Carlo paths")
     percentiles: list[int] = Field(
         default_factory=lambda: [5, 50, 95],
         description="Percentiles (0..100) reported for the wealth distribution",

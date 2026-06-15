@@ -107,9 +107,13 @@ class TestMCSpec:
         assert mc.period_years == 25
         assert mc.scenarios == 500
 
-    def test_scenarios_cap(self) -> None:
+    def test_scenarios_no_upper_cap(self) -> None:
+        assert MCSpec(scenarios=10_000).scenarios == 10_000
+        assert MCSpec(scenarios=1_000_000).scenarios == 1_000_000
+
+    def test_scenarios_must_be_positive(self) -> None:
         with pytest.raises(ValidationError):
-            MCSpec(scenarios=10_000)
+            MCSpec(scenarios=0)
 
     def test_period_years_must_be_positive(self) -> None:
         with pytest.raises(ValidationError):

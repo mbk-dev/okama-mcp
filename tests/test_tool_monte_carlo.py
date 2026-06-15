@@ -248,11 +248,6 @@ class TestValidation:
         with pytest.raises(OkamaMcpError):
             mc_tool.monte_carlo_forecast(VALID_PF_SPEC, VALID_MC_SPEC, bad_cf)
 
-    def test_too_many_scenarios_rejected(self) -> None:
-        bad_mc = dict(VALID_MC_SPEC, scenarios=10_000)
-        with pytest.raises(OkamaMcpError):
-            mc_tool.monte_carlo_forecast(VALID_PF_SPEC, bad_mc, VALID_INDEXATION_CASHFLOW)
-
 
 class TestSurvivalCalculations:
     def test_scenarios_above_zero_pct_from_last_row(self) -> None:
