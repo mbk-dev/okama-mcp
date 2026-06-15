@@ -293,13 +293,13 @@ def plot_qq(
     """
     pf, mc_spec = _prepare_mc(portfolio, mc)
     ror = pf.dcf.mc.ror.astype(float)
+    # Full fitted parameters (shape + loc + scale) so the plot honors any custom
+    # distribution_parameters loc/scale, consistent with plot_hist_fit. The tuple
+    # shape matches each distribution: norm=(mu, sigma); lognorm=(shape, loc, scale);
+    # t=(df, loc, scale) — exactly what scipy's probplot sparams expects.
     params = pf.dcf.mc.get_parameters_for_distribution()
-    if mc_spec.distribution == "norm":
-        dist_name, sparams = "norm", ()
-    else:  # 'lognorm' and 't' both take a single shape param first
-        dist_name, sparams = mc_spec.distribution, (params[0],)
     fig, ax = make_figure(width, height)
-    scipy.stats.probplot(ror.values, dist=dist_name, sparams=sparams, plot=ax)
+    scipy.stats.probplot(ror.values, dist=mc_spec.distribution, sparams=tuple(params), plot=ax)
     ax.set_title(f"Q-Q plot vs {mc_spec.distribution} — {getattr(pf, 'symbol', 'portfolio')}")
     return _render(fig, save_path)
 
