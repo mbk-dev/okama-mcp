@@ -29,6 +29,7 @@ from pydantic import (
 RebalancingPeriod = Literal["month", "quarter", "half-year", "year", "none"]
 CashflowFrequency = Literal["month", "quarter", "half-year", "year"]
 Distribution = Literal["norm", "lognorm", "t"]
+_DIST_PARAM_LENGTHS: dict[str, int] = {"norm": 2, "lognorm": 3, "t": 3}
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +125,14 @@ class MCSpec(BaseModel):
         description="Percentiles (0..100) reported for the wealth distribution",
     )
     random_seed: int | None = Field(default=None, description="Optional seed for reproducibility")
+    distribution_parameters: list[float | None] | None = Field(
+        default=None,
+        description=(
+            "Optional explicit distribution parameters; any None element is fitted "
+            "from history via MLE. Lengths by distribution: norm=[mu, sigma]; "
+            "lognorm=[shape, loc, scale]; t=[df, loc, scale]."
+        ),
+    )
 
     @model_validator(mode="after")
     def _validate_percentiles(self) -> MCSpec:
@@ -132,6 +141,17 @@ class MCSpec(BaseModel):
         for p in self.percentiles:
             if p < 0 or p > 100:
                 raise ValueError(f"percentile {p} must be in [0, 100]")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_distribution_parameters(self) -> MCSpec:
+        if self.distribution_parameters is not None:
+            expected = _DIST_PARAM_LENGTHS[self.distribution]
+            if len(self.distribution_parameters) != expected:
+                raise ValueError(
+                    f"distribution_parameters for '{self.distribution}' must have "
+                    f"{expected} elements, got {len(self.distribution_parameters)}"
+                )
         return self
 
 

@@ -128,6 +128,23 @@ class TestMCSpec:
         with pytest.raises(ValidationError):
             MCSpec(percentiles=[5, 110])
 
+    def test_distribution_parameters_default_none(self) -> None:
+        assert MCSpec().distribution_parameters is None
+
+    def test_distribution_parameters_norm_length(self) -> None:
+        assert MCSpec(distribution="norm", distribution_parameters=[0.01, 0.04]).distribution_parameters == [0.01, 0.04]
+        with pytest.raises(ValidationError):
+            MCSpec(distribution="norm", distribution_parameters=[0.01, 0.04, 0.1])
+
+    def test_distribution_parameters_t_length(self) -> None:
+        assert MCSpec(distribution="t", distribution_parameters=[3, None, None]).distribution_parameters == [3, None, None]
+        with pytest.raises(ValidationError):
+            MCSpec(distribution="t", distribution_parameters=[3, None])
+
+    def test_distribution_parameters_lognorm_length(self) -> None:
+        with pytest.raises(ValidationError):
+            MCSpec(distribution="lognorm", distribution_parameters=[0.1, 0.2])
+
 
 class TestCashflowSpec:
     def test_indexation_cashflow(self) -> None:
