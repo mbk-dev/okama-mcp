@@ -4,6 +4,7 @@ import struct
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import pytest
 from fastmcp.utilities.types import Image
@@ -291,3 +292,39 @@ class TestServerRegistration:
                      "plot_monte_carlo", "plot_assets", "plot_irr_distribution",
                      "plot_transition_map"):
             assert tool in names
+
+
+MC_SPEC_T: dict = {"distribution": "t", "period_years": 10, "scenarios": 50}
+
+
+def _pf_with_ror() -> SimpleNamespace:
+    pf = SimpleNamespace()
+    pf.symbol = "pf.PF"
+    pf.symbols = ["GLD.US"]
+    dcf = SimpleNamespace()
+    dcf.set_mc_parameters = lambda **kwargs: None
+    rng = np.random.default_rng(0)
+    mc = SimpleNamespace()
+    mc.ror = pd.Series(rng.normal(0.005, 0.04, 120))
+    mc.get_parameters_for_distribution = lambda: (5.0, 0.005, 0.04)
+    dcf.mc = mc
+    pf.dcf = dcf
+    return pf
+
+
+class TestPlotQQ:
+    def test_returns_image(self) -> None:
+        pf = _pf_with_ror()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = plots_tool.plot_qq(VALID_SPEC, MC_SPEC_T)
+        assert isinstance(out, Image)
+
+
+class TestPlotHistFit:
+    def test_returns_image(self) -> None:
+        pf = _pf_with_ror()
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
+            out = plots_tool.plot_hist_fit(VALID_SPEC, MC_SPEC_T)
+        assert isinstance(out, Image)

@@ -10,7 +10,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+import scipy.stats
 from fastmcp import FastMCP
 from fastmcp.utilities.types import Image
 
@@ -18,7 +20,7 @@ from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
 from okama_mcp.tools.asset_list import _build_asset_list
 from okama_mcp.tools.frontier import _get_frontier
-from okama_mcp.tools.monte_carlo import _prepare_dcf
+from okama_mcp.tools.monte_carlo import _prepare_dcf, _prepare_mc
 from okama_mcp.tools.portfolio import _get_portfolio
 
 _TM_NON_WEIGHT_COLS = {"Risk", "Mean return", "CAGR", "Weights", "iterations", "init_guess"}
@@ -275,6 +277,68 @@ def plot_transition_map(
     return _render(fig, save_path)
 
 
+@translates_okama_errors
+def plot_qq(
+    portfolio: dict[str, Any],
+    mc: dict[str, Any],
+    width: int = 1500,
+    height: int = 900,
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
+    """Q-Q plot of historical returns against the fitted MC distribution.
+
+    The reference distribution is set by ``mc.distribution`` ('norm'/'lognorm'/'t')
+    with parameters fitted from history (or overridden via ``distribution_parameters``).
+    ``save_path``: also write the PNG there (for clients without inline images).
+    """
+    pf, mc_spec = _prepare_mc(portfolio, mc)
+    ror = pf.dcf.mc.ror.astype(float)
+    params = pf.dcf.mc.get_parameters_for_distribution()
+    if mc_spec.distribution == "norm":
+        dist_name, sparams = "norm", ()
+    else:  # 'lognorm' and 't' both take a single shape param first
+        dist_name, sparams = mc_spec.distribution, (params[0],)
+    fig, ax = make_figure(width, height)
+    scipy.stats.probplot(ror.values, dist=dist_name, sparams=sparams, plot=ax)
+    ax.set_title(f"Q-Q plot vs {mc_spec.distribution} — {getattr(pf, 'symbol', 'portfolio')}")
+    return _render(fig, save_path)
+
+
+@translates_okama_errors
+def plot_hist_fit(
+    portfolio: dict[str, Any],
+    mc: dict[str, Any],
+    bins: int | None = None,
+    width: int = 1500,
+    height: int = 900,
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
+    """Histogram of historical returns with the fitted distribution PDF overlaid.
+
+    The fitted curve is the ``mc.distribution`` density using parameters from
+    history (or ``distribution_parameters``). ``bins``: histogram bin count.
+    ``save_path``: also write the PNG there (for clients without inline images).
+    """
+    pf, mc_spec = _prepare_mc(portfolio, mc)
+    ror = pf.dcf.mc.ror.astype(float)
+    params = pf.dcf.mc.get_parameters_for_distribution()
+    fig, ax = make_figure(width, height)
+    ax.hist(ror.values, bins=bins if bins is not None else "auto", density=True, alpha=0.5,
+            label="historical returns")
+    x = np.linspace(float(ror.min()), float(ror.max()), 200)
+    if mc_spec.distribution == "norm":
+        pdf = scipy.stats.norm.pdf(x, loc=params[0], scale=params[1])
+    elif mc_spec.distribution == "lognorm":
+        pdf = scipy.stats.lognorm.pdf(x, params[0], loc=params[1], scale=params[2])
+    else:  # t
+        pdf = scipy.stats.t.pdf(x, df=params[0], loc=params[1], scale=params[2])
+    ax.plot(x, pdf, color="tab:red", label=f"{mc_spec.distribution} fit")
+    ax.set_title(f"Return distribution fit ({mc_spec.distribution}) — {getattr(pf, 'symbol', 'portfolio')}")
+    ax.set_xlabel("Monthly return")
+    ax.legend()
+    return _render(fig, save_path)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
@@ -284,3 +348,5 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(plot_monte_carlo)
     mcp.tool(plot_assets)
     mcp.tool(plot_irr_distribution)
+    mcp.tool(plot_qq)
+    mcp.tool(plot_hist_fit)
