@@ -14,8 +14,10 @@ def register_all(mcp: FastMCP) -> None:
     from okama_mcp.tools import (
         asset,
         asset_list,
+        dcf,
         frontier,
         macro,
+        mc_diagnostics,
         monte_carlo,
         plots,
         portfolio,
@@ -27,6 +29,8 @@ def register_all(mcp: FastMCP) -> None:
     asset_list.register(mcp)
     portfolio.register(mcp)
     monte_carlo.register(mcp)
+    mc_diagnostics.register(mcp)
+    dcf.register(mcp)
     frontier.register(mcp)
     macro.register(mcp)
     plots.register(mcp)
