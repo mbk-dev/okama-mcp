@@ -232,6 +232,28 @@ portfolio against gold, or put a sub-portfolio on the efficient frontier.
 | `monte_carlo_forecast(portfolio, mc, cashflow)` | Forward simulation with one of five cash-flow strategies (`indexation`, `percentage`, `time_series`, `vanguard`, `cut_if_drawdown`). Returns percentile wealth bands, terminal-wealth stats, survival metrics. Includes the money-weighted IRR distribution (percentiles + mean). |
 | `get_portfolio_irr(portfolio, cashflow)` | Historical money-weighted return (IRR) for a contribution/withdrawal plan. |
 | `find_the_largest_withdrawals_size(portfolio, mc, cashflow, goal, ...)` | Largest sustainable withdrawal (Monte Carlo) for a `goal`: keep real purchasing power, keep nominal balance, or survive N years. |
+| `get_monte_carlo_cash_flow(portfolio, mc, cashflow, discounting?)` | Monte Carlo distribution of future cash flows over time (percentile bands). |
+
+The `mc` argument accepts `distribution_parameters` to override the fitted distribution (e.g. a fixed Student-t `df`); see the MCSpec shape below.
+
+### Distribution diagnostics
+
+| Tool | Purpose |
+|---|---|
+| `get_distribution_fit(portfolio, mc)` | Goodness-of-fit for the return distribution: fitted parameters, Jarque-Bera, Kolmogorov-Smirnov (chosen + all distributions), and backtesting error (theoretical vs empirical mean/VaR/CVaR). |
+| `get_return_moments(portfolio, mc, rolling_window?)` | Skewness & kurtosis time series — expanding, or rolling when a window (months) is given. |
+| `optimize_students_df(portfolio, mc, var_level?)` | Degrees of freedom for a Student-t that best matches empirical VaR/CVaR. |
+| `get_cagr_distribution(portfolio, mc, percentiles?, score?)` | Simulated CAGR at each percentile, plus the probability of a CAGR at/below `score` (e.g. `score=0` → probability of a loss). |
+
+### DCF (historical cash-flow analysis)
+
+| Tool | Purpose |
+|---|---|
+| `get_dcf_wealth_index(portfolio, cashflow, discounting?, include_negative_values?, discount_rate?)` | Historical wealth index with the cash-flow plan (FV nominal or PV discounted). |
+| `get_dcf_cash_flow_ts(portfolio, cashflow, discounting?, remove_if_wealth_index_negative?, discount_rate?)` | Historical contribution/withdrawal time series (FV or PV). |
+| `get_dcf_wealth_with_assets(portfolio, cashflow)` | Historical wealth index for the portfolio and each underlying asset. |
+| `get_survival_period(portfolio, cashflow, threshold?, discount_rate?)` | Historical longevity: survival period (years) and depletion date. |
+| `get_initial_investment_values(portfolio, cashflow, discount_rate?)` | Present value (PV) and future value (FV) of the initial investment. |
 
 ### Efficient Frontier
 
@@ -266,6 +288,8 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_drawdowns(portfolio)` | Drawdown depth over time. |
 | `plot_monte_carlo(portfolio, mc, cashflow)` | Monte Carlo forecast fan (percentile bands). |
 | `plot_irr_distribution(portfolio, mc, cashflow)` | Histogram of IRR across Monte Carlo scenarios (percentile markers). |
+| `plot_qq(portfolio, mc)` | Q-Q plot of historical returns against the fitted distribution (norm/lognorm/t). |
+| `plot_hist_fit(portfolio, mc, bins?)` | Histogram of historical returns with the fitted distribution PDF overlaid. |
 | `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
 | `plot_transition_map(frontier, x_axe="risk")` | Transition map: asset weights along the efficient frontier (x-axis = risk or CAGR). |
 | `plot_assets(symbols, ccy, ..., portfolios?)` | Wealth-index comparison of individual assets. |
@@ -297,13 +321,14 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
   "period_years":  25,
   "scenarios":     500,                // ≥ 1, no upper limit
   "percentiles":   [5, 50, 95],
-  "random_seed":   42                  // optional, for reproducibility
+  "random_seed":   42,                 // optional, for reproducibility
+  "distribution_parameters": null      // optional; null = fit from history (MLE). Lengths: norm [mu, sigma]; lognorm/t [shape|df, loc, scale]. Any element null = fit that one (e.g. [4, null, null])
 }
 
 // CashflowSpec — discriminated by `type`
 { "type": "indexation",       "initial_investment": 1000000, "frequency": "month", "amount": -1000, "indexation": "inflation" }
 { "type": "percentage",       "initial_investment": 1000000, "frequency": "year",  "percentage": -0.04 }
-{ "type": "time_series",      "initial_investment": 100000,  "events":    { "2030-06": -50000 } }
+{ "type": "time_series",      "initial_investment": 100000,  "events":    { "2030-06": -50000 }, "time_series_discounted_values": false }
 { "type": "vanguard",         "initial_investment": 1000000, "percentage": -0.04, "floor_ceiling": [-0.025, 0.05], "indexation": "inflation" }
 { "type": "cut_if_drawdown",  "initial_investment": 1000000, "frequency": "year",  "amount": -60000, "indexation": "inflation",
   "crash_threshold_reduction": [[0.2, 0.4], [0.5, 1.0]] }

@@ -313,3 +313,69 @@ async def test_largest_withdrawals_size_live(server) -> None:
     assert payload["goal"] == "survival_period"
     assert isinstance(payload["success"], bool)
     assert payload["withdrawal_rel"] is not None
+
+
+# ---------------------------------------------------------------------------
+# MC diagnostics + DCF tools (full-parity expansion)
+# ---------------------------------------------------------------------------
+
+_PF_6040: dict = {
+    "assets": ["SPY.US", "AGG.US"], "weights": [0.6, 0.4], "ccy": "USD",
+    "first_date": "2010-01", "last_date": "2024-10", "rebalancing_strategy": {"period": "year"},
+}
+_CF_INDEXATION: dict = {
+    "type": "indexation", "initial_investment": 100_000.0, "frequency": "year",
+    "amount": -5_000.0, "indexation": "inflation",
+}
+
+
+async def test_distribution_fit_live(server) -> None:
+    """Student-t goodness-of-fit diagnostics for a 60/40 portfolio."""
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "get_distribution_fit",
+            {"portfolio": _PF_6040, "mc": {"distribution": "t", "period_years": 10, "scenarios": 200}},
+        )).data
+    assert len(payload["parameters"]) == 3
+    assert "p-value" in payload["kstest"]
+    assert "kstest_all_distributions" in payload
+
+
+async def test_cagr_distribution_live(server) -> None:
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "get_cagr_distribution",
+            {"portfolio": _PF_6040, "mc": {"distribution": "norm", "period_years": 10, "scenarios": 200},
+             "percentiles": [10, 50, 90], "score": 0.0},
+        )).data
+    assert set(payload["percentiles"].keys()) == {"10", "50", "90"}
+    assert payload["prob_below_score_pct"] is not None
+
+
+async def test_dcf_survival_and_mc_cashflow_live(server) -> None:
+    async with Client(server) as client:
+        surv = (await client.call_tool(
+            "get_survival_period", {"portfolio": _PF_6040, "cashflow": _CF_INDEXATION}
+        )).data
+        mc_cf = (await client.call_tool(
+            "get_monte_carlo_cash_flow",
+            {"portfolio": _PF_6040,
+             "mc": {"distribution": "norm", "period_years": 10, "scenarios": 100, "percentiles": [5, 50, 95]},
+             "cashflow": _CF_INDEXATION},
+        )).data
+    assert surv["survival_period_years"] is not None
+    assert set(mc_cf["cash_flow_paths"]["percentiles"].keys()) == {"5", "50", "95"}
+
+
+async def test_distribution_parameters_custom_t_live(server) -> None:
+    """Custom Student-t df=4 (loc/scale fitted) flows end-to-end into the forecast."""
+    async with Client(server) as client:
+        payload = (await client.call_tool(
+            "monte_carlo_forecast",
+            {"portfolio": _PF_6040,
+             "mc": {"distribution": "t", "distribution_parameters": [4, None, None],
+                    "period_years": 10, "scenarios": 100, "percentiles": [5, 50, 95]},
+             "cashflow": _CF_INDEXATION},
+        )).data
+    assert payload["mc_spec"]["distribution_parameters"] == [4, None, None]
+    assert "wealth_paths" in payload
