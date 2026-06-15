@@ -1,3 +1,4 @@
 okama>=2.2.0
 fastmcp>=2.7
 pydantic>=2.0
+scipy>=1.11
