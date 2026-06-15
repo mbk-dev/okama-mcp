@@ -183,6 +183,23 @@ class TestTimeSeriesCashflow:
         assert strat.initial_investment == 100_000.0
         assert strat.time_series_dic == events
 
+    def test_passes_discounted_values_flag(self) -> None:
+        pf = _make_pf_mock()
+        strat = MagicMock(name="TimeSeriesStrategy_instance")
+        cf_spec = {
+            "type": "time_series",
+            "initial_investment": 100_000.0,
+            "events": {"2030-01": -50_000},
+            "time_series_discounted_values": True,
+        }
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.TimeSeriesStrategy", return_value=strat),
+        ):
+            mc_tool.monte_carlo_forecast(VALID_PF_SPEC, VALID_MC_SPEC, cf_spec)
+        assert strat.time_series_discounted_values is True
+
 
 class TestVanguardCashflow:
     def test_dispatches_to_vanguard(self) -> None:

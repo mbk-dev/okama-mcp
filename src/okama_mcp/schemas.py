@@ -197,6 +197,10 @@ class TimeSeriesCashflow(_CashflowBase):
     events: dict[str, float] = Field(
         description="Mapping of 'YYYY-MM' to signed cash flow amount",
     )
+    time_series_discounted_values: bool = Field(
+        default=False,
+        description="If true, event values are interpreted as present values (PV) instead of nominal.",
+    )
 
 
 class VanguardDynamicCashflow(_CashflowBase):

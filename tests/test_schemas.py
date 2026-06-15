@@ -265,3 +265,15 @@ class TestNestedSpecs:
         spec = FrontierSpec(assets=["GLD.US", {"assets": ["SPY.US", "AGG.US"]}])
         assert isinstance(spec.assets[1], PortfolioSpec)
         assert spec.assets[0] == "GLD.US"
+
+
+class TestTimeSeriesDiscounted:
+    def test_default_false(self) -> None:
+        spec = TimeSeriesCashflow(initial_investment=100.0, events={"2030-01": -50.0})
+        assert spec.time_series_discounted_values is False
+
+    def test_can_set_true(self) -> None:
+        spec = TimeSeriesCashflow(
+            initial_investment=100.0, events={"2030-01": -50.0}, time_series_discounted_values=True
+        )
+        assert spec.time_series_discounted_values is True

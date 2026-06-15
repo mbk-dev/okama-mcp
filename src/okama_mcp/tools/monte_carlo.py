@@ -71,6 +71,7 @@ def _build_cashflow_strategy(pf: Any, cashflow: Any) -> Any:
         strat = ok.TimeSeriesStrategy(pf)
         strat.initial_investment = cashflow.initial_investment
         strat.time_series_dic = dict(cashflow.events)
+        strat.time_series_discounted_values = cashflow.time_series_discounted_values
         return strat
 
     if isinstance(cashflow, VanguardDynamicCashflow):
