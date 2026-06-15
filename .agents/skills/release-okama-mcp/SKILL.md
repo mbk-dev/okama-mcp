@@ -184,22 +184,51 @@ EOF
 
 Group notes by New / Changed / Fixed; name each new tool. Keep it short.
 
-## 8. Draft the Russian community.okama.io announcement
+## 8. Announce on community.okama.io (Russian)
 
-Prepare a short **Russian** announcement for the community forum
-(community.okama.io, Discourse) and **present the text to the user — do not
-auto-post** (no forum API credential is configured; posting is the user's call).
+Prepare a **Russian** announcement for the community forum (community.okama.io,
+Discourse). Posting is outward-facing — **get the user's go-ahead before you
+post.** A forum API credential **is** available at
+`~/.config/secrets/discourse-okama.env` (`DISCOURSE_OKAMA_URL`,
+`DISCOURSE_OKAMA_API_KEY`, `DISCOURSE_OKAMA_API_USERNAME`) — source it and post
+via the Discourse REST API. Never print the key.
 
 Write it for end users, not developers:
 - Что нового простыми словами — какие вопросы теперь можно задать ИИ-ассистенту
   (например: «сравни мой портфель с бенчмарком», «какую сумму можно безопасно
   изымать в пенсии»), а не список внутренних имён инструментов.
-- Как обновиться: `uvx okama-mcp` подтянет новую версию сам; клиенты MCP увидят
-  её в каталоге.
+- Как установить / как обновиться: `uvx okama-mcp` (пакет `uv` даёт команду
+  `uvx`); клиенты MCP увидят новую версию в каталоге. Команды на каждого клиента
+  — из README "Connect a client".
+- Терминология рунета: пиши «MCP-сервер», «MCP-клиент» (так на Хабре), не «MCP
+  server».
 - Ссылки: репозиторий, https://mcp.okama.io/, GitHub release.
-- Тон — дружелюбный, без маркетингового шума; 1–3 коротких абзаца.
+- Тон — дружелюбный, без маркетингового шума.
 
-Output it as ready-to-paste Markdown so the user can post it to the forum.
+### Formatting — required for any post beyond a couple of paragraphs
+
+Split the message into **sections**, and where a section is long, into
+**subsections** — each titled with a real Markdown header:
+- `##` for top-level sections (e.g. `## Что нового`, `## Как установить`,
+  `## Как обновиться`, `## Ссылки`).
+- `###` for subsections under a section.
+- Do **not** fake headings with bold text (`**…**`) — use real `##`/`###` so
+  Discourse renders a proper outline. A long wall of text without headers is not
+  acceptable for a release announcement.
+
+### Posting mechanics (Discourse REST API)
+
+Every call carries the `Api-Key` and `Api-Username` headers from the env file.
+- **New product line → its own top-level category.** The forum already has
+  parallel ones ("Python: библиотека okama", "Финансовые виджеты", "База
+  финансовых данных"). Create with `POST /categories.json` (`name`, `slug`,
+  `color`). Skip if a suitable category already exists.
+- **Announcement topic:** `POST /posts.json` with `title`, `raw`, `category`.
+- **Hero image:** `POST /uploads.json` (multipart `file`, `type=composer`,
+  `synchronous=true`) → put the returned `short_url` at the top of the post as
+  `![alt|WxH](upload://…)`. Reuse the release cover (`docs/images/announce-en.png`,
+  1200×630) so the tool count matches this release — don't reuse a stale render.
+- **Edit a post:** `PUT /posts/{id}.json` with `{"post": {"raw": …}}`.
 
 ## Done — report
 
