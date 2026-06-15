@@ -128,7 +128,7 @@ class TestIndexationCashflowForecast:
 
         # MC parameters were set on the portfolio's dcf.
         pf.dcf.set_mc_parameters.assert_called_once_with(
-            distribution="norm", period=25, mc_number=4, seed=None
+            distribution="norm", distribution_parameters=None, period=25, mc_number=4, seed=None
         )
 
         # The output has wealth percentile bands + terminal & survival stats + IRR block.
@@ -337,7 +337,7 @@ class TestRandomSeed:
             mc_tool.monte_carlo_forecast(VALID_PF_SPEC, spec_with_seed, VALID_INDEXATION_CASHFLOW)
 
         pf.dcf.set_mc_parameters.assert_called_once_with(
-            distribution="norm", period=25, mc_number=4, seed=42
+            distribution="norm", distribution_parameters=None, period=25, mc_number=4, seed=42
         )
 
     def test_seed_none_is_passed_as_none(self) -> None:
@@ -352,7 +352,7 @@ class TestRandomSeed:
             mc_tool.monte_carlo_forecast(VALID_PF_SPEC, spec_no_seed, VALID_INDEXATION_CASHFLOW)
 
         pf.dcf.set_mc_parameters.assert_called_once_with(
-            distribution="norm", period=25, mc_number=4, seed=None
+            distribution="norm", distribution_parameters=None, period=25, mc_number=4, seed=None
         )
 
 
@@ -425,6 +425,41 @@ class TestLargestWithdrawalsSize:
                 cashflow=VALID_INDEXATION_CASHFLOW,
                 goal="not_a_goal",
             )
+
+
+class TestPrepareHelpers:
+    def test_distribution_parameters_passed_as_tuple(self) -> None:
+        pf = _make_pf_mock()
+        mc_spec = dict(VALID_MC_SPEC, distribution="t", distribution_parameters=[3, None, None])
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            mc_tool.monte_carlo_forecast(VALID_PF_SPEC, mc_spec, VALID_INDEXATION_CASHFLOW)
+        kwargs = pf.dcf.set_mc_parameters.call_args.kwargs
+        assert kwargs["distribution_parameters"] == (3, None, None)
+
+    def test_prepare_cashflow_no_mc_call(self) -> None:
+        pf = _make_pf_mock()
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+            patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=MagicMock()),
+        ):
+            built_pf, spec = mc_tool._prepare_cashflow(VALID_PF_SPEC, VALID_INDEXATION_CASHFLOW, discount_rate=0.07)
+        pf.dcf.set_mc_parameters.assert_not_called()
+        assert pf.dcf.discount_rate == 0.07
+
+    def test_prepare_mc_sets_params_no_cashflow(self) -> None:
+        pf = _make_pf_mock()
+        with (
+            patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=pf),
+            patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"),
+        ):
+            built_pf, spec = mc_tool._prepare_mc(VALID_PF_SPEC, VALID_MC_SPEC)
+        pf.dcf.set_mc_parameters.assert_called_once()
+        assert built_pf is pf
 
 
 class TestServerRegistration:

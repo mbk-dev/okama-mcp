@@ -159,23 +159,66 @@ def _mc_index_iso(mc_wealth: pd.DataFrame) -> list[str]:
     return [str(v) for v in idx]
 
 
-def _prepare_dcf(
-    portfolio: dict[str, Any], mc: dict[str, Any], cashflow: dict[str, Any]
-) -> tuple[Any, MCSpec]:
-    """Validate specs and return (Portfolio configured for MC, validated MCSpec)."""
-    mc_spec = _validate_mc(mc)
-    cashflow_spec = _validate_cashflow(cashflow)
-    _, pf = _get_portfolio(portfolio)
-
+def _apply_mc_parameters(pf: Any, mc_spec: MCSpec) -> None:
+    """Push MCSpec onto the portfolio's DCF Monte Carlo config."""
     pf.dcf.set_mc_parameters(
         distribution=mc_spec.distribution,
+        distribution_parameters=(
+            tuple(mc_spec.distribution_parameters)
+            if mc_spec.distribution_parameters is not None
+            else None
+        ),
         period=mc_spec.period_years,
         mc_number=mc_spec.scenarios,
         seed=mc_spec.random_seed,
     )
+
+
+def _prepare_dcf(
+    portfolio: dict[str, Any],
+    mc: dict[str, Any],
+    cashflow: dict[str, Any],
+    discount_rate: float | None = None,
+) -> tuple[Any, MCSpec]:
+    """Validate specs and return (Portfolio configured for MC + cashflow, MCSpec)."""
+    mc_spec = _validate_mc(mc)
+    cashflow_spec = _validate_cashflow(cashflow)
+    _, pf = _get_portfolio(portfolio)
+    _apply_mc_parameters(pf, mc_spec)
+    if discount_rate is not None:
+        pf.dcf.discount_rate = discount_rate
     strategy = _build_cashflow_strategy(pf, cashflow_spec)
     pf.dcf.cashflow_parameters = strategy
     return pf, mc_spec
+
+
+def _prepare_mc(portfolio: dict[str, Any], mc: dict[str, Any]) -> tuple[Any, MCSpec]:
+    """Build the portfolio and configure MC parameters WITHOUT a cashflow.
+
+    For distribution-diagnostics tools that only read ``pf.dcf.mc``.
+    """
+    mc_spec = _validate_mc(mc)
+    _, pf = _get_portfolio(portfolio)
+    _apply_mc_parameters(pf, mc_spec)
+    return pf, mc_spec
+
+
+def _prepare_cashflow(
+    portfolio: dict[str, Any],
+    cashflow: dict[str, Any],
+    discount_rate: float | None = None,
+) -> tuple[Any, Any]:
+    """Build the portfolio + cashflow strategy WITHOUT MC parameters.
+
+    For historical DCF tools (wealth index, cash flow, survival) that don't simulate.
+    """
+    cashflow_spec = _validate_cashflow(cashflow)
+    _, pf = _get_portfolio(portfolio)
+    if discount_rate is not None:
+        pf.dcf.discount_rate = discount_rate
+    strategy = _build_cashflow_strategy(pf, cashflow_spec)
+    pf.dcf.cashflow_parameters = strategy
+    return pf, cashflow_spec
 
 
 # ---------------------------------------------------------------------------
