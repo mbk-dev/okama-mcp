@@ -1,4 +1,4 @@
-"""Tests for tools/macro.py: get_inflation, get_central_bank_rate."""
+"""Tests for tools/macro.py: get_inflation, get_central_bank_rate, get_indicator, _resolve_plot_symbol."""
 
 from __future__ import annotations
 

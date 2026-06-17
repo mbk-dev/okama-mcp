@@ -1,10 +1,12 @@
-"""Macroeconomic indicator tools: inflation and central-bank rates.
+"""Macroeconomic indicator tools: inflation, central-bank rates, and indicators.
 
 okama exposes inflation under the ``.INFL`` namespace (``USD.INFL``,
-``EUR.INFL``, ``RUB.INFL`` ...) and central-bank rates under ``.RATE``
-(``US.RATE``, ``ECB.RATE``, ``RUS.RATE``). To keep the LLM-facing API tidy
-the tools accept either a bare currency / country code (``USD``, ``US``) or
-the full symbol — we normalise.
+``EUR.INFL``, ``RUB.INFL`` ...), central-bank rates under ``.RATE``
+(``US_EFFR.RATE``, ``EU_MRO.RATE``, ``RUS_CBR.RATE``, ``UK_BR.RATE``),
+and indicators under ``.RATIO`` (``USA_CAPE10.RATIO``, ``EUR_CAPE10.RATIO``).
+To keep the LLM-facing API tidy, tools accept friendly codes (``US``, ``ECB``,
+``RUS`` for rates; ``USD``, ``EUR`` for inflation; ``USA``, ``EUR`` for
+indicators) mapped via ``_RATE_ALIASES`` / ``_normalise_*`` to real symbols.
 """
 
 from __future__ import annotations
@@ -40,7 +42,7 @@ def _metadata(obj: Any) -> dict[str, Any]:
 
 # Curated central-bank key policy-rate aliases (friendly code -> real okama symbol).
 # Values are verified to exist in the RATE namespace. Full symbols (with a dot)
-# and underscored symbols (RUS_CBR, RUSFAR1M, ...) are passed through unchanged.
+# pass through unchanged; bare underscored codes (RUS_CBR, RUSFAR1M) get .RATE appended.
 _RATE_ALIASES = {
     "US": "US_EFFR", "USA": "US_EFFR",
     "EU": "EU_MRO", "ECB": "EU_MRO",

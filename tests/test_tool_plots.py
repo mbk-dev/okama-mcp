@@ -243,7 +243,7 @@ class TestSavePath:
         assert target.read_bytes().startswith(PNG_MAGIC)
 
 
-def _make_macro_series_mock(symbol: str, *, daily: bool = False) -> SimpleNamespace:
+def _make_macro_series_mock(symbol: str) -> SimpleNamespace:
     idx = pd.period_range("2020-01", periods=6, freq="M")
     monthly = pd.Series([30.0, 31.0, 29.5, 32.0, 33.0, 31.5], index=idx, name=symbol)
     didx = pd.date_range("2024-01-01", periods=6, freq="D")
@@ -269,7 +269,7 @@ class TestPlotMacro:
         assert out.data.startswith(PNG_MAGIC)
 
     def test_daily_frequency_on_rate(self) -> None:
-        rate = _make_macro_series_mock("US_EFFR.RATE", daily=True)
+        rate = _make_macro_series_mock("US_EFFR.RATE")
         with patch("okama_mcp.tools.plots.ok.Rate", return_value=rate):
             out = plots_tool.plot_macro(["US_EFFR.RATE"], frequency="daily")
         assert isinstance(out, Image)
