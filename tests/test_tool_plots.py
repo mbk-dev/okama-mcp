@@ -243,6 +243,58 @@ class TestSavePath:
         assert target.read_bytes().startswith(PNG_MAGIC)
 
 
+def _make_macro_series_mock(symbol: str, *, daily: bool = False) -> SimpleNamespace:
+    idx = pd.period_range("2020-01", periods=6, freq="M")
+    monthly = pd.Series([30.0, 31.0, 29.5, 32.0, 33.0, 31.5], index=idx, name=symbol)
+    didx = pd.date_range("2024-01-01", periods=6, freq="D")
+    daily_s = pd.Series([0.05, 0.05, 0.049, 0.049, 0.048, 0.048], index=didx, name=symbol)
+    return SimpleNamespace(symbol=symbol, values_monthly=monthly, values_daily=daily_s)
+
+
+class TestPlotMacro:
+    def test_returns_png_for_cape10(self) -> None:
+        ind = _make_macro_series_mock("USA_CAPE10.RATIO")
+        with patch("okama_mcp.tools.plots.ok.Indicator", return_value=ind):
+            out = plots_tool.plot_macro(["USA_CAPE10.RATIO"])
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)
+        assert struct.unpack(">II", out.data[16:24]) == (1500, 900)
+
+    def test_multiple_symbols_overlay(self) -> None:
+        usa = _make_macro_series_mock("USA_CAPE10.RATIO")
+        eur = _make_macro_series_mock("EUR_CAPE10.RATIO")
+        with patch("okama_mcp.tools.plots.ok.Indicator", side_effect=[usa, eur]):
+            out = plots_tool.plot_macro(["USA", "EUR"])
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)
+
+    def test_daily_frequency_on_rate(self) -> None:
+        rate = _make_macro_series_mock("US_EFFR.RATE", daily=True)
+        with patch("okama_mcp.tools.plots.ok.Rate", return_value=rate):
+            out = plots_tool.plot_macro(["US_EFFR.RATE"], frequency="daily")
+        assert isinstance(out, Image)
+
+    def test_daily_on_non_rate_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            plots_tool.plot_macro(["USA_CAPE10.RATIO"], frequency="daily")
+
+    def test_empty_symbols_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            plots_tool.plot_macro([])
+
+    def test_invalid_frequency_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            plots_tool.plot_macro(["USA_CAPE10.RATIO"], frequency="weekly")
+
+    def test_save_path_writes_png(self, tmp_path) -> None:
+        ind = _make_macro_series_mock("USA_CAPE10.RATIO")
+        target = tmp_path / "cape.png"
+        with patch("okama_mcp.tools.plots.ok.Indicator", return_value=ind):
+            out = plots_tool.plot_macro(["USA_CAPE10.RATIO"], save_path=str(target))
+        assert isinstance(out, list) and len(out) == 2
+        assert target.read_bytes().startswith(PNG_MAGIC)
+
+
 def _make_ef_mock_for_tm() -> SimpleNamespace:
     ef = SimpleNamespace()
     ef.symbols = ["SPY.US", "GLD.US", "BND.US"]
@@ -290,7 +342,7 @@ class TestServerRegistration:
         names = {t.name for t in tools}
         for tool in ("plot_wealth_index", "plot_drawdowns", "plot_efficient_frontier",
                      "plot_monte_carlo", "plot_assets", "plot_irr_distribution",
-                     "plot_transition_map", "plot_qq", "plot_hist_fit"):
+                     "plot_transition_map", "plot_qq", "plot_hist_fit", "plot_macro"):
             assert tool in names
 
 

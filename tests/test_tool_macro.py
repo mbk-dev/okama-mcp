@@ -247,6 +247,20 @@ class TestGetIndicator:
                 macro_tool.get_indicator("ZZZ")
 
 
+class TestResolvePlotSymbol:
+    def test_suffixed_symbols_route_by_namespace(self) -> None:
+        assert macro_tool._resolve_plot_symbol("USD.INFL") == ("USD.INFL", "INFL")
+        assert macro_tool._resolve_plot_symbol("us_effr.rate") == ("US_EFFR.RATE", "RATE")
+        assert macro_tool._resolve_plot_symbol("USA_CAPE10.RATIO") == ("USA_CAPE10.RATIO", "RATIO")
+
+    def test_bare_code_defaults_to_cape10(self) -> None:
+        assert macro_tool._resolve_plot_symbol("USA") == ("USA_CAPE10.RATIO", "RATIO")
+
+    def test_unknown_suffix_raises(self) -> None:
+        with pytest.raises(OkamaMcpError):
+            macro_tool._resolve_plot_symbol("SPY.US")
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase7_tools_registered(self) -> None:

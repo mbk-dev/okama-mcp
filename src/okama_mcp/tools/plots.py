@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import okama as ok
 import pandas as pd
 import scipy.stats
 from fastmcp import FastMCP
@@ -20,6 +21,7 @@ from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
 from okama_mcp.tools.asset_list import _build_asset_list
 from okama_mcp.tools.frontier import _get_frontier
+from okama_mcp.tools.macro import _resolve_plot_symbol
 from okama_mcp.tools.monte_carlo import _prepare_dcf, _prepare_mc
 from okama_mcp.tools.portfolio import _get_portfolio
 
@@ -339,6 +341,52 @@ def plot_hist_fit(
     return _render(fig, save_path)
 
 
+@translates_okama_errors
+def plot_macro(
+    symbols: list[str],
+    first_date: str | None = None,
+    last_date: str | None = None,
+    frequency: str = "monthly",
+    title: str | None = None,
+    width: int = 1500,
+    height: int = 900,
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
+    """Line chart of one or more macro series (inflation, rate, CAPE10).
+
+    Each symbol routes by its namespace suffix: ``.INFL`` (inflation), ``.RATE``
+    (central-bank / money-market rate), ``.RATIO`` (indicator, e.g.
+    ``USA_CAPE10.RATIO``). A bare code is treated as a CAPE10 country code
+    (``USA`` -> ``USA_CAPE10.RATIO``). Overlay several symbols on one axis
+    (e.g. ``["USA_CAPE10.RATIO", "EUR_CAPE10.RATIO"]``). ``frequency='daily'``
+    is valid only for ``.RATE`` symbols. ``width``/``height``: PNG size in pixels
+    (300-4000); ``save_path``: optionally also write the PNG and report the path.
+    """
+    if not symbols:
+        raise OkamaMcpError("symbols must be a non-empty list of macro tickers")
+    if frequency not in ("monthly", "daily"):
+        raise OkamaMcpError("frequency must be 'monthly' or 'daily'")
+
+    classes = {"INFL": ok.Inflation, "RATE": ok.Rate, "RATIO": ok.Indicator}
+    fig, ax = make_figure(width, height)
+    resolved: list[str] = []
+    for raw in symbols:
+        symbol, namespace = _resolve_plot_symbol(raw)
+        if frequency == "daily" and namespace != "RATE":
+            raise OkamaMcpError(
+                f"frequency='daily' is only available for .RATE symbols, not {symbol!r}"
+            )
+        obj = classes[namespace](symbol=symbol, first_date=first_date, last_date=last_date)
+        series = obj.values_daily if frequency == "daily" else obj.values_monthly
+        x = _plot_index_values(series.index)
+        ax.plot(x, series.astype(float).values, label=symbol)
+        resolved.append(symbol)
+    ax.set_title(title or ", ".join(resolved))
+    ax.set_ylabel("Value")
+    ax.legend()
+    return _render(fig, save_path)
+
+
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
     mcp.tool(plot_wealth_index)
@@ -350,3 +398,4 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(plot_irr_distribution)
     mcp.tool(plot_qq)
     mcp.tool(plot_hist_fit)
+    mcp.tool(plot_macro)

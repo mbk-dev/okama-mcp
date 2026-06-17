@@ -72,6 +72,28 @@ def _normalise_indicator(value: str) -> str:
     return f"{value.upper()}_CAPE10.RATIO"
 
 
+_MACRO_NAMESPACES = ("INFL", "RATE", "RATIO")
+
+
+def _resolve_plot_symbol(value: str) -> tuple[str, str]:
+    """Resolve a macro symbol for plotting: (symbol, namespace_tag).
+
+    A symbol with a namespace suffix routes by it; a bare code is treated as a
+    CAPE10 country code (RATIO). Non-macro symbols raise OkamaMcpError.
+    """
+    value = value.strip()
+    if "." in value:
+        symbol = value.upper()
+        namespace = symbol.rsplit(".", 1)[1]
+        if namespace not in _MACRO_NAMESPACES:
+            raise OkamaMcpError(
+                f"{value!r} is not a macro symbol "
+                "(expected an .INFL / .RATE / .RATIO suffix)"
+            )
+        return symbol, namespace
+    return _normalise_indicator(value), "RATIO"
+
+
 def _describe(obj: Any) -> dict[str, Any]:
     """Serialise a macro object's ``describe()`` table (small fixed-shape frame)."""
     return dataframe_to_json(obj.describe(), full=True)
