@@ -78,6 +78,8 @@ def get_inflation(
     first_date: str | None = None,
     last_date: str | None = None,
     include_cumulative: bool = False,
+    include_rolling: bool = False,
+    include_describe: bool = False,
     full: bool = False,
 ) -> dict[str, Any]:
     """Return historical inflation for a currency.
@@ -92,6 +94,10 @@ def get_inflation(
     include_cumulative : bool, default False
         Include the cumulative-inflation series. Omitted by default to keep
         responses compact — derivable from monthly series anyway.
+    include_rolling : bool, default False
+        Include the 12-month rolling inflation series.
+    include_describe : bool, default False
+        Include the describe() table (mean/median/max/min over YTD, 1/5/10y).
     full : bool, default False
         If True, return entire series. Otherwise long series are truncated.
     """
@@ -104,6 +110,10 @@ def get_inflation(
     out["purchasing_power_1000"] = value_to_json(getattr(infl, "purchasing_power_1000", None))
     if include_cumulative:
         out["cumulative_inflation"] = series_to_json(infl.cumulative_inflation, full=full)
+    if include_rolling:
+        out["rolling_inflation"] = series_to_json(infl.rolling_inflation, full=full)
+    if include_describe:
+        out["describe"] = _describe(infl)
     return out
 
 

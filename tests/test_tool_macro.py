@@ -33,6 +33,9 @@ def _make_inflation_mock(*, values=None, cumulative=None, annual=None,
         cumulative_inflation=cumulative,
         annual_inflation_ts=annual,
         purchasing_power_1000=purchasing_power_1000,
+        rolling_inflation=pd.Series([0.011, 0.012], index=idx[-2:]),
+        describe=lambda years=(1, 5, 10): pd.DataFrame(
+            {symbol: [0.012, 0.07]}, index=["annual_inflation", "compound"]),
     )
 
 
@@ -102,6 +105,26 @@ class TestGetInflation:
         ):
             with pytest.raises(OkamaMcpError):
                 macro_tool.get_inflation("ZZZ")
+
+    def test_include_rolling_flag(self) -> None:
+        infl = _make_inflation_mock()
+        with patch("okama_mcp.tools.macro.ok.Inflation", return_value=infl):
+            out = macro_tool.get_inflation("USD", include_rolling=True)
+        assert "rolling_inflation" in out
+
+    def test_include_describe_flag(self) -> None:
+        infl = _make_inflation_mock()
+        with patch("okama_mcp.tools.macro.ok.Inflation", return_value=infl):
+            out = macro_tool.get_inflation("USD", include_describe=True)
+        assert "describe" in out
+        assert "columns" in out["describe"]
+
+    def test_rolling_and_describe_absent_by_default(self) -> None:
+        infl = _make_inflation_mock()
+        with patch("okama_mcp.tools.macro.ok.Inflation", return_value=infl):
+            out = macro_tool.get_inflation("USD")
+        assert "rolling_inflation" not in out
+        assert "describe" not in out
 
 
 class TestGetCentralBankRate:
