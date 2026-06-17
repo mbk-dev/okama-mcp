@@ -379,3 +379,37 @@ async def test_distribution_parameters_custom_t_live(server) -> None:
         )).data
     assert payload["mc_spec"]["distribution_parameters"] == [4, None, None]
     assert "wealth_paths" in payload
+
+
+async def test_get_indicator_cape10_live(server) -> None:
+    async with Client(server) as client:
+        result = await client.call_tool(
+            "get_indicator",
+            {"symbol": "USA_CAPE10.RATIO", "first_date": "2020-01", "last_date": "2020-12"},
+        )
+        payload = result.data
+    assert payload["symbol"] == "USA_CAPE10.RATIO"
+    assert payload["values_monthly"]["values"]
+
+
+async def test_get_central_bank_rate_daily_live(server) -> None:
+    async with Client(server) as client:
+        result = await client.call_tool(
+            "get_central_bank_rate",
+            {"country": "US", "frequency": "daily",
+             "first_date": "2024-01", "last_date": "2024-03"},
+        )
+        payload = result.data
+    assert payload["symbol"] == "US_EFFR.RATE"
+    assert "values_daily" in payload
+    assert payload["values_daily"]["values"]
+
+
+async def test_plot_macro_cape10_live(server) -> None:
+    async with Client(server) as client:
+        result = await client.call_tool(
+            "plot_macro",
+            {"symbols": ["USA_CAPE10.RATIO", "EUR_CAPE10.RATIO"],
+             "first_date": "2015-01", "last_date": "2020-12"},
+        )
+    assert any(c.type == "image" for c in result.content)
