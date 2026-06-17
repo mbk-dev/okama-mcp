@@ -1,0 +1,13 @@
+# Smithery configuration: https://smithery.ai/docs/build/project-config/smithery.yaml
+# okama-mcp is a local stdio MCP server distributed on PyPI and run via uvx.
+startCommand:
+  type: stdio
+  # No user configuration required — the server is stateless and needs no API keys.
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction:
+    # Produces the CLI command that launches okama-mcp over stdio.
+    |-
+    (config) => ({ command: 'uvx', args: ['okama-mcp', 'stdio'] })
+  exampleConfig: {}
