@@ -268,8 +268,9 @@ The `mc` argument accepts `distribution_parameters` to override the fitted distr
 
 | Tool | Purpose |
 |---|---|
-| `get_inflation(currency, first_date?, last_date?, include_cumulative?)` | Inflation series for a currency (`USD`, `EUR`, `RUB`, …). |
-| `get_central_bank_rate(country, first_date?, last_date?)` | Central-bank policy rate (`US`, `ECB`, `RUS`, …). |
+| `get_inflation(currency, first_date?, last_date?, include_cumulative?, include_rolling?, include_describe?)` | Inflation series for a currency (`USD`, `EUR`, `RUB`, …). Optional: cumulative inflation, 12-month rolling inflation, describe() table. |
+| `get_central_bank_rate(country, first_date?, last_date?, frequency="monthly"\|"daily", include_describe?)` | Central-bank policy rate (`US`→US_EFFR, `EU`/`ECB`→EU_MRO, `RUS`→RUS_CBR, `UK`/`GB`→UK_BR, `ISR`→ISR_IR, `CN`/`CHN`→CHN_LPR1, or full symbol). Monthly or daily series; optional describe() table. |
+| `get_indicator(symbol, first_date?, last_date?, include_describe?)` | Macro indicator from the RATIO namespace (e.g. `USA_CAPE10.RATIO`); bare country code defaults to that country's CAPE10. |
 
 ### Charts
 
@@ -293,6 +294,7 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_efficient_frontier(frontier)` | EF curve with individual asset points. |
 | `plot_transition_map(frontier, x_axe="risk")` | Transition map: asset weights along the efficient frontier (x-axis = risk or CAGR). |
 | `plot_assets(symbols, ccy, ..., portfolios?)` | Wealth-index comparison of individual assets. |
+| `plot_macro(symbols, first_date?, last_date?, frequency="monthly"\|"daily")` | Line chart of inflation / central-bank rate / CAPE10 series. Overlay multiple symbols (e.g. `["USA_CAPE10.RATIO", "EUR_CAPE10.RATIO"]`). `frequency='daily'` valid only for `.RATE` symbols. |
 
 ## Spec shapes
 
