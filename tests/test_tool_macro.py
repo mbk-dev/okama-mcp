@@ -60,6 +60,23 @@ def _make_rate_mock(*, values=None, symbol="US_EFFR.RATE") -> SimpleNamespace:
     )
 
 
+def _make_indicator_mock(*, symbol="USA_CAPE10.RATIO") -> SimpleNamespace:
+    idx = pd.period_range("2020-01", periods=4, freq="M")
+    values = pd.Series([30.1, 31.4, 29.8, 32.0], index=idx, name=symbol)
+    desc = pd.DataFrame({symbol: [30.8, 30.95]}, index=["mean", "median"])
+    return SimpleNamespace(
+        symbol=symbol,
+        name="USA CAPE 10 cyclically adjusted P/E",
+        country="USA",
+        currency="USD",
+        type="RATIO",
+        first_date=pd.Timestamp("2020-01-01"),
+        last_date=pd.Timestamp("2020-04-30"),
+        values_monthly=values,
+        describe=lambda years=(1, 5, 10): desc,
+    )
+
+
 class TestGetInflation:
     def test_currency_is_uppercased_and_namespace_appended(self) -> None:
         infl = _make_inflation_mock(symbol="EUR.INFL")
@@ -186,6 +203,50 @@ class TestGetCentralBankRate:
                 macro_tool.get_central_bank_rate("ZZZ")
 
 
+class TestGetIndicator:
+    def test_bare_country_code_maps_to_cape10(self) -> None:
+        ind = _make_indicator_mock(symbol="USA_CAPE10.RATIO")
+        with patch("okama_mcp.tools.macro.ok.Indicator", return_value=ind) as cls:
+            macro_tool.get_indicator("usa")
+        cls.assert_called_once_with(symbol="USA_CAPE10.RATIO", first_date=None, last_date=None)
+
+    def test_underscored_code_gets_ratio_suffix(self) -> None:
+        ind = _make_indicator_mock(symbol="EUR_CAPE10.RATIO")
+        with patch("okama_mcp.tools.macro.ok.Indicator", return_value=ind) as cls:
+            macro_tool.get_indicator("EUR_CAPE10")
+        cls.assert_called_once_with(symbol="EUR_CAPE10.RATIO", first_date=None, last_date=None)
+
+    def test_full_symbol_passed_through(self) -> None:
+        ind = _make_indicator_mock(symbol="JPN_CAPE10.RATIO")
+        with patch("okama_mcp.tools.macro.ok.Indicator", return_value=ind) as cls:
+            macro_tool.get_indicator("JPN_CAPE10.RATIO", first_date="2015-01")
+        cls.assert_called_once_with(
+            symbol="JPN_CAPE10.RATIO", first_date="2015-01", last_date=None)
+
+    def test_returns_metadata_and_series(self) -> None:
+        ind = _make_indicator_mock()
+        with patch("okama_mcp.tools.macro.ok.Indicator", return_value=ind):
+            out = macro_tool.get_indicator("USA")
+        assert out["symbol"] == "USA_CAPE10.RATIO"
+        assert out["type"] == "RATIO"
+        assert out["values_monthly"]["values"][0] == 30.1
+        assert "describe" not in out
+
+    def test_include_describe_flag(self) -> None:
+        ind = _make_indicator_mock()
+        with patch("okama_mcp.tools.macro.ok.Indicator", return_value=ind):
+            out = macro_tool.get_indicator("USA", include_describe=True)
+        assert "describe" in out
+
+    def test_unknown_symbol_translated(self) -> None:
+        with patch(
+            "okama_mcp.tools.macro.ok.Indicator",
+            side_effect=ValueError("ZZZ_CAPE10.RATIO is not in the list of assets"),
+        ):
+            with pytest.raises(OkamaMcpError):
+                macro_tool.get_indicator("ZZZ")
+
+
 class TestServerRegistration:
     @pytest.mark.asyncio
     async def test_phase7_tools_registered(self) -> None:
@@ -195,3 +256,4 @@ class TestServerRegistration:
         names = {t.name for t in tools}
         assert "get_inflation" in names
         assert "get_central_bank_rate" in names
+        assert "get_indicator" in names

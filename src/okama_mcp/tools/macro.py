@@ -62,6 +62,16 @@ def _normalise_rate(value: str) -> str:
     return f"{key}.RATE"
 
 
+def _normalise_indicator(value: str) -> str:
+    """Resolve an indicator symbol; a bare country code defaults to CAPE10."""
+    value = value.strip()
+    if "." in value:
+        return value.upper()
+    if "_" in value:
+        return f"{value.upper()}.RATIO"
+    return f"{value.upper()}_CAPE10.RATIO"
+
+
 def _describe(obj: Any) -> dict[str, Any]:
     """Serialise a macro object's ``describe()`` table (small fixed-shape frame)."""
     return dataframe_to_json(obj.describe(), full=True)
@@ -160,6 +170,40 @@ def get_central_bank_rate(
     return out
 
 
+@translates_okama_errors
+def get_indicator(
+    symbol: str = "USA_CAPE10.RATIO",
+    first_date: str | None = None,
+    last_date: str | None = None,
+    include_describe: bool = False,
+    full: bool = False,
+) -> dict[str, Any]:
+    """Return a macro indicator series (the RATIO namespace, e.g. CAPE10).
+
+    Parameters
+    ----------
+    symbol : str, default 'USA_CAPE10.RATIO'
+        A full okama symbol ('USA_CAPE10.RATIO'), an indicator code without the
+        namespace ('USA_CAPE10' -> '...RATIO'), or a bare country code ('USA',
+        'EUR') which defaults to that country's CAPE10. Use
+        search_assets(namespace='RATIO') to list all available indicators.
+    first_date, last_date : str, optional
+        ISO 'YYYY-MM' bounds.
+    include_describe : bool, default False
+        Include the describe() table (mean/median/max/min over YTD, 1/5/10y).
+    full : bool, default False
+        If True, return the entire series. Otherwise long series are truncated.
+    """
+    resolved = _normalise_indicator(symbol)
+    ind = ok.Indicator(symbol=resolved, first_date=first_date, last_date=last_date)
+
+    out: dict[str, Any] = _metadata(ind)
+    out["values_monthly"] = series_to_json(ind.values_monthly, full=full)
+    if include_describe:
+        out["describe"] = _describe(ind)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
@@ -169,3 +213,4 @@ def register(mcp: FastMCP) -> None:
     """Register Phase 7 macro tools with the FastMCP server."""
     mcp.tool(get_inflation)
     mcp.tool(get_central_bank_rate)
+    mcp.tool(get_indicator)
