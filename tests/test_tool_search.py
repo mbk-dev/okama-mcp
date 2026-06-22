@@ -82,6 +82,36 @@ class TestListNamespaces:
             result = search_tool.list_namespaces("macro")
         assert result["namespaces"] == fake_ns
 
+    def test_assets_list_shape_is_enriched_with_descriptions(self) -> None:
+        # okama 2.2 returns a bare list of codes for assets_namespaces, not a
+        # code->description dict. Descriptions are looked up in the full mapping.
+        full = {"US": "US Stocks", "LSE": "London Stock Exchange"}
+        with (
+            patch.object(search_tool, "_get_assets_namespaces", return_value=["US", "LSE"]),
+            patch.object(search_tool, "_get_namespaces", return_value=full),
+        ):
+            result = search_tool.list_namespaces("assets")
+        assert result["namespaces"] == full
+
+    def test_macro_list_shape_is_enriched_with_descriptions(self) -> None:
+        full = {"INFL": "Inflation", "RATE": "Central bank rates", "RATIO": "Indicators"}
+        with (
+            patch.object(
+                search_tool, "_get_macro_namespaces", return_value=["INFL", "RATE", "RATIO"]
+            ),
+            patch.object(search_tool, "_get_namespaces", return_value=full),
+        ):
+            result = search_tool.list_namespaces("macro")
+        assert result["namespaces"] == full
+
+    def test_list_shape_code_without_description_falls_back_to_empty(self) -> None:
+        with (
+            patch.object(search_tool, "_get_assets_namespaces", return_value=["ZZZ"]),
+            patch.object(search_tool, "_get_namespaces", return_value={}),
+        ):
+            result = search_tool.list_namespaces("assets")
+        assert result["namespaces"] == {"ZZZ": ""}
+
     def test_invalid_kind_raises(self) -> None:
         with pytest.raises(OkamaMcpError):
             search_tool.list_namespaces("crypto")

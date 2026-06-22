@@ -96,7 +96,24 @@ def list_namespaces(kind: str = "all") -> dict[str, Any]:
         ns = _get_macro_namespaces()
     else:
         raise OkamaMcpError(f"kind must be one of {_VALID_KINDS}, got {kind!r}")
-    return {"kind": kind, "namespaces": dict(ns)}
+    return {"kind": kind, "namespaces": _as_code_to_description(ns)}
+
+
+def _as_code_to_description(ns: dict[str, str] | list[str]) -> dict[str, str]:
+    """Normalise okama's namespace getters to a ``{code: description}`` mapping.
+
+    okama 2.2 is inconsistent: ``ok.namespaces`` is a ``{code: description}``
+    dict, but ``ok.assets_namespaces`` / ``ok.macro_namespaces`` return a bare
+    ``list`` of codes. Calling ``dict()`` on the list shape raises
+    ``ValueError: dictionary update sequence element ... has length N``. For the
+    list shape we look each code's description up in the full namespace mapping
+    (which covers every code), falling back to an empty string.
+    """
+    if isinstance(ns, dict):
+        return dict(ns)
+    full = _get_namespaces()
+    descriptions = full if isinstance(full, dict) else {}
+    return {code: descriptions.get(code, "") for code in ns}
 
 
 def _safe_price(asset: Any) -> float | None:
