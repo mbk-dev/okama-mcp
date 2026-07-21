@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "okama": {
+      "type": "stdio",
+      "command": "poetry",
+      "args": [
+        "run",
+        "okama-mcp",
+        "stdio"
+      ],
+      "env": {}
+    }
+  }
+}
