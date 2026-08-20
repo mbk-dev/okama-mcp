@@ -45,27 +45,59 @@ def _get_macro_namespaces() -> dict[str, str]:
 
 
 @translates_okama_errors
-def search_assets(query: str, namespace: str | None = None) -> dict[str, Any]:
-    """Search for okama tickers by name, ticker, or ISIN.
+def search_assets(
+    query: str = "",
+    namespace: str | None = None,
+    asset_type: str | None = None,
+    oldest_first: bool = False,
+    limit: int = MAX_RESULTS,
+) -> dict[str, Any]:
+    """Search for okama tickers by name, local name, ticker, or ISIN.
 
     Parameters
     ----------
     query : str
         Free-text query (case-insensitive). Examples: 'gold', 'SPY', 'Apple',
-        'US78462F1030'.
+        'Сбербанк', 'US78462F1030'. Leave empty only with ``namespace`` to
+        browse that namespace.
     namespace : str, optional
         Restrict the search to one namespace (e.g. 'US', 'MOEX', 'XETR').
         Omit to search across all namespaces.
+    asset_type : str, optional
+        Restrict results to an exact okama ``type`` value, case-insensitively.
+        For example, MOEX exchange-traded mutual funds (BPIFs) use ``'ETF'``.
+    oldest_first : bool, default False
+        Sort filtered results by ``first_date`` from oldest to newest. Missing
+        dates are placed after dated records.
+    limit : int, default 50
+        Maximum number of rows to return (1 through 50).
 
     Returns
     -------
     dict with keys ``count``, ``truncated``, ``results``. Each result row is a
-    dict of asset metadata (symbol, name, country, currency, type, isin, ...).
+    dict of asset metadata (symbol, name, local_name, country, currency, type,
+    isin, first_date, ...). ``count`` is the number after filtering and before
+    applying ``limit``.
     """
+    if not query and namespace is None:
+        raise OkamaMcpError("query must be non-empty when namespace is omitted")
+    if not 1 <= limit <= MAX_RESULTS:
+        raise OkamaMcpError(f"limit must be between 1 and {MAX_RESULTS}, got {limit}")
+
     df = ok.search(query, namespace=namespace, response_format="frame")
+    if asset_type is not None:
+        if "type" not in df.columns:
+            raise OkamaMcpError("okama search results do not include a type field")
+        types = df["type"].astype("string").str.casefold()
+        df = df.loc[types == asset_type.casefold()]
+    if oldest_first:
+        if "first_date" not in df.columns:
+            raise OkamaMcpError("okama search results do not include a first_date field")
+        df = df.sort_values("first_date", ascending=True, na_position="last", kind="stable")
+
     total = int(len(df))
-    truncated = total > MAX_RESULTS
-    rows = df.head(MAX_RESULTS).to_dict(orient="records") if total else []
+    truncated = total > limit
+    rows = df.head(limit).to_dict(orient="records") if total else []
     return {
         "count": total,
         "truncated": truncated,
@@ -145,6 +177,7 @@ def get_asset_info(symbol: str) -> dict[str, Any]:
     return {
         "symbol": asset.symbol,
         "name": asset.name,
+        "local_name": value_to_json(getattr(asset, "local_name", None)),
         "country": asset.country,
         "exchange": asset.exchange,
         "currency": asset.currency,

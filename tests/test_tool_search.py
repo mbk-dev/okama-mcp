@@ -52,6 +52,67 @@ class TestSearchAssets:
         assert len(result["results"]) == search_tool.MAX_RESULTS
         assert result["truncated"] is True
 
+    def test_returns_oldest_matching_etfs_with_requested_limit(self) -> None:
+        """Protect the "five oldest MOEX BPIFs" discovery workflow.
+
+        MOEX classifies exchange-traded mutual funds (BPIFs) as ``ETF``.  The
+        history sort must happen after the type filter and before the response
+        limit so the caller receives the truly oldest matching assets.
+        """
+        df = pd.DataFrame(
+            [
+                {
+                    "symbol": "SNGS.MOEX",
+                    "name": "Surgutneftegaz PAO",
+                    "type": "Common Stock",
+                    "first_date": "1997-05-30",
+                    "local_name": "Сургнфгз",
+                },
+                {
+                    "symbol": "LATE.MOEX",
+                    "name": "New fund",
+                    "type": "ETF",
+                    "first_date": "2022-10-01",
+                    "local_name": "Новый фонд",
+                },
+                {
+                    "symbol": "SBMX.MOEX",
+                    "name": "Sber MOEX Index Fund",
+                    "type": "ETF",
+                    "first_date": "2018-09-17",
+                    "local_name": "Сбер БПИФ МосБиржи",
+                },
+                {
+                    "symbol": "FXUS.MOEX",
+                    "name": "FinEx USA UCITS ETF",
+                    "type": "ETF",
+                    "first_date": "2013-02-28",
+                    "local_name": "FinEx USA",
+                },
+                {
+                    "symbol": "UNKNOWN.MOEX",
+                    "name": "Undated fund",
+                    "type": "ETF",
+                    "first_date": None,
+                    "local_name": "Без даты",
+                },
+            ]
+        )
+
+        with patch("okama_mcp.tools.search.ok.search", return_value=df) as search:
+            result = search_tool.search_assets(
+                namespace="MOEX",
+                asset_type="ETF",
+                oldest_first=True,
+                limit=2,
+            )
+
+        search.assert_called_once_with("", namespace="MOEX", response_format="frame")
+        assert result["count"] == 4
+        assert result["truncated"] is True
+        assert [row["symbol"] for row in result["results"]] == ["FXUS.MOEX", "SBMX.MOEX"]
+        assert result["results"][1]["local_name"] == "Сбер БПИФ МосБиржи"
+
     def test_okama_value_error_is_translated(self) -> None:
         with patch(
             "okama_mcp.tools.search.ok.search",
@@ -122,6 +183,7 @@ class TestGetAssetInfo:
         asset_mock = SimpleNamespace(
             symbol="GLD.US",
             name="SPDR Gold Shares",
+            local_name="SPDR Gold",
             country="USA",
             exchange="NYSE ARCA",
             currency="USD",
@@ -138,6 +200,7 @@ class TestGetAssetInfo:
         m.assert_called_once_with("GLD.US")
         assert result["symbol"] == "GLD.US"
         assert result["name"] == "SPDR Gold Shares"
+        assert result["local_name"] == "SPDR Gold"
         assert result["currency"] == "USD"
         assert result["first_date"] == "2004-11-18"
         assert result["last_date"] == "2024-12-31"

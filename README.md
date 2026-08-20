@@ -197,7 +197,7 @@ portfolio against gold, or put a sub-portfolio on the efficient frontier.
 
 | Tool | Purpose |
 |---|---|
-| `search_assets(query, namespace?)` | Free-text search across all okama symbols by name / ticker / ISIN. |
+| `search_assets(query="", namespace?, asset_type?, oldest_first?, limit=50)` | Free-text search by name / local name / ticker / ISIN. Filter by okama type and sort by `first_date`; for example, `namespace="MOEX", asset_type="ETF", oldest_first=true, limit=5` finds the five oldest MOEX-listed BPIFs. |
 | `list_namespaces(kind="all"\|"assets"\|"macro")` | Show the available okama namespaces. |
 | `get_asset_info(symbol)` | Metadata for one symbol — name, country, currency, type, date range. |
 
