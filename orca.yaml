@@ -1,0 +1,13 @@
+# Orca per-repo configuration, committed so every worktree is set up the same way.
+# `scripts.setup` runs in every freshly created worktree, with the worktree as CWD.
+scripts:
+  setup: |
+    set -euo pipefail
+    # poetry and the pinned interpreter live in ~/.local/bin, which a
+    # non-login setup shell may not have on PATH.
+    export PATH="$HOME/.local/bin:$PATH"
+    # `.python-version` is inert without pyenv, so pin the interpreter
+    # explicitly — otherwise poetry picks the system python (3.14) and the
+    # okama wheels are missing.
+    poetry env use python3.11
+    poetry install

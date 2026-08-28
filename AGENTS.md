@@ -10,6 +10,26 @@
   repo root, `/tmp`, or source directories. Clean it up freely; nothing in `tmp/` is
   precious.
 
+## Worktrees
+
+Worktrees for this repo live at `~/projects/rs/wt/okama-mcp/<branch>` (Orca setting
+`worktreeBasePath: ../../../wt`) — never inside the repository tree.
+
+**A fresh worktree has no usable environment until its poetry env is built.** `orca.yaml`
+(`scripts.setup`) does that automatically for Orca-created worktrees; for a manual
+`git worktree add`, run the same two commands in the new tree before anything else:
+
+```bash
+poetry env use python3.11   # `.python-version` is inert without pyenv: poetry would
+                            # otherwise grab the system interpreter (3.14), for which
+                            # the okama/scipy wheels do not exist
+poetry install
+```
+
+Skipping this breaks more than the tests: `.mcp.json` starts the okama MCP server with
+`poetry run okama-mcp stdio` in the current directory, so an unbuilt env makes the server
+exit before the MCP handshake and the client reports only `Connection closed`.
+
 ## Test-Driven Development (TDD)
 Any change to production code (new feature, bugfix, refactor, behavior change) must follow TDD:
 **write a failing test first, then the minimal code that makes it pass**. This overrides the default
