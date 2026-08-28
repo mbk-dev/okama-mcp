@@ -12,8 +12,18 @@
 
 ## Worktrees
 
-Worktrees for this repo live at `~/projects/rs/wt/okama-mcp/<branch>` (Orca setting
-`worktreeBasePath: ../../../wt`) — never inside the repository tree.
+Worktrees for this repo live at `~/projects/rs/wt/okama-mcp/<branch>` — never inside the
+repository tree. Two Orca settings enforce that and they are stored **locally, not in the
+repo**, so a machine rebuild loses them silently; re-apply both:
+
+- `worktreeBasePath: ../../../wt` — `orca project setup-update --setup <setup-id>
+  --worktree-base-path ../../../wt`.
+- **Wait for setup to complete before starting agent** — a toggle in Orca's repository
+  settings, no CLI equivalent. Without it the agent (and its MCP client) starts while
+  `poetry install` is still running, which is exactly the failure below.
+
+Never type anything into Orca's local *Setup Script* field: a non-empty local script flips
+`commandSourcePolicy` to `local-only` and silently disables the committed `orca.yaml`.
 
 **A fresh worktree has no usable environment until its poetry env is built.** `orca.yaml`
 (`scripts.setup`) does that automatically for Orca-created worktrees; for a manual
