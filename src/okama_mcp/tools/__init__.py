@@ -15,6 +15,7 @@ def register_all(mcp: FastMCP) -> None:
         asset,
         asset_list,
         dcf,
+        finplan,
         frontier,
         macro,
         mc_diagnostics,
@@ -31,6 +32,7 @@ def register_all(mcp: FastMCP) -> None:
     monte_carlo.register(mcp)
     mc_diagnostics.register(mcp)
     dcf.register(mcp)
+    finplan.register(mcp)
     frontier.register(mcp)
     macro.register(mcp)
     plots.register(mcp)

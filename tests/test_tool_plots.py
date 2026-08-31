@@ -380,3 +380,98 @@ class TestPlotHistFit:
              patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"):
             out = plots_tool.plot_hist_fit(VALID_SPEC, MC_SPEC_T)
         assert isinstance(out, Image)
+
+
+FINPLAN_SPEC: dict = {
+    "stages": [
+        {
+            "portfolio": VALID_SPEC,
+            "period_years": 20,
+            "name": "accumulation",
+            "cashflow": {
+                "type": "indexation",
+                "initial_investment": 100_000.0,
+                "frequency": "year",
+                "amount": 12_000.0,
+            },
+        },
+        {"portfolio": VALID_SPEC, "period_years": 25, "name": "retirement"},
+    ],
+    "initial_investment": 100_000.0,
+    "scenarios": 4,
+    "percentiles": [10, 50, 90],
+}
+
+
+def _make_finplan_mock() -> SimpleNamespace:
+    idx = pd.period_range("2025-01", periods=24, freq="M")
+    base = np.linspace(100_000, 250_000, 24)
+    wealth = pd.DataFrame({f"s{i}": base * (1 + (i - 1) * 0.1) for i in range(4)}, index=idx)
+    plan = SimpleNamespace()
+    plan.name = "plan"
+    plan.currency = "USD"
+    plan.monte_carlo_wealth = lambda **kwargs: wealth
+    plan.stages = [
+        SimpleNamespace(name="accumulation", period_months=12),
+        SimpleNamespace(name="retirement", period_months=12),
+    ]
+
+    def _must_not_be_called(*args, **kwargs):  # pragma: no cover - guard
+        raise AssertionError("plot_forecast_monte_carlo goes through pyplot and is not thread-safe")
+
+    plan.plot_forecast_monte_carlo = _must_not_be_called
+    return plan
+
+
+class TestPlotFinPlanForecast:
+    def _run(self, **kwargs):
+        plan = _make_finplan_mock()
+        captured: dict = {}
+        real_make_figure = plots_tool.make_figure
+
+        def _spy(width_px: int, height_px: int):
+            fig, ax = real_make_figure(width_px, height_px)
+            captured["ax"] = ax
+            return fig, ax
+
+        with patch("okama_mcp.tools.portfolio.ok.Portfolio", return_value=_make_portfolio_mock()), \
+             patch("okama_mcp.tools.portfolio.ok.Rebalance", return_value="REB"), \
+             patch("okama_mcp.tools.finplan.ok.FinPlanStage"), \
+             patch("okama_mcp.tools.finplan.ok.FinPlan", return_value=plan), \
+             patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=SimpleNamespace()), \
+             patch.object(plots_tool, "make_figure", _spy):
+            out = plots_tool.plot_finplan_forecast(FINPLAN_SPEC, **kwargs)
+        return out, captured["ax"]
+
+    def test_returns_png_image(self) -> None:
+        out, _ = self._run()
+        assert isinstance(out, Image)
+        assert out.data.startswith(PNG_MAGIC)
+
+    def test_draws_one_line_per_requested_percentile(self) -> None:
+        _, ax = self._run()
+        labels = [line.get_label() for line in ax.get_lines()]
+        assert [label for label in labels if str(label).startswith("p")] == ["p10", "p50", "p90"]
+
+    def test_marks_every_stage_boundary_but_not_the_plan_end(self) -> None:
+        _, ax = self._run()
+        # Two stages -> exactly one internal boundary, drawn as a dashed vertical line.
+        dashed = [line for line in ax.get_lines() if line.get_linestyle() == "--"]
+        assert len(dashed) == 1
+
+    def test_labels_every_stage(self) -> None:
+        _, ax = self._run()
+        assert sorted(text.get_text() for text in ax.texts) == ["accumulation", "retirement"]
+
+    def test_save_path_writes_the_png(self, tmp_path) -> None:
+        target = tmp_path / "plan.png"
+        out, _ = self._run(save_path=str(target))
+        assert isinstance(out, list)
+        assert target.read_bytes().startswith(PNG_MAGIC)
+
+    @pytest.mark.asyncio
+    async def test_registered(self) -> None:
+        from okama_mcp.server import mcp
+
+        names = {t.name for t in await mcp.list_tools()}
+        assert {"plot_finplan_forecast", "finplan_forecast", "finplan_backtest"} <= names

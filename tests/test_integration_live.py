@@ -413,3 +413,99 @@ async def test_plot_macro_cape10_live(server) -> None:
              "first_date": "2015-01", "last_date": "2020-12"},
         )
     assert any(c.type == "image" for c in result.content)
+
+
+_FINPLAN_LIVE: dict = {
+    "stages": [
+        {
+            "portfolio": {
+                "assets": ["SPY.US", "AGG.US"],
+                "weights": [0.7, 0.3],
+                "ccy": "USD",
+                "first_date": "2005-01",
+                "last_date": "2024-12",
+            },
+            "period_years": 15,
+            "name": "accumulation",
+            "cashflow": {
+                "type": "indexation",
+                "initial_investment": 100_000.0,
+                "frequency": "year",
+                "amount": 12_000.0,
+                "indexation": 0.03,
+            },
+        },
+        {
+            "portfolio": {
+                "assets": ["SPY.US", "AGG.US"],
+                "weights": [0.3, 0.7],
+                "ccy": "USD",
+                "first_date": "2005-01",
+                "last_date": "2024-12",
+            },
+            "period_years": 20,
+            "name": "retirement",
+            "cashflow": {
+                "type": "percentage",
+                "initial_investment": 100_000.0,
+                "frequency": "year",
+                "percentage": -0.04,
+            },
+        },
+    ],
+    "initial_investment": 100_000.0,
+    "scenarios": 100,
+    "random_seed": 11,
+    "percentiles": [10, 50, 90],
+    "name": "live plan",
+}
+
+
+async def test_finplan_forecast_live(server) -> None:
+    """A two-stage plan chains its stages against live okama data."""
+    async with Client(server) as client:
+        payload = (await client.call_tool("finplan_forecast", {"plan": _FINPLAN_LIVE})).data
+
+    assert set(payload["wealth_paths"]["percentiles"].keys()) == {"10", "50", "90"}
+    assert payload["wealth_paths"]["n_scenarios"] == 100
+    # 35 years of plan plus the opening balance row.
+    assert payload["wealth_paths"]["n_months"] == 35 * 12 + 1
+    assert payload["total_period_years"] == 35
+    assert [stage["name"] for stage in payload["stages"]] == ["accumulation", "retirement"]
+    assert 0 <= payload["success"]["probability_pct"] <= 100
+    assert payload["stage_boundaries"]["index"] == ["accumulation", "retirement"]
+
+    # The accumulation stage contributes, so its median boundary balance must
+    # exceed the money put in; chaining is what carries it into retirement.
+    columns = payload["stage_boundaries"]["columns"]
+    median_col = columns.index("50%")
+    accumulation_median = payload["stage_boundaries"]["data"][0][median_col]
+    assert accumulation_median > 100_000.0
+
+
+# The backtest replays the plan over real history, so the plan must fit inside
+# the window every stage portfolio covers: 18 years against 2005-01..2024-12.
+_FINPLAN_BACKTESTABLE: dict = {
+    **_FINPLAN_LIVE,
+    "stages": [
+        {**_FINPLAN_LIVE["stages"][0], "period_years": 10},
+        {**_FINPLAN_LIVE["stages"][1], "period_years": 8},
+    ],
+}
+
+
+async def test_finplan_backtest_live(server) -> None:
+    async with Client(server) as client:
+        payload = (await client.call_tool("finplan_backtest", {"plan": _FINPLAN_BACKTESTABLE})).data
+
+    assert payload["discounting"] == "fv"
+    assert "wealth_index" in payload
+    assert "cash_flow" in payload
+
+
+async def test_plot_finplan_forecast_live(server) -> None:
+    async with Client(server) as client:
+        result = await client.call_tool("plot_finplan_forecast", {"plan": _FINPLAN_LIVE})
+    blocks = [c for c in result.content if getattr(c, "type", None) == "image"]
+    assert blocks, "expected an image content block"
+    assert blocks[0].mimeType == "image/png"

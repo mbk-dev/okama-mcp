@@ -22,6 +22,7 @@ from okama_mcp.rendering import fig_to_png, make_figure
 from okama_mcp.tools.asset_list import _build_asset_list
 from okama_mcp.tools.frontier import _get_frontier
 from okama_mcp.tools.macro import _resolve_plot_symbol
+from okama_mcp.tools.finplan import _get_plan
 from okama_mcp.tools.monte_carlo import _prepare_dcf, _prepare_mc
 from okama_mcp.tools.portfolio import _get_portfolio
 
@@ -386,6 +387,60 @@ def plot_macro(
     ax.legend()
     return _render(fig, save_path)
 
+@translates_okama_errors
+def plot_finplan_forecast(
+    plan: dict[str, Any],
+    width: int = 1500,
+    height: int = 900,
+    save_path: str | None = None,
+) -> Image | list[Image | str]:
+    """Financial-plan forecast fan: percentile bands of wealth with stage boundaries.
+
+    Each dashed vertical line is a stage transition — where the portfolio and
+    the cash-flow regime change — and the labels along the top name the stages.
+    Without them a multi-stage chart gives no hint of where the plan changes
+    gear, which is the whole point of a plan.
+
+    ``width``/``height``: PNG size in pixels (300-4000) for custom sizes/aspect ratios.
+    ``save_path``: optional file path — also write the PNG there and report it
+    (for clients that don't render MCP images inline, e.g. terminal clients).
+    """
+    spec, plan_obj = _get_plan(plan)
+    wealth = plan_obj.monte_carlo_wealth(discounting="fv", include_negative_values=False)
+
+    fig, ax = make_figure(width, height)
+    x = _plot_index_values(wealth.index)
+    percentiles = sorted(spec.percentiles)
+    bands = {p: wealth.quantile(p / 100.0, axis=1) for p in percentiles}
+    for p, series in bands.items():
+        ax.plot(x, series.values, label=f"p{p}")
+    if len(percentiles) >= 2:
+        ax.fill_between(x, bands[percentiles[0]].values, bands[percentiles[-1]].values, alpha=0.15)
+
+    # Stage boundaries and labels. monte_carlo_wealth prepends the opening
+    # balance one month before t0, so the month at index `month_offset + 1` is
+    # the first month of the next stage.
+    month_offset = 0
+    top = ax.get_ylim()[1]
+    for number, stage in enumerate(plan_obj.stages, start=1):
+        stage_start = month_offset
+        month_offset += stage.period_months
+        if number < len(plan_obj.stages):
+            ax.axvline(x[month_offset + 1], color="grey", linestyle="--", linewidth=1)
+        ax.text(
+            x[(stage_start + month_offset) // 2],
+            top,
+            stage.name or f"stage {number}",
+            ha="center",
+            va="top",
+        )
+
+    ax.set_title(f"{spec.name} — {spec.scenarios} scenarios, {len(spec.stages)} stages")
+    ax.set_ylabel(f"Wealth ({getattr(plan_obj, 'currency', '')})")
+    ax.legend()
+    return _render(fig, save_path)
+
+
 
 def register(mcp: FastMCP) -> None:
     """Register chart tools with the FastMCP server."""
@@ -399,3 +454,4 @@ def register(mcp: FastMCP) -> None:
     mcp.tool(plot_qq)
     mcp.tool(plot_hist_fit)
     mcp.tool(plot_macro)
+    mcp.tool(plot_finplan_forecast)
