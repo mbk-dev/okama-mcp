@@ -436,7 +436,9 @@ def plot_finplan_forecast(
         )
 
     ax.set_title(f"{spec.name} — {spec.scenarios} scenarios, {len(spec.stages)} stages")
-    ax.set_ylabel(f"Wealth ({getattr(plan_obj, 'currency', '')})")
+    # FinPlan itself carries no currency: it enforces that every stage portfolio
+    # shares one, so the first stage's portfolio is the authority.
+    ax.set_ylabel(f"Wealth ({plan_obj.stages[0].portfolio.currency})")
     ax.legend()
     return _render(fig, save_path)
 

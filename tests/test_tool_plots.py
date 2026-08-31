@@ -414,11 +414,12 @@ def _make_finplan_mock() -> SimpleNamespace:
     wealth = pd.DataFrame({f"s{i}": base * (1 + (i - 1) * 0.1) for i in range(4)}, index=idx)
     plan = SimpleNamespace()
     plan.name = "plan"
-    plan.currency = "USD"
+    # okama.FinPlan has no `currency` of its own: it validates that every stage
+    # portfolio shares one currency and leaves the value on the portfolios.
     plan.monte_carlo_wealth = MagicMock(return_value=wealth)
     plan.stages = [
-        SimpleNamespace(name="accumulation", period_months=12),
-        SimpleNamespace(name="retirement", period_months=12),
+        SimpleNamespace(name="accumulation", period_months=12, portfolio=SimpleNamespace(currency="USD")),
+        SimpleNamespace(name="retirement", period_months=12, portfolio=SimpleNamespace(currency="USD")),
     ]
 
     def _must_not_be_called(*args, **kwargs):  # pragma: no cover - guard
@@ -477,6 +478,10 @@ class TestPlotFinPlanForecast:
         # A depleted scenario must flatline at zero on the chart rather than
         # dragging the bands into negative territory.
         self.plan.monte_carlo_wealth.assert_called_once_with(discounting="fv", include_negative_values=False)
+
+    def test_labels_the_axis_with_the_plan_currency(self) -> None:
+        _, ax = self._run()
+        assert ax.get_ylabel() == "Wealth (USD)"
 
     def test_labels_every_stage(self) -> None:
         _, ax = self._run()
