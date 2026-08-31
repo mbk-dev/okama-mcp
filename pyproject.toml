@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "okama-mcp"
-version = "1.7.0"
+version = "1.8.0"
 description = "MCP (Model Context Protocol) server exposing the okama investment portfolio toolkit to AI assistants"
 authors = ["Sergey Kikevich <sergey@rostsber.ru>"]
 readme = "README.md"
@@ -17,7 +17,7 @@ packages = [{ include = "okama_mcp", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0.0"
-okama = ">=2.3.1"
+okama = ">=3.0.0"
 fastmcp = ">=2.7"
 pydantic = ">=2.0"
 scipy = ">=1.11"
