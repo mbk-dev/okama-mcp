@@ -46,6 +46,21 @@ def _render(fig: Any, save_path: str | None) -> Image | list[Image | str]:
     return [image, f"Chart saved to {path}"]
 
 
+def _truncate_at_depletion(values: np.ndarray) -> np.ndarray:
+    """Blank a percentile band after the month it first runs out of money.
+
+    Once a band reaches zero it stays there for the rest of the plan, and a flat
+    run along the axis tells the reader nothing — a depleted plan looks the same
+    as one with no data. Keeping the first zero makes the line land on the axis
+    and stop there, which is the fact worth showing.
+    """
+    out = values.astype(float).copy()
+    (zeros,) = np.nonzero(out <= 0.0)
+    if zeros.size:
+        out[zeros[0] + 1 :] = np.nan
+    return out
+
+
 def _plot_index_values(index: pd.Index) -> pd.Index:
     """PeriodIndex can't be plotted directly — convert to timestamps."""
     return index.to_timestamp() if isinstance(index, pd.PeriodIndex) else index
@@ -411,11 +426,15 @@ def plot_finplan_forecast(
     fig, ax = make_figure(width, height)
     x = _plot_index_values(wealth.index)
     percentiles = sorted(spec.percentiles)
-    bands = {p: wealth.quantile(p / 100.0, axis=1) for p in percentiles}
-    for p, series in bands.items():
-        ax.plot(x, series.values, label=f"p{p}")
+    bands = {p: _truncate_at_depletion(wealth.quantile(p / 100.0, axis=1).values) for p in percentiles}
+    for p, values in bands.items():
+        ax.plot(x, values, label=f"p{p}")
     if len(percentiles) >= 2:
-        ax.fill_between(x, bands[percentiles[0]].values, bands[percentiles[-1]].values, alpha=0.15)
+        # A depleted lower band is a floor of zero, not a hole: keep filling
+        # against it, and stop the fill where the upper band itself runs out.
+        lower = np.nan_to_num(bands[percentiles[0]], nan=0.0)
+        upper = bands[percentiles[-1]]
+        ax.fill_between(x, lower, np.nan_to_num(upper, nan=0.0), where=~np.isnan(upper), alpha=0.15)
 
     # Stage boundaries and labels. monte_carlo_wealth prepends the opening
     # balance one month before t0, so the month at index `month_offset + 1` is

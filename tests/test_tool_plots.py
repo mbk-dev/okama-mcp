@@ -430,8 +430,10 @@ def _make_finplan_mock() -> SimpleNamespace:
 
 
 class TestPlotFinPlanForecast:
-    def _run(self, **kwargs):
+    def _run(self, _wealth=None, **kwargs):
         plan = _make_finplan_mock()
+        if _wealth is not None:
+            plan.monte_carlo_wealth = MagicMock(return_value=_wealth)
         captured: dict = {}
         real_make_figure = plots_tool.make_figure
 
@@ -478,6 +480,22 @@ class TestPlotFinPlanForecast:
         # A depleted scenario must flatline at zero on the chart rather than
         # dragging the bands into negative territory.
         self.plan.monte_carlo_wealth.assert_called_once_with(discounting="fv", include_negative_values=False)
+
+    def test_stops_a_band_where_it_runs_out_of_money(self) -> None:
+        # A percentile that hits zero stays zero for the rest of the plan. Drawing
+        # that flat run says nothing — the reader cannot tell a depleted plan from
+        # a plan with no data — so the line must end on the first zero.
+        idx = pd.period_range("2024-12", periods=25, freq="M")
+        depleting = np.concatenate([np.linspace(100_000, 0, 20), np.zeros(5)])
+        wealth = pd.DataFrame({f"s{i}": depleting for i in range(4)}, index=idx)
+        _, ax = self._run(_wealth=wealth)
+        (line,) = [ln for ln in ax.get_lines() if ln.get_label() == "p50"]
+        y = np.asarray(line.get_ydata(), dtype=float)
+        drawn = y[~np.isnan(y)]
+        # The drawn part ends on the first zero; the rest is blank, not flat.
+        assert len(drawn) == 20, f"expected 20 drawn points, got {len(drawn)}"
+        assert drawn[-1] == 0.0
+        assert np.isnan(y[20:]).all()
 
     def test_labels_the_axis_with_the_plan_currency(self) -> None:
         _, ax = self._run()
