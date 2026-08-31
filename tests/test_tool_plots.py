@@ -2,7 +2,7 @@
 
 import struct
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,7 @@ from fastmcp.utilities.types import Image
 import okama_mcp.tools.plots as plots_tool
 import okama_mcp.tools.portfolio as pf_tool
 import okama_mcp.tools.frontier as fr_tool
+import okama_mcp.tools.finplan as fp_tool
 from okama_mcp.errors import OkamaMcpError
 
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
@@ -31,6 +32,7 @@ VALID_SPEC: dict = {
 def _clear_caches() -> None:
     pf_tool.clear_cache()
     fr_tool.clear_cache()
+    fp_tool.clear_cache()
 
 
 def _make_portfolio_mock() -> SimpleNamespace:
@@ -404,13 +406,16 @@ FINPLAN_SPEC: dict = {
 
 
 def _make_finplan_mock() -> SimpleNamespace:
-    idx = pd.period_range("2025-01", periods=24, freq="M")
-    base = np.linspace(100_000, 250_000, 24)
+    # Two 12-month stages. Like okama, the frame opens with the starting balance
+    # dated one month before t0, so it has 25 rows and row 13 is the first month
+    # of the second stage.
+    idx = pd.period_range("2024-12", periods=25, freq="M")
+    base = np.linspace(100_000, 250_000, 25)
     wealth = pd.DataFrame({f"s{i}": base * (1 + (i - 1) * 0.1) for i in range(4)}, index=idx)
     plan = SimpleNamespace()
     plan.name = "plan"
     plan.currency = "USD"
-    plan.monte_carlo_wealth = lambda **kwargs: wealth
+    plan.monte_carlo_wealth = MagicMock(return_value=wealth)
     plan.stages = [
         SimpleNamespace(name="accumulation", period_months=12),
         SimpleNamespace(name="retirement", period_months=12),
@@ -441,6 +446,7 @@ class TestPlotFinPlanForecast:
              patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", return_value=SimpleNamespace()), \
              patch.object(plots_tool, "make_figure", _spy):
             out = plots_tool.plot_finplan_forecast(FINPLAN_SPEC, **kwargs)
+        self.plan = plan
         return out, captured["ax"]
 
     def test_returns_png_image(self) -> None:
@@ -458,6 +464,19 @@ class TestPlotFinPlanForecast:
         # Two stages -> exactly one internal boundary, drawn as a dashed vertical line.
         dashed = [line for line in ax.get_lines() if line.get_linestyle() == "--"]
         assert len(dashed) == 1
+
+    def test_boundary_sits_on_the_first_month_of_the_next_stage(self) -> None:
+        _, ax = self._run()
+        dashed = [line for line in ax.get_lines() if line.get_linestyle() == "--"]
+        # Stage 1 runs 2025-01..2025-12, so the transition belongs on 2026-01,
+        # not on the last month of stage 1 and not one month past it.
+        assert pd.Timestamp(dashed[0].get_xdata()[0]) == pd.Timestamp("2026-01-01")
+
+    def test_hides_scenarios_after_the_money_runs_out(self) -> None:
+        self._run()
+        # A depleted scenario must flatline at zero on the chart rather than
+        # dragging the bands into negative territory.
+        self.plan.monte_carlo_wealth.assert_called_once_with(discounting="fv", include_negative_values=False)
 
     def test_labels_every_stage(self) -> None:
         _, ax = self._run()

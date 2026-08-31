@@ -219,6 +219,14 @@ class TestForecastPayload:
         assert out["wealth_paths"]["n_months"] == 24
         assert out["wealth_paths"]["index"][0] == "2025-01-31"
 
+    def test_keeps_depleted_scenarios_in_the_statistics(self) -> None:
+        self._run()
+        # Survival and terminal statistics need the raw paths: zeroing a scenario
+        # after it goes broke would hide exactly what those numbers measure.
+        # The chart asks for include_negative_values=False on the same cached plan,
+        # which okama applies after its simulation cache, so the two never collide.
+        self.plan.monte_carlo_wealth.assert_called_once_with(discounting="fv", include_negative_values=True)
+
     def test_reports_terminal_survival_and_irr(self) -> None:
         out = self._run()
         assert out["terminal_wealth"]["count"] == 4
