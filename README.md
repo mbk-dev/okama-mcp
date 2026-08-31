@@ -236,6 +236,21 @@ portfolio against gold, or put a sub-portfolio on the efficient frontier.
 
 The `mc` argument accepts `distribution_parameters` to override the fitted distribution (e.g. a fixed Student-t `df`); see the MCSpec shape below.
 
+### Financial plan (multi-stage)
+
+A plan is an ordered sequence of stages, each with its own portfolio, horizon and
+cash-flow regime. Scenarios are chained: the balance a Monte Carlo scenario ends a
+stage with is the balance it starts the next one with, so the retirement stage is
+funded by whatever the accumulation stage produced **in that same scenario** — not by
+a percentile of it. Use these instead of `monte_carlo_forecast` whenever the portfolio
+or the contribution/withdrawal regime changes partway through the horizon.
+
+| Tool | Purpose |
+|---|---|
+| `finplan_forecast(plan, success_threshold=0)` | Monte Carlo forecast of the whole plan: percentile wealth bands, terminal-wealth stats, survival metrics, the share of scenarios finishing above `success_threshold`, the balance distribution at every stage boundary, and the IRR distribution. |
+| `finplan_backtest(plan, discounting?, first_date?)` | Replay the same plan over real history — a glide-path backtest. Requires the window covered by every stage portfolio to be at least as long as the plan. |
+
+
 ### Distribution diagnostics
 
 | Tool | Purpose |
@@ -288,6 +303,7 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_wealth_index(portfolio)` | Portfolio wealth index (+ inflation line). |
 | `plot_drawdowns(portfolio)` | Drawdown depth over time. |
 | `plot_monte_carlo(portfolio, mc, cashflow)` | Monte Carlo forecast fan (percentile bands). |
+| `plot_finplan_forecast(plan)` | Financial-plan forecast fan: percentile bands with dashed stage boundaries and stage labels. |
 | `plot_irr_distribution(portfolio, mc, cashflow)` | Histogram of IRR across Monte Carlo scenarios (percentile markers). |
 | `plot_qq(portfolio, mc)` | Q-Q plot of historical returns against the fitted distribution (norm/lognorm/t). |
 | `plot_hist_fit(portfolio, mc, bins?)` | Histogram of historical returns with the fitted distribution PDF overlaid. |
@@ -335,6 +351,25 @@ The complex tools take typed dicts validated by pydantic. The full schemas live 
 { "type": "cut_if_drawdown",  "initial_investment": 1000000, "frequency": "year",  "amount": -60000, "indexation": "inflation",
   "crash_threshold_reduction": [[0.2, 0.4], [0.5, 1.0]] }
 
+// FinPlanSpec — a plan is a sequence of stages, chained per scenario
+{
+  "stages": [
+    { "portfolio": { "assets": ["SPY.US", "AGG.US"], "weights": [0.7, 0.3] },
+      "period_years": 20, "name": "accumulation",
+      "cashflow": { "type": "indexation", "initial_investment": 100000, "frequency": "year", "amount": 12000, "indexation": 0.03 } },
+    { "portfolio": { "assets": ["SPY.US", "AGG.US"], "weights": [0.3, 0.7] },
+      "period_years": 25, "name": "retirement",
+      "distribution": "t", "distribution_parameters": [5, null, null],
+      "cashflow": { "type": "percentage", "initial_investment": 100000, "frequency": "year", "percentage": -0.04 } }
+  ],
+  "initial_investment": 100000,       // balance the first stage starts with
+  "discount_rate": null,               // optional; null lets okama use inflation
+  "scenarios": 500,
+  "random_seed": 42,                   // optional
+  "percentiles": [10, 50, 90],
+  "name": "retirement plan"
+}
+
 // FrontierSpec
 {
   "assets":   ["SPY.US", "BND.US", "GLD.US"],
@@ -377,13 +412,13 @@ poetry run pytest -m integration
 src/okama_mcp/
 ├── server.py          # FastMCP instance + registration entry point
 ├── transport.py       # CLI: `okama-mcp stdio | http`
-├── schemas.py         # PortfolioSpec, MCSpec, CashflowSpec, FrontierSpec
+├── schemas.py         # PortfolioSpec, MCSpec, CashflowSpec, FrontierSpec, FinPlanSpec
 ├── cache.py           # TTL+LRU cache keyed by sha256 of canonical spec
 ├── serialization.py   # pandas → JSON-safe with smart truncation
 ├── errors.py          # Translate okama exceptions to actionable MCP errors
 └── tools/
     ├── search.py, asset.py, asset_list.py
-    ├── portfolio.py, monte_carlo.py
+    ├── portfolio.py, monte_carlo.py, finplan.py
     ├── frontier.py, macro.py
     └── plots.py
 ```
