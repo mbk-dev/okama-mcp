@@ -290,3 +290,99 @@ class FrontierSpec(BaseModel):
             if lo < 0 or hi > 1 or lo > hi:
                 raise ValueError(f"bound {pair} must satisfy 0 <= min <= max <= 1")
         return self
+
+
+# ---------------------------------------------------------------------------
+# Financial plan (okama.FinPlan)
+# ---------------------------------------------------------------------------
+
+
+class FinPlanStageSpec(BaseModel):
+    """One stage of a financial plan, mirrors ``okama.FinPlanStage``.
+
+    A stage owns its portfolio, its horizon and its own cash-flow regime, so a
+    plan can hold a stock-heavy accumulation stage followed by a bond-heavy
+    retirement stage with a different withdrawal strategy.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    portfolio: PortfolioSpec = Field(description="Portfolio held during this stage")
+    period_years: int = Field(ge=1, le=100, description="Stage length in whole years")
+    cashflow: CashflowSpec | None = Field(  # type: ignore[valid-type]
+        default=None,
+        description=(
+            "Cash-flow strategy for this stage: one of indexation / percentage / "
+            "time_series / vanguard / cut_if_drawdown, discriminated by 'type'. "
+            "Omit for a stage with no contributions or withdrawals."
+        ),
+    )
+    name: str | None = Field(
+        default=None,
+        description="Stage label shown on charts and in stage-boundary tables, e.g. 'retirement'",
+    )
+    distribution: Distribution = Field(
+        default="norm",
+        description="Return distribution simulated for this stage",
+    )
+    distribution_parameters: list[float | None] | None = Field(
+        default=None,
+        description=(
+            "Optional explicit distribution parameters; any None element is fitted "
+            "from history via MLE. Lengths by distribution: norm=[mu, sigma]; "
+            "lognorm=[shape, loc, scale]; t=[df, loc, scale]."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _validate_distribution_parameters(self) -> FinPlanStageSpec:
+        if self.distribution_parameters is not None:
+            expected = _DIST_PARAM_LENGTHS[self.distribution]
+            if len(self.distribution_parameters) != expected:
+                raise ValueError(
+                    f"distribution_parameters for '{self.distribution}' must have "
+                    f"{expected} elements, got {len(self.distribution_parameters)}"
+                )
+        return self
+
+
+class FinPlanSpec(BaseModel):
+    """Specification of a multi-stage financial plan passed to ``okama.FinPlan``.
+
+    Stages run in the listed order and the balance a Monte Carlo scenario
+    reaches at the end of one stage is the balance it starts the next one with,
+    so a retirement stage is funded by whatever the accumulation stage produced
+    in that same scenario.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    stages: list[FinPlanStageSpec] = Field(
+        min_length=1,
+        description="Plan stages in chronological order; each one chains onto the previous balance",
+    )
+    initial_investment: float = Field(
+        default=1000.0,
+        gt=0,
+        description="Balance the first stage starts with",
+    )
+    discount_rate: float | None = Field(
+        default=None,
+        description="Annual rate used for PV discounting; None lets okama use inflation",
+    )
+    scenarios: int = Field(default=500, ge=1, description="Number of Monte Carlo paths")
+    random_seed: int | None = Field(default=None, description="Optional seed for reproducibility")
+    percentiles: list[int] = Field(
+        default_factory=lambda: [10, 50, 90],
+        description="Percentiles (0..100) reported for the wealth distribution",
+    )
+    name: str = Field(default="plan", description="Plan label shown on charts")
+
+    @model_validator(mode="after")
+    def _validate_percentiles(self) -> FinPlanSpec:
+        if not self.percentiles:
+            raise ValueError("percentiles must be non-empty")
+        for p in self.percentiles:
+            if p < 0 or p > 100:
+                raise ValueError(f"percentile {p} must be in [0, 100]")
+        return self

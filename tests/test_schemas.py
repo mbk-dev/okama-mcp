@@ -8,6 +8,8 @@ from pydantic import ValidationError
 from okama_mcp.schemas import (
     CashflowAdapter,
     CutIfDrawdownCashflow,
+    FinPlanSpec,
+    FinPlanStageSpec,
     FrontierSpec,
     IndexationCashflow,
     MCSpec,
@@ -277,3 +279,123 @@ class TestTimeSeriesDiscounted:
             initial_investment=100.0, events={"2030-01": -50.0}, time_series_discounted_values=True
         )
         assert spec.time_series_discounted_values is True
+
+
+class TestFinPlanStageSpec:
+    def test_minimal_valid(self) -> None:
+        spec = FinPlanStageSpec(portfolio={"assets": ["SPY.US"]}, period_years=10)
+        assert isinstance(spec.portfolio, PortfolioSpec)
+        assert spec.period_years == 10
+        assert spec.cashflow is None
+        assert spec.name is None
+        assert spec.distribution == "norm"
+        assert spec.distribution_parameters is None
+
+    def test_period_must_be_at_least_one_year(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanStageSpec(portfolio={"assets": ["SPY.US"]}, period_years=0)
+
+    def test_cashflow_is_discriminated(self) -> None:
+        spec = FinPlanStageSpec(
+            portfolio={"assets": ["SPY.US"]},
+            period_years=10,
+            cashflow={
+                "type": "indexation",
+                "initial_investment": 100_000,
+                "frequency": "year",
+                "amount": -40_000,
+            },
+        )
+        assert isinstance(spec.cashflow, IndexationCashflow)
+        assert spec.cashflow.amount == -40_000
+
+    def test_distribution_parameters_length_checked(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanStageSpec(
+                portfolio={"assets": ["SPY.US"]},
+                period_years=10,
+                distribution="t",
+                distribution_parameters=[5.0, 0.0],
+            )
+
+    def test_distribution_parameters_accept_fitted_nulls(self) -> None:
+        spec = FinPlanStageSpec(
+            portfolio={"assets": ["SPY.US"]},
+            period_years=10,
+            distribution="t",
+            distribution_parameters=[5.0, None, None],
+        )
+        assert spec.distribution_parameters == [5.0, None, None]
+
+    def test_extra_field_rejected(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanStageSpec(portfolio={"assets": ["SPY.US"]}, period_years=10, horizon=5)
+
+
+class TestFinPlanSpec:
+    def test_minimal_valid(self) -> None:
+        spec = FinPlanSpec(stages=[{"portfolio": {"assets": ["SPY.US"]}, "period_years": 10}])
+        assert len(spec.stages) == 1
+        assert isinstance(spec.stages[0], FinPlanStageSpec)
+        assert spec.initial_investment == 1000.0
+        assert spec.discount_rate is None
+        assert spec.scenarios == 500
+        assert spec.random_seed is None
+        assert spec.percentiles == [10, 50, 90]
+        assert spec.name == "plan"
+
+    def test_at_least_one_stage_required(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanSpec(stages=[])
+
+    def test_initial_investment_must_be_positive(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanSpec(
+                stages=[{"portfolio": {"assets": ["SPY.US"]}, "period_years": 10}],
+                initial_investment=0,
+            )
+
+    def test_percentiles_must_be_in_range(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanSpec(
+                stages=[{"portfolio": {"assets": ["SPY.US"]}, "period_years": 10}],
+                percentiles=[10, 120],
+            )
+
+    def test_percentiles_must_be_non_empty(self) -> None:
+        with pytest.raises(ValidationError):
+            FinPlanSpec(
+                stages=[{"portfolio": {"assets": ["SPY.US"]}, "period_years": 10}],
+                percentiles=[],
+            )
+
+    def test_two_stages_keep_their_own_cashflow(self) -> None:
+        spec = FinPlanSpec(
+            stages=[
+                {
+                    "portfolio": {"assets": ["SPY.US"]},
+                    "period_years": 20,
+                    "name": "accumulation",
+                    "cashflow": {
+                        "type": "indexation",
+                        "initial_investment": 100_000,
+                        "frequency": "year",
+                        "amount": 12_000,
+                    },
+                },
+                {
+                    "portfolio": {"assets": ["AGG.US"]},
+                    "period_years": 25,
+                    "name": "retirement",
+                    "cashflow": {
+                        "type": "percentage",
+                        "initial_investment": 100_000,
+                        "frequency": "year",
+                        "percentage": -0.04,
+                    },
+                },
+            ],
+        )
+        assert isinstance(spec.stages[0].cashflow, IndexationCashflow)
+        assert isinstance(spec.stages[1].cashflow, PercentageCashflow)
+        assert spec.stages[0].name == "accumulation"
