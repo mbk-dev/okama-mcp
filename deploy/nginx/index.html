@@ -147,7 +147,7 @@
     <ul>
       <li><em>"Backtest a portfolio of 30% gold and 70% real estate over the last 15 years."</em></li>
       <li><em>"Run a Monte Carlo retirement forecast withdrawing $1,000/month indexed to inflation over 25 years."</em></li>
-      <li><em>"Build a plan: contribute $1,000/month for 20 years into a 70/30 portfolio, then withdraw $3,000/month indexed to inflation for 25 years &mdash; what are the odds it lasts?"</em></li>
+      <li><em>"Build a plan: contribute $1,000/month for 20 years into a 70/30 portfolio, then withdraw $6,000/month indexed to inflation for 25 years &mdash; what are the odds it lasts?"</em></li>
       <li><em>"What's the tangency portfolio of SPY, BND, and GLD with a 3% risk-free rate?"</em></li>
       <li><em>"Plot the efficient frontier of SPY, BND, and GLD."</em></li>
       <li><em>"Show the five MOEX-listed BPIFs with the longest price histories."</em></li>
@@ -161,8 +161,17 @@
     <h2>Charts</h2>
     <p>
       Chart tools render PNG images that MCP clients like Claude Desktop display inline.
-      Here are the Monte Carlo forecast and the efficient frontier from the examples above:
+      Here are the multi-stage plan, the Monte Carlo forecast and the efficient frontier
+      from the examples above:
     </p>
+    <figure>
+      <img src="/finplan-forecast.png" alt="Financial-plan forecast fan — percentile bands with stage boundaries"
+           width="1500" height="900" loading="lazy" />
+      <figcaption>
+        Multi-stage plan — contributions, then withdrawals, with the stage boundary marked.
+        Each band ends on the month its percentile runs out of money.
+      </figcaption>
+    </figure>
     <figure>
       <img src="/monte-carlo-forecast.png" alt="Monte Carlo forecast fan — percentile bands of future wealth"
            width="1500" height="900" loading="lazy" />

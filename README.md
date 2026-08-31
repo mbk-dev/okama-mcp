@@ -175,9 +175,12 @@ not be public, restrict access at the nginx level (allow-list, VPN, or HTTP basi
 
 ## Tool catalog
 
-A Monte Carlo retirement forecast (30% gold / 70% real estate, withdrawing $1,000/month
-indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD — the
-exact examples from the top of this page:
+A multi-stage financial plan (contribute $1,000/month for 20 years into a 70/30
+SPY/AGG portfolio, then withdraw $6,000/month indexed to inflation for 25 years),
+a Monte Carlo retirement forecast (30% gold / 70% real estate, withdrawing $1,000/month
+indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD:
+
+![Financial-plan forecast fan — percentile bands with dashed stage boundaries](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/finplan-forecast.png)
 
 ![Monte Carlo forecast fan — percentile bands of future wealth](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/monte-carlo-forecast.png)
 
