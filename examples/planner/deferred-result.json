@@ -1,0 +1,3288 @@
+{
+  "schema_version": "1.0",
+  "currency": "USD",
+  "portfolio_mode": "single",
+  "metrics": {
+    "probability_of_success": 0.972,
+    "median_survival_years": 6.0,
+    "terminal_p10": 6915.732855610568,
+    "terminal_p25": 15897.535469477443,
+    "terminal_p50": 25412.62632800031,
+    "terminal_p75": 37308.94730195359,
+    "terminal_p90": 50439.854478548295
+  },
+  "goals": [
+    {
+      "goal_id": 1,
+      "label": "Synthetic purchase",
+      "month": "2029-07",
+      "amount_nominal": 21224.160000000003,
+      "p_affordable": 1.0,
+      "p_alive": 1.0
+    },
+    {
+      "goal_id": 2,
+      "label": "Synthetic retirement spending",
+      "month": "2029-01",
+      "amount_nominal": 2122.416,
+      "p_affordable": 1.0,
+      "p_alive": 1.0
+    }
+  ],
+  "ledger": {
+    "t0": "2026-01",
+    "months": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09",
+      "2026-10",
+      "2026-11",
+      "2026-12",
+      "2027-01",
+      "2027-02",
+      "2027-03",
+      "2027-04",
+      "2027-05",
+      "2027-06",
+      "2027-07",
+      "2027-08",
+      "2027-09",
+      "2027-10",
+      "2027-11",
+      "2027-12",
+      "2028-01",
+      "2028-02",
+      "2028-03",
+      "2028-04",
+      "2028-05",
+      "2028-06",
+      "2028-07",
+      "2028-08",
+      "2028-09",
+      "2028-10",
+      "2028-11",
+      "2028-12",
+      "2029-01",
+      "2029-02",
+      "2029-03",
+      "2029-04",
+      "2029-05",
+      "2029-06",
+      "2029-07",
+      "2029-08",
+      "2029-09",
+      "2029-10",
+      "2029-11",
+      "2029-12",
+      "2030-01",
+      "2030-02",
+      "2030-03",
+      "2030-04",
+      "2030-05",
+      "2030-06",
+      "2030-07",
+      "2030-08",
+      "2030-09",
+      "2030-10",
+      "2030-11",
+      "2030-12",
+      "2031-01",
+      "2031-02",
+      "2031-03",
+      "2031-04",
+      "2031-05",
+      "2031-06",
+      "2031-07",
+      "2031-08",
+      "2031-09",
+      "2031-10",
+      "2031-11",
+      "2031-12"
+    ],
+    "lines": [
+      {
+        "month": "2026-01",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-02",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-03",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-04",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-05",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-06",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-07",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-08",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-09",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-10",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-11",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-12",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3000.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-01",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-02",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-03",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-04",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-05",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-06",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-07",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-08",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-09",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-10",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-11",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-12",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3060.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-01",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-02",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-03",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-04",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-05",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-06",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-07",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-08",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-09",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-10",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-11",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-12",
+        "line_kind": "income",
+        "label": "Synthetic household income",
+        "amount": 3121.2,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-01",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-02",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-03",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-04",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-05",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-06",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-07",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-08",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-09",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-10",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-11",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2026-12",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2300.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-01",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-02",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-03",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-04",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-05",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-06",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-07",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-08",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-09",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-10",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-11",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2027-12",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2346.0,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-01",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-02",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-03",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-04",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-05",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-06",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-07",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-08",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-09",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-10",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-11",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2028-12",
+        "line_kind": "expense",
+        "label": "Synthetic family expenses",
+        "amount": -2392.92,
+        "resolved_rate": 0.02,
+        "goal_id": null
+      },
+      {
+        "month": "2029-07",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic purchase",
+        "amount": -21224.160000000003,
+        "resolved_rate": 0.02,
+        "goal_id": 1
+      },
+      {
+        "month": "2029-01",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-02",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-03",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-04",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-05",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-06",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-07",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-08",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-09",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-10",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-11",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2029-12",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2122.416,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-01",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-02",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-03",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-04",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-05",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-06",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-07",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-08",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-09",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-10",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-11",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2030-12",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2164.86432,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-01",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-02",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-03",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-04",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-05",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-06",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-07",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-08",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-09",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-10",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-11",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2031-12",
+        "line_kind": "goal_outflow",
+        "label": "Synthetic retirement spending",
+        "amount": -2208.1616064,
+        "resolved_rate": 0.02,
+        "goal_id": 2
+      },
+      {
+        "month": "2026-01",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-02",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-03",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-04",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-05",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-06",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-07",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-08",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-09",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-10",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-11",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2026-12",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 700.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-01",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-02",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-03",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-04",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-05",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-06",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-07",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-08",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-09",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-10",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-11",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2027-12",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 714.0,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-01",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-02",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-03",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-04",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-05",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-06",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-07",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-08",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-09",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-10",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-11",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2028-12",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": 728.2799999999997,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-01",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-02",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-03",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-04",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-05",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-06",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-07",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -23346.576000000005,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-08",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-09",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-10",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-11",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2029-12",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2122.416,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-01",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-02",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-03",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-04",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-05",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-06",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-07",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-08",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-09",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-10",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-11",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2030-12",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2164.86432,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-01",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-02",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-03",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-04",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-05",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-06",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-07",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-08",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-09",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-10",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-11",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      },
+      {
+        "month": "2031-12",
+        "line_kind": "portfolio_flow",
+        "label": "\u041f\u043e\u0442\u043e\u043a \u0432 \u043f\u043e\u0440\u0442\u0444\u0435\u043b\u044c",
+        "amount": -2208.1616064,
+        "resolved_rate": null,
+        "goal_id": null
+      }
+    ],
+    "portfolio_flow": {
+      "2026-01": 700.0,
+      "2026-02": 700.0,
+      "2026-03": 700.0,
+      "2026-04": 700.0,
+      "2026-05": 700.0,
+      "2026-06": 700.0,
+      "2026-07": 700.0,
+      "2026-08": 700.0,
+      "2026-09": 700.0,
+      "2026-10": 700.0,
+      "2026-11": 700.0,
+      "2026-12": 700.0,
+      "2027-01": 714.0,
+      "2027-02": 714.0,
+      "2027-03": 714.0,
+      "2027-04": 714.0,
+      "2027-05": 714.0,
+      "2027-06": 714.0,
+      "2027-07": 714.0,
+      "2027-08": 714.0,
+      "2027-09": 714.0,
+      "2027-10": 714.0,
+      "2027-11": 714.0,
+      "2027-12": 714.0,
+      "2028-01": 728.2799999999997,
+      "2028-02": 728.2799999999997,
+      "2028-03": 728.2799999999997,
+      "2028-04": 728.2799999999997,
+      "2028-05": 728.2799999999997,
+      "2028-06": 728.2799999999997,
+      "2028-07": 728.2799999999997,
+      "2028-08": 728.2799999999997,
+      "2028-09": 728.2799999999997,
+      "2028-10": 728.2799999999997,
+      "2028-11": 728.2799999999997,
+      "2028-12": 728.2799999999997,
+      "2029-01": -2122.416,
+      "2029-02": -2122.416,
+      "2029-03": -2122.416,
+      "2029-04": -2122.416,
+      "2029-05": -2122.416,
+      "2029-06": -2122.416,
+      "2029-07": -23346.576000000005,
+      "2029-08": -2122.416,
+      "2029-09": -2122.416,
+      "2029-10": -2122.416,
+      "2029-11": -2122.416,
+      "2029-12": -2122.416,
+      "2030-01": -2164.86432,
+      "2030-02": -2164.86432,
+      "2030-03": -2164.86432,
+      "2030-04": -2164.86432,
+      "2030-05": -2164.86432,
+      "2030-06": -2164.86432,
+      "2030-07": -2164.86432,
+      "2030-08": -2164.86432,
+      "2030-09": -2164.86432,
+      "2030-10": -2164.86432,
+      "2030-11": -2164.86432,
+      "2030-12": -2164.86432,
+      "2031-01": -2208.1616064,
+      "2031-02": -2208.1616064,
+      "2031-03": -2208.1616064,
+      "2031-04": -2208.1616064,
+      "2031-05": -2208.1616064,
+      "2031-06": -2208.1616064,
+      "2031-07": -2208.1616064,
+      "2031-08": -2208.1616064,
+      "2031-09": -2208.1616064,
+      "2031-10": -2208.1616064,
+      "2031-11": -2208.1616064,
+      "2031-12": -2208.1616064
+    },
+    "buffer_balance": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "reserve_balance": [
+      0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "non_working_balance": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      21224.160000000003,
+      21259.213425804966,
+      21294.324745192556,
+      21329.494053778733,
+      21364.721447337375,
+      21400.007021800528,
+      21435.350873258696,
+      21470.75309796107,
+      21506.21379231581,
+      21541.733052890297,
+      21577.31097641141,
+      21612.947659765767,
+      21648.643200000017,
+      21684.39769432108,
+      21720.21124009642,
+      21756.083934854323,
+      21792.015876284135,
+      21828.007162236558,
+      21864.057890723885,
+      21900.168159920308,
+      21936.338068162142,
+      21972.567713948116,
+      22008.85719593965,
+      22045.206612961094,
+      22081.61606400003,
+      22118.085648207514,
+      22154.61546489836,
+      22191.20561355142,
+      22227.85619380983,
+      22264.567305481298
+    ],
+    "liability_balance": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "principal_repaid": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "buffer_by_goal": [],
+    "goal_portfolio_shares": {},
+    "reserve_coverage": [],
+    "reserve_required": [],
+    "reserve_income_funding": [],
+    "reserve_portfolio_funding": [],
+    "reserve_tasks": []
+  },
+  "portfolio_flow": {
+    "2026-01": 700.0,
+    "2026-02": 700.0,
+    "2026-03": 700.0,
+    "2026-04": 700.0,
+    "2026-05": 700.0,
+    "2026-06": 700.0,
+    "2026-07": 700.0,
+    "2026-08": 700.0,
+    "2026-09": 700.0,
+    "2026-10": 700.0,
+    "2026-11": 700.0,
+    "2026-12": 700.0,
+    "2027-01": 714.0,
+    "2027-02": 714.0,
+    "2027-03": 714.0,
+    "2027-04": 714.0,
+    "2027-05": 714.0,
+    "2027-06": 714.0,
+    "2027-07": 714.0,
+    "2027-08": 714.0,
+    "2027-09": 714.0,
+    "2027-10": 714.0,
+    "2027-11": 714.0,
+    "2027-12": 714.0,
+    "2028-01": 728.2799999999997,
+    "2028-02": 728.2799999999997,
+    "2028-03": 728.2799999999997,
+    "2028-04": 728.2799999999997,
+    "2028-05": 728.2799999999997,
+    "2028-06": 728.2799999999997,
+    "2028-07": 728.2799999999997,
+    "2028-08": 728.2799999999997,
+    "2028-09": 728.2799999999997,
+    "2028-10": 728.2799999999997,
+    "2028-11": 728.2799999999997,
+    "2028-12": 728.2799999999997,
+    "2029-01": -2122.416,
+    "2029-02": -2122.416,
+    "2029-03": -2122.416,
+    "2029-04": -2122.416,
+    "2029-05": -2122.416,
+    "2029-06": -2122.416,
+    "2029-07": -23346.576000000005,
+    "2029-08": -2122.416,
+    "2029-09": -2122.416,
+    "2029-10": -2122.416,
+    "2029-11": -2122.416,
+    "2029-12": -2122.416,
+    "2030-01": -2164.86432,
+    "2030-02": -2164.86432,
+    "2030-03": -2164.86432,
+    "2030-04": -2164.86432,
+    "2030-05": -2164.86432,
+    "2030-06": -2164.86432,
+    "2030-07": -2164.86432,
+    "2030-08": -2164.86432,
+    "2030-09": -2164.86432,
+    "2030-10": -2164.86432,
+    "2030-11": -2164.86432,
+    "2030-12": -2164.86432,
+    "2031-01": -2208.1616064,
+    "2031-02": -2208.1616064,
+    "2031-03": -2208.1616064,
+    "2031-04": -2208.1616064,
+    "2031-05": -2208.1616064,
+    "2031-06": -2208.1616064,
+    "2031-07": -2208.1616064,
+    "2031-08": -2208.1616064,
+    "2031-09": -2208.1616064,
+    "2031-10": -2208.1616064,
+    "2031-11": -2208.1616064,
+    "2031-12": -2208.1616064
+  },
+  "charts": {
+    "portfolio": [
+      {
+        "month": "2025-12",
+        "p10": 75000.0,
+        "p25": 75000.0,
+        "p50": 75000.0,
+        "p75": 75000.0,
+        "p90": 75000.0
+      },
+      {
+        "month": "2026-01",
+        "p10": 73930.13401133964,
+        "p25": 75062.16213974901,
+        "p50": 76211.68234798562,
+        "p75": 77295.45448873722,
+        "p90": 78469.62380094365
+      },
+      {
+        "month": "2026-02",
+        "p10": 74213.15356482822,
+        "p25": 75652.73785078326,
+        "p50": 77142.48865233004,
+        "p75": 78978.0999923656,
+        "p90": 80694.06727431185
+      },
+      {
+        "month": "2026-03",
+        "p10": 74498.04091594169,
+        "p25": 76495.29677733118,
+        "p50": 78394.39019188425,
+        "p75": 80719.63059999935,
+        "p90": 82907.05745271491
+      },
+      {
+        "month": "2026-04",
+        "p10": 74895.70809813622,
+        "p25": 77168.24319122518,
+        "p50": 79656.84502483395,
+        "p75": 82234.99001125705,
+        "p90": 84677.07761779206
+      },
+      {
+        "month": "2026-05",
+        "p10": 75718.07717753756,
+        "p25": 78196.855051744,
+        "p50": 80758.4911419219,
+        "p75": 84095.35618280576,
+        "p90": 86760.7072979502
+      },
+      {
+        "month": "2026-06",
+        "p10": 76348.03067861122,
+        "p25": 79053.36728900115,
+        "p50": 82053.6806496992,
+        "p75": 85469.1695839855,
+        "p90": 88564.82167162106
+      },
+      {
+        "month": "2026-07",
+        "p10": 77220.46542033779,
+        "p25": 79756.72075949538,
+        "p50": 83385.79813326399,
+        "p75": 87106.04398297927,
+        "p90": 89979.79590883726
+      },
+      {
+        "month": "2026-08",
+        "p10": 78019.33004191353,
+        "p25": 80916.88442661004,
+        "p50": 84813.71762654072,
+        "p75": 88294.09550841739,
+        "p90": 92106.23421475984
+      },
+      {
+        "month": "2026-09",
+        "p10": 78647.18856223961,
+        "p25": 82024.04443866997,
+        "p50": 85913.2193664033,
+        "p75": 89553.36094069146,
+        "p90": 93989.32434684364
+      },
+      {
+        "month": "2026-10",
+        "p10": 79478.07324941452,
+        "p25": 82940.92500754268,
+        "p50": 86837.69062168855,
+        "p75": 90966.76831165422,
+        "p90": 95539.85288862493
+      },
+      {
+        "month": "2026-11",
+        "p10": 79955.43138263811,
+        "p25": 83976.31672924336,
+        "p50": 88125.3981201884,
+        "p75": 92063.54544355904,
+        "p90": 97009.2252229362
+      },
+      {
+        "month": "2026-12",
+        "p10": 80830.16267259563,
+        "p25": 84737.85552826308,
+        "p50": 89527.85216017565,
+        "p75": 93849.14420484923,
+        "p90": 98430.22667606678
+      },
+      {
+        "month": "2027-01",
+        "p10": 81995.58833118269,
+        "p25": 85779.97358114962,
+        "p50": 90842.4435337006,
+        "p75": 95640.32653239917,
+        "p90": 99778.94340620538
+      },
+      {
+        "month": "2027-02",
+        "p10": 82926.08556666679,
+        "p25": 86738.6212673414,
+        "p50": 91903.45312568868,
+        "p75": 97067.92423163849,
+        "p90": 101992.32192969396
+      },
+      {
+        "month": "2027-03",
+        "p10": 83839.28326492988,
+        "p25": 88043.67893754996,
+        "p50": 93085.9238653147,
+        "p75": 98583.3443913126,
+        "p90": 104249.2948958617
+      },
+      {
+        "month": "2027-04",
+        "p10": 85007.92231943701,
+        "p25": 88787.28109323377,
+        "p50": 94589.46016995574,
+        "p75": 100315.08966646301,
+        "p90": 105582.74653198906
+      },
+      {
+        "month": "2027-05",
+        "p10": 86116.2487659694,
+        "p25": 90397.48000824431,
+        "p50": 95819.79561873453,
+        "p75": 101725.90743586609,
+        "p90": 107034.79133411289
+      },
+      {
+        "month": "2027-06",
+        "p10": 86357.33423187814,
+        "p25": 90845.05950946322,
+        "p50": 96943.7306947684,
+        "p75": 103265.90295175639,
+        "p90": 108777.69949918779
+      },
+      {
+        "month": "2027-07",
+        "p10": 87229.87278858821,
+        "p25": 92625.08161894095,
+        "p50": 98079.24398948712,
+        "p75": 104920.91772028383,
+        "p90": 110477.8685213352
+      },
+      {
+        "month": "2027-08",
+        "p10": 88205.39093316156,
+        "p25": 93370.14667642806,
+        "p50": 99320.77782456978,
+        "p75": 106668.81798655458,
+        "p90": 112335.61506025826
+      },
+      {
+        "month": "2027-09",
+        "p10": 88973.44339473557,
+        "p25": 94509.7366151159,
+        "p50": 100674.71925712466,
+        "p75": 107763.81539017175,
+        "p90": 114834.58898529383
+      },
+      {
+        "month": "2027-10",
+        "p10": 89774.2057786236,
+        "p25": 95360.918812107,
+        "p50": 101552.21642962363,
+        "p75": 109281.12213131349,
+        "p90": 117111.50970138564
+      },
+      {
+        "month": "2027-11",
+        "p10": 91225.63620015435,
+        "p25": 96710.9219539601,
+        "p50": 103507.10098354088,
+        "p75": 110568.32202052657,
+        "p90": 119284.95223738013
+      },
+      {
+        "month": "2027-12",
+        "p10": 92284.49181502846,
+        "p25": 97393.8412548055,
+        "p50": 104974.52336961158,
+        "p75": 112009.65339117114,
+        "p90": 120006.09220382568
+      },
+      {
+        "month": "2028-01",
+        "p10": 93041.99072152849,
+        "p25": 98510.38271569733,
+        "p50": 105808.08811392382,
+        "p75": 113994.31335290363,
+        "p90": 122021.82664551592
+      },
+      {
+        "month": "2028-02",
+        "p10": 94067.13185115696,
+        "p25": 99268.7446148681,
+        "p50": 107396.02141481239,
+        "p75": 115897.97973844598,
+        "p90": 123022.99689648562
+      },
+      {
+        "month": "2028-03",
+        "p10": 94568.70280017126,
+        "p25": 100625.78017392886,
+        "p50": 107917.62969045728,
+        "p75": 117646.09278157205,
+        "p90": 124547.96933651494
+      },
+      {
+        "month": "2028-04",
+        "p10": 95286.64786542417,
+        "p25": 101612.92565371042,
+        "p50": 109005.32808371808,
+        "p75": 118507.68824197623,
+        "p90": 126319.3489736019
+      },
+      {
+        "month": "2028-05",
+        "p10": 96109.02378781002,
+        "p25": 102451.31301658385,
+        "p50": 110338.76812868123,
+        "p75": 119084.7873366068,
+        "p90": 128443.92332423806
+      },
+      {
+        "month": "2028-06",
+        "p10": 98082.32092488272,
+        "p25": 103357.70661678807,
+        "p50": 111825.01701360062,
+        "p75": 120716.59281806015,
+        "p90": 130396.99121738045
+      },
+      {
+        "month": "2028-07",
+        "p10": 98357.30204654623,
+        "p25": 104680.56052186868,
+        "p50": 113359.30204412152,
+        "p75": 122011.54597232712,
+        "p90": 133078.6876161772
+      },
+      {
+        "month": "2028-08",
+        "p10": 99662.34928025602,
+        "p25": 106246.23697135314,
+        "p50": 114653.31234660953,
+        "p75": 122897.78585313808,
+        "p90": 135663.03439221898
+      },
+      {
+        "month": "2028-09",
+        "p10": 100660.03456894282,
+        "p25": 107667.81757722475,
+        "p50": 115670.05420074142,
+        "p75": 124321.92301843331,
+        "p90": 136733.60383653984
+      },
+      {
+        "month": "2028-10",
+        "p10": 101202.34345842765,
+        "p25": 109319.62881015906,
+        "p50": 117387.43665681088,
+        "p75": 125831.98067496996,
+        "p90": 139050.33633911368
+      },
+      {
+        "month": "2028-11",
+        "p10": 101911.60875153325,
+        "p25": 109535.09453419954,
+        "p50": 118416.38672817204,
+        "p75": 128417.17674982784,
+        "p90": 139993.97662038985
+      },
+      {
+        "month": "2028-12",
+        "p10": 102611.07169695091,
+        "p25": 111387.30158707492,
+        "p50": 119943.79086865942,
+        "p75": 129977.99629494932,
+        "p90": 141214.12012974464
+      },
+      {
+        "month": "2029-01",
+        "p10": 100723.15963674319,
+        "p25": 109172.75089748183,
+        "p50": 118036.21706184748,
+        "p75": 128836.5415917059,
+        "p90": 139303.8639956718
+      },
+      {
+        "month": "2029-02",
+        "p10": 98692.42922430053,
+        "p25": 107617.8133141367,
+        "p50": 116317.93511251206,
+        "p75": 127227.09382685152,
+        "p90": 137545.40456363178
+      },
+      {
+        "month": "2029-03",
+        "p10": 96659.93370862375,
+        "p25": 105526.39043473214,
+        "p50": 114623.00418377464,
+        "p75": 125582.89362744082,
+        "p90": 136175.95927455934
+      },
+      {
+        "month": "2029-04",
+        "p10": 94927.66328950108,
+        "p25": 103741.6607552988,
+        "p50": 112361.60504723676,
+        "p75": 123098.85657380229,
+        "p90": 133866.57478111185
+      },
+      {
+        "month": "2029-05",
+        "p10": 93176.79723204848,
+        "p25": 101861.65275953885,
+        "p50": 110523.29249140985,
+        "p75": 120709.66239033845,
+        "p90": 132826.45718664836
+      },
+      {
+        "month": "2029-06",
+        "p10": 91475.37061682336,
+        "p25": 99672.4634564545,
+        "p50": 108358.79470515555,
+        "p75": 119122.09440463752,
+        "p90": 130965.23634534738
+      },
+      {
+        "month": "2029-07",
+        "p10": 67756.78031202038,
+        "p25": 76768.23894864533,
+        "p50": 85177.95221945923,
+        "p75": 95910.62392806917,
+        "p90": 107645.23572747583
+      },
+      {
+        "month": "2029-08",
+        "p10": 65565.55916593908,
+        "p25": 74794.835651182,
+        "p50": 83172.19569444863,
+        "p75": 93891.32178671456,
+        "p90": 105732.52690586241
+      },
+      {
+        "month": "2029-09",
+        "p10": 63774.70385050138,
+        "p25": 72823.82007310589,
+        "p50": 81376.35432957375,
+        "p75": 92219.6858232577,
+        "p90": 104380.0378913149
+      },
+      {
+        "month": "2029-10",
+        "p10": 61957.16577945485,
+        "p25": 70914.12660636955,
+        "p50": 79247.85463708422,
+        "p75": 90246.51452774153,
+        "p90": 102388.68047265394
+      },
+      {
+        "month": "2029-11",
+        "p10": 59669.0376680838,
+        "p25": 68570.34196362883,
+        "p50": 77355.78576728927,
+        "p75": 88086.00331146157,
+        "p90": 100236.07226144349
+      },
+      {
+        "month": "2029-12",
+        "p10": 57773.23685300944,
+        "p25": 66809.49670459049,
+        "p50": 75766.159666372,
+        "p75": 86322.93225666246,
+        "p90": 98397.17585181119
+      },
+      {
+        "month": "2030-01",
+        "p10": 55744.09359648047,
+        "p25": 64517.040376455516,
+        "p50": 73486.11205294757,
+        "p75": 84313.49245905738,
+        "p90": 96590.78218527444
+      },
+      {
+        "month": "2030-02",
+        "p10": 53424.40330960569,
+        "p25": 62471.76233786457,
+        "p50": 71556.6327891027,
+        "p75": 82340.91301860138,
+        "p90": 94613.95866896247
+      },
+      {
+        "month": "2030-03",
+        "p10": 51791.01766649754,
+        "p25": 60314.83979092812,
+        "p50": 69703.7141584231,
+        "p75": 80550.4373623825,
+        "p90": 92559.98657833436
+      },
+      {
+        "month": "2030-04",
+        "p10": 49505.781934279235,
+        "p25": 58055.61427401909,
+        "p50": 67758.85584601818,
+        "p75": 78664.32936675294,
+        "p90": 91007.99935387458
+      },
+      {
+        "month": "2030-05",
+        "p10": 47585.917710540336,
+        "p25": 56293.478118127525,
+        "p50": 65651.86337324967,
+        "p75": 76282.84196059978,
+        "p90": 89205.16928998489
+      },
+      {
+        "month": "2030-06",
+        "p10": 45323.446784217405,
+        "p25": 54191.41935926235,
+        "p50": 63740.833885849956,
+        "p75": 74424.40217390582,
+        "p90": 87160.62326630631
+      },
+      {
+        "month": "2030-07",
+        "p10": 43107.31671520896,
+        "p25": 52164.83141894622,
+        "p50": 61609.759619643184,
+        "p75": 72767.02533755027,
+        "p90": 84650.72732682545
+      },
+      {
+        "month": "2030-08",
+        "p10": 40732.77556672257,
+        "p25": 50141.11724369378,
+        "p50": 59345.69512090187,
+        "p75": 70050.0635618483,
+        "p90": 83002.25994445408
+      },
+      {
+        "month": "2030-09",
+        "p10": 38694.89588000604,
+        "p25": 48155.329869573754,
+        "p50": 57174.066754830725,
+        "p75": 68199.7030188899,
+        "p90": 81141.24340010132
+      },
+      {
+        "month": "2030-10",
+        "p10": 37019.77250920102,
+        "p25": 45952.272501963795,
+        "p50": 55253.23179492135,
+        "p75": 66647.00461479765,
+        "p90": 78894.64890444305
+      },
+      {
+        "month": "2030-11",
+        "p10": 34608.30485413439,
+        "p25": 43691.51773317305,
+        "p50": 53212.21473740463,
+        "p75": 64962.67911887964,
+        "p90": 77387.93450849579
+      },
+      {
+        "month": "2030-12",
+        "p10": 32415.636313825584,
+        "p25": 41610.555017845996,
+        "p50": 51149.94290367501,
+        "p75": 62678.16270088723,
+        "p90": 75396.21873677279
+      },
+      {
+        "month": "2031-01",
+        "p10": 30511.952002243263,
+        "p25": 39423.740047961546,
+        "p50": 49302.554819769706,
+        "p75": 60548.72423559498,
+        "p90": 73511.65313609302
+      },
+      {
+        "month": "2031-02",
+        "p10": 28559.00850851725,
+        "p25": 37205.60087899691,
+        "p50": 47109.23835815361,
+        "p75": 58548.561651896765,
+        "p90": 71492.0552808384
+      },
+      {
+        "month": "2031-03",
+        "p10": 26490.635307142133,
+        "p25": 35231.75645734994,
+        "p50": 45038.445672055546,
+        "p75": 56612.50278556388,
+        "p90": 69722.30514274855
+      },
+      {
+        "month": "2031-04",
+        "p10": 24458.54270392166,
+        "p25": 33125.348442974006,
+        "p50": 42775.75217862893,
+        "p75": 54267.82438479474,
+        "p90": 67255.46000340136
+      },
+      {
+        "month": "2031-05",
+        "p10": 22294.277844443113,
+        "p25": 31009.11751544982,
+        "p50": 40719.93727159171,
+        "p75": 52355.53066259758,
+        "p90": 65345.05125455021
+      },
+      {
+        "month": "2031-06",
+        "p10": 20015.469241068826,
+        "p25": 28685.984625759855,
+        "p50": 38375.23239723614,
+        "p75": 49987.774990108905,
+        "p90": 63262.5537170519
+      },
+      {
+        "month": "2031-07",
+        "p10": 17672.83806312502,
+        "p25": 26547.576025503404,
+        "p50": 36252.36461189645,
+        "p75": 47881.59206511523,
+        "p90": 61488.43464793171
+      },
+      {
+        "month": "2031-08",
+        "p10": 15741.342762359407,
+        "p25": 24459.167486774466,
+        "p50": 34060.371625914864,
+        "p75": 45471.77974835309,
+        "p90": 58869.916001708654
+      },
+      {
+        "month": "2031-09",
+        "p10": 13551.66086921055,
+        "p25": 22374.47009535688,
+        "p50": 31925.59944614586,
+        "p75": 43533.28163645319,
+        "p90": 57262.222486498154
+      },
+      {
+        "month": "2031-10",
+        "p10": 11306.841210110493,
+        "p25": 20134.86827959757,
+        "p50": 29634.223570806666,
+        "p75": 41415.33017227171,
+        "p90": 54916.78676648464
+      },
+      {
+        "month": "2031-11",
+        "p10": 9082.78074426211,
+        "p25": 18090.453413050884,
+        "p50": 27464.568957362062,
+        "p75": 39366.583191959915,
+        "p90": 52784.281494876996
+      },
+      {
+        "month": "2031-12",
+        "p10": 6915.732855610568,
+        "p25": 15897.535469477443,
+        "p50": 25412.62632800031,
+        "p75": 37308.94730195359,
+        "p90": 50439.854478548295
+      }
+    ],
+    "capital": [
+      {
+        "month": "2025-12",
+        "p10": 75000.0,
+        "p25": 75000.0,
+        "p50": 75000.0,
+        "p75": 75000.0,
+        "p90": 75000.0
+      },
+      {
+        "month": "2026-01",
+        "p10": 73930.13401133964,
+        "p25": 75062.16213974901,
+        "p50": 76211.68234798562,
+        "p75": 77295.45448873722,
+        "p90": 78469.62380094365
+      },
+      {
+        "month": "2026-02",
+        "p10": 74213.15356482822,
+        "p25": 75652.73785078326,
+        "p50": 77142.48865233004,
+        "p75": 78978.0999923656,
+        "p90": 80694.06727431185
+      },
+      {
+        "month": "2026-03",
+        "p10": 74498.04091594169,
+        "p25": 76495.29677733118,
+        "p50": 78394.39019188425,
+        "p75": 80719.63059999935,
+        "p90": 82907.05745271491
+      },
+      {
+        "month": "2026-04",
+        "p10": 74895.70809813622,
+        "p25": 77168.24319122518,
+        "p50": 79656.84502483395,
+        "p75": 82234.99001125705,
+        "p90": 84677.07761779206
+      },
+      {
+        "month": "2026-05",
+        "p10": 75718.07717753756,
+        "p25": 78196.855051744,
+        "p50": 80758.4911419219,
+        "p75": 84095.35618280576,
+        "p90": 86760.7072979502
+      },
+      {
+        "month": "2026-06",
+        "p10": 76348.03067861122,
+        "p25": 79053.36728900115,
+        "p50": 82053.6806496992,
+        "p75": 85469.1695839855,
+        "p90": 88564.82167162106
+      },
+      {
+        "month": "2026-07",
+        "p10": 77220.46542033779,
+        "p25": 79756.72075949538,
+        "p50": 83385.79813326399,
+        "p75": 87106.04398297927,
+        "p90": 89979.79590883726
+      },
+      {
+        "month": "2026-08",
+        "p10": 78019.33004191353,
+        "p25": 80916.88442661004,
+        "p50": 84813.71762654072,
+        "p75": 88294.09550841739,
+        "p90": 92106.23421475984
+      },
+      {
+        "month": "2026-09",
+        "p10": 78647.18856223961,
+        "p25": 82024.04443866997,
+        "p50": 85913.2193664033,
+        "p75": 89553.36094069146,
+        "p90": 93989.32434684364
+      },
+      {
+        "month": "2026-10",
+        "p10": 79478.07324941452,
+        "p25": 82940.92500754268,
+        "p50": 86837.69062168855,
+        "p75": 90966.76831165422,
+        "p90": 95539.85288862493
+      },
+      {
+        "month": "2026-11",
+        "p10": 79955.43138263811,
+        "p25": 83976.31672924336,
+        "p50": 88125.3981201884,
+        "p75": 92063.54544355904,
+        "p90": 97009.2252229362
+      },
+      {
+        "month": "2026-12",
+        "p10": 80830.16267259563,
+        "p25": 84737.85552826308,
+        "p50": 89527.85216017565,
+        "p75": 93849.14420484923,
+        "p90": 98430.22667606678
+      },
+      {
+        "month": "2027-01",
+        "p10": 81995.58833118269,
+        "p25": 85779.97358114962,
+        "p50": 90842.4435337006,
+        "p75": 95640.32653239917,
+        "p90": 99778.94340620538
+      },
+      {
+        "month": "2027-02",
+        "p10": 82926.08556666679,
+        "p25": 86738.6212673414,
+        "p50": 91903.45312568868,
+        "p75": 97067.92423163849,
+        "p90": 101992.32192969396
+      },
+      {
+        "month": "2027-03",
+        "p10": 83839.28326492988,
+        "p25": 88043.67893754996,
+        "p50": 93085.9238653147,
+        "p75": 98583.3443913126,
+        "p90": 104249.2948958617
+      },
+      {
+        "month": "2027-04",
+        "p10": 85007.92231943701,
+        "p25": 88787.28109323377,
+        "p50": 94589.46016995574,
+        "p75": 100315.08966646301,
+        "p90": 105582.74653198906
+      },
+      {
+        "month": "2027-05",
+        "p10": 86116.2487659694,
+        "p25": 90397.48000824431,
+        "p50": 95819.79561873453,
+        "p75": 101725.90743586609,
+        "p90": 107034.79133411289
+      },
+      {
+        "month": "2027-06",
+        "p10": 86357.33423187814,
+        "p25": 90845.05950946322,
+        "p50": 96943.7306947684,
+        "p75": 103265.90295175639,
+        "p90": 108777.69949918779
+      },
+      {
+        "month": "2027-07",
+        "p10": 87229.87278858821,
+        "p25": 92625.08161894095,
+        "p50": 98079.24398948712,
+        "p75": 104920.91772028383,
+        "p90": 110477.8685213352
+      },
+      {
+        "month": "2027-08",
+        "p10": 88205.39093316156,
+        "p25": 93370.14667642806,
+        "p50": 99320.77782456978,
+        "p75": 106668.81798655458,
+        "p90": 112335.61506025826
+      },
+      {
+        "month": "2027-09",
+        "p10": 88973.44339473557,
+        "p25": 94509.7366151159,
+        "p50": 100674.71925712466,
+        "p75": 107763.81539017175,
+        "p90": 114834.58898529383
+      },
+      {
+        "month": "2027-10",
+        "p10": 89774.2057786236,
+        "p25": 95360.918812107,
+        "p50": 101552.21642962363,
+        "p75": 109281.12213131349,
+        "p90": 117111.50970138564
+      },
+      {
+        "month": "2027-11",
+        "p10": 91225.63620015435,
+        "p25": 96710.9219539601,
+        "p50": 103507.10098354088,
+        "p75": 110568.32202052657,
+        "p90": 119284.95223738013
+      },
+      {
+        "month": "2027-12",
+        "p10": 92284.49181502846,
+        "p25": 97393.8412548055,
+        "p50": 104974.52336961158,
+        "p75": 112009.65339117114,
+        "p90": 120006.09220382568
+      },
+      {
+        "month": "2028-01",
+        "p10": 93041.99072152849,
+        "p25": 98510.38271569733,
+        "p50": 105808.08811392382,
+        "p75": 113994.31335290363,
+        "p90": 122021.82664551592
+      },
+      {
+        "month": "2028-02",
+        "p10": 94067.13185115696,
+        "p25": 99268.7446148681,
+        "p50": 107396.02141481239,
+        "p75": 115897.97973844598,
+        "p90": 123022.99689648562
+      },
+      {
+        "month": "2028-03",
+        "p10": 94568.70280017126,
+        "p25": 100625.78017392886,
+        "p50": 107917.62969045728,
+        "p75": 117646.09278157205,
+        "p90": 124547.96933651494
+      },
+      {
+        "month": "2028-04",
+        "p10": 95286.64786542417,
+        "p25": 101612.92565371042,
+        "p50": 109005.32808371808,
+        "p75": 118507.68824197623,
+        "p90": 126319.3489736019
+      },
+      {
+        "month": "2028-05",
+        "p10": 96109.02378781002,
+        "p25": 102451.31301658385,
+        "p50": 110338.76812868123,
+        "p75": 119084.7873366068,
+        "p90": 128443.92332423806
+      },
+      {
+        "month": "2028-06",
+        "p10": 98082.32092488272,
+        "p25": 103357.70661678807,
+        "p50": 111825.01701360062,
+        "p75": 120716.59281806015,
+        "p90": 130396.99121738045
+      },
+      {
+        "month": "2028-07",
+        "p10": 98357.30204654623,
+        "p25": 104680.56052186868,
+        "p50": 113359.30204412152,
+        "p75": 122011.54597232712,
+        "p90": 133078.6876161772
+      },
+      {
+        "month": "2028-08",
+        "p10": 99662.34928025602,
+        "p25": 106246.23697135314,
+        "p50": 114653.31234660953,
+        "p75": 122897.78585313808,
+        "p90": 135663.03439221898
+      },
+      {
+        "month": "2028-09",
+        "p10": 100660.03456894282,
+        "p25": 107667.81757722475,
+        "p50": 115670.05420074142,
+        "p75": 124321.92301843331,
+        "p90": 136733.60383653984
+      },
+      {
+        "month": "2028-10",
+        "p10": 101202.34345842765,
+        "p25": 109319.62881015906,
+        "p50": 117387.43665681088,
+        "p75": 125831.98067496996,
+        "p90": 139050.33633911368
+      },
+      {
+        "month": "2028-11",
+        "p10": 101911.60875153325,
+        "p25": 109535.09453419954,
+        "p50": 118416.38672817204,
+        "p75": 128417.17674982784,
+        "p90": 139993.97662038985
+      },
+      {
+        "month": "2028-12",
+        "p10": 102611.07169695091,
+        "p25": 111387.30158707492,
+        "p50": 119943.79086865942,
+        "p75": 129977.99629494932,
+        "p90": 141214.12012974464
+      },
+      {
+        "month": "2029-01",
+        "p10": 100723.15963674319,
+        "p25": 109172.75089748183,
+        "p50": 118036.21706184748,
+        "p75": 128836.5415917059,
+        "p90": 139303.8639956718
+      },
+      {
+        "month": "2029-02",
+        "p10": 98692.42922430053,
+        "p25": 107617.8133141367,
+        "p50": 116317.93511251206,
+        "p75": 127227.09382685152,
+        "p90": 137545.40456363178
+      },
+      {
+        "month": "2029-03",
+        "p10": 96659.93370862375,
+        "p25": 105526.39043473214,
+        "p50": 114623.00418377464,
+        "p75": 125582.89362744082,
+        "p90": 136175.95927455934
+      },
+      {
+        "month": "2029-04",
+        "p10": 94927.66328950108,
+        "p25": 103741.6607552988,
+        "p50": 112361.60504723676,
+        "p75": 123098.85657380229,
+        "p90": 133866.57478111185
+      },
+      {
+        "month": "2029-05",
+        "p10": 93176.79723204848,
+        "p25": 101861.65275953885,
+        "p50": 110523.29249140985,
+        "p75": 120709.66239033845,
+        "p90": 132826.45718664836
+      },
+      {
+        "month": "2029-06",
+        "p10": 91475.37061682336,
+        "p25": 99672.4634564545,
+        "p50": 108358.79470515555,
+        "p75": 119122.09440463752,
+        "p90": 130965.23634534738
+      },
+      {
+        "month": "2029-07",
+        "p10": 88980.94031202038,
+        "p25": 97992.39894864534,
+        "p50": 106402.11221945923,
+        "p75": 117134.78392806917,
+        "p90": 128869.39572747583
+      },
+      {
+        "month": "2029-08",
+        "p10": 86824.77259174404,
+        "p25": 96054.04907698696,
+        "p50": 104431.4091202536,
+        "p75": 115150.53521251952,
+        "p90": 126991.74033166737
+      },
+      {
+        "month": "2029-09",
+        "p10": 85069.02859569393,
+        "p25": 94118.14481829845,
+        "p50": 102670.6790747663,
+        "p75": 113514.01056845026,
+        "p90": 125674.36263650746
+      },
+      {
+        "month": "2029-10",
+        "p10": 83286.65983323359,
+        "p25": 92243.62066014828,
+        "p50": 100577.34869086296,
+        "p75": 111576.00858152026,
+        "p90": 123718.17452643267
+      },
+      {
+        "month": "2029-11",
+        "p10": 81033.75911542118,
+        "p25": 89935.0634109662,
+        "p50": 98720.50721462665,
+        "p75": 109450.72475879894,
+        "p90": 121600.79370878087
+      },
+      {
+        "month": "2029-12",
+        "p10": 79173.24387480997,
+        "p25": 88209.50372639102,
+        "p50": 97166.16668817253,
+        "p75": 107722.93927846299,
+        "p90": 119797.18287361172
+      },
+      {
+        "month": "2030-01",
+        "p10": 77179.44446973916,
+        "p25": 85952.39124971422,
+        "p50": 94921.46292620627,
+        "p75": 105748.84333231607,
+        "p90": 118026.13305853313
+      },
+      {
+        "month": "2030-02",
+        "p10": 74895.15640756676,
+        "p25": 83942.51543582564,
+        "p50": 93027.38588706378,
+        "p75": 103811.66611656245,
+        "p90": 116084.71176692354
+      },
+      {
+        "month": "2030-03",
+        "p10": 73297.23145881334,
+        "p25": 81821.05358324393,
+        "p50": 91209.92795073891,
+        "p75": 102056.65115469831,
+        "p90": 114066.20037065017
+      },
+      {
+        "month": "2030-04",
+        "p10": 71047.51498716953,
+        "p25": 79597.3473269094,
+        "p50": 89300.58889890848,
+        "p75": 100206.06241964323,
+        "p90": 112549.73240676487
+      },
+      {
+        "month": "2030-05",
+        "p10": 69163.22868695174,
+        "p25": 77870.78909453894,
+        "p50": 87229.17434966107,
+        "p75": 97860.15293701118,
+        "p90": 110782.48026639629
+      },
+      {
+        "month": "2030-06",
+        "p10": 66936.39444398317,
+        "p25": 75804.36701902811,
+        "p50": 85353.78154561573,
+        "p75": 96037.34983367159,
+        "p90": 108773.57092607208
+      },
+      {
+        "month": "2030-07",
+        "p10": 64755.95991520898,
+        "p25": 73813.47461894623,
+        "p50": 83258.4028196432,
+        "p75": 94415.66853755029,
+        "p90": 106299.37052682547
+      },
+      {
+        "month": "2030-08",
+        "p10": 62417.17326104365,
+        "p25": 71825.51493801485,
+        "p50": 81030.09281522295,
+        "p75": 91734.4612561694,
+        "p90": 104686.65763877516
+      },
+      {
+        "month": "2030-09",
+        "p10": 60415.10712010246,
+        "p25": 69875.54110967017,
+        "p50": 78894.27799492715,
+        "p75": 89919.91425898632,
+        "p90": 102861.45464019774
+      },
+      {
+        "month": "2030-10",
+        "p10": 58775.856444055345,
+        "p25": 67708.35643681811,
+        "p50": 77009.31572977567,
+        "p75": 88403.08854965198,
+        "p90": 100650.73283929737
+      },
+      {
+        "month": "2030-11",
+        "p10": 56400.32073041852,
+        "p25": 65483.53360945718,
+        "p50": 75004.23061368876,
+        "p75": 86754.69499516378,
+        "p90": 99179.95038477992
+      },
+      {
+        "month": "2030-12",
+        "p10": 54243.64347606214,
+        "p25": 63438.562180082554,
+        "p50": 72977.95006591157,
+        "p75": 84506.1698631238,
+        "p90": 97224.22589900935
+      },
+      {
+        "month": "2031-01",
+        "p10": 52376.00989296715,
+        "p25": 61287.79793868543,
+        "p50": 71166.61271049359,
+        "p75": 82412.78212631887,
+        "p90": 95375.7110268169
+      },
+      {
+        "month": "2031-02",
+        "p10": 50459.17666843756,
+        "p25": 59105.76903891722,
+        "p50": 69009.40651807393,
+        "p75": 80448.72981181707,
+        "p90": 93392.22344075871
+      },
+      {
+        "month": "2031-03",
+        "p10": 48426.973375304275,
+        "p25": 57168.09452551208,
+        "p50": 66974.78374021768,
+        "p75": 78548.84085372603,
+        "p90": 91658.6432109107
+      },
+      {
+        "month": "2031-04",
+        "p10": 46431.11041786977,
+        "p25": 55097.91615692212,
+        "p50": 64748.31989257704,
+        "p75": 76240.39209874286,
+        "p90": 89228.02771734947
+      },
+      {
+        "month": "2031-05",
+        "p10": 44303.13504038277,
+        "p25": 53017.97471138947,
+        "p50": 62728.79446753136,
+        "p75": 74364.38785853723,
+        "p90": 87353.90845048986
+      },
+      {
+        "month": "2031-06",
+        "p10": 42060.67585402992,
+        "p25": 50731.191238720945,
+        "p50": 60420.43901019724,
+        "p75": 72032.98160307,
+        "p90": 85307.760330013
+      },
+      {
+        "month": "2031-07",
+        "p10": 39754.45412712505,
+        "p25": 48629.192089503435,
+        "p50": 58333.980675896484,
+        "p75": 69963.20812911526,
+        "p90": 83570.05071193175
+      },
+      {
+        "month": "2031-08",
+        "p10": 37859.42841056692,
+        "p25": 46577.25313498198,
+        "p50": 56178.45727412238,
+        "p75": 67589.8653965606,
+        "p90": 80988.00164991617
+      },
+      {
+        "month": "2031-09",
+        "p10": 35706.27633410891,
+        "p25": 44529.08556025524,
+        "p50": 54080.214911044226,
+        "p75": 65687.89710135155,
+        "p90": 79416.83795139652
+      },
+      {
+        "month": "2031-10",
+        "p10": 33498.04682366191,
+        "p25": 42326.07389314899,
+        "p50": 51825.42918435809,
+        "p75": 63606.53578582313,
+        "p90": 77107.99238003607
+      },
+      {
+        "month": "2031-11",
+        "p10": 31310.63693807194,
+        "p25": 40318.30960686071,
+        "p50": 49692.42515117189,
+        "p75": 61594.43938576974,
+        "p90": 75012.13768868682
+      },
+      {
+        "month": "2031-12",
+        "p10": 29180.300161091865,
+        "p25": 38162.10277495874,
+        "p50": 47677.19363348161,
+        "p75": 59573.51460743489,
+        "p90": 72704.42178402959
+      }
+    ]
+  },
+  "provenance": {
+    "input_sha256": "60b1af46f5cbdf76e764f365c4cf38d671e9e7b0cf0305763dfd8aa75991b97a",
+    "seed": 42,
+    "mc_number": 500,
+    "distribution": "norm",
+    "match_moments": true,
+    "okama_version": "3.0.0",
+    "numpy_version": "2.4.6",
+    "pandas_version": "3.0.6",
+    "scipy_version": "1.17.1",
+    "data_source": "provided_stage_samples",
+    "stages": [
+      {
+        "name": "accumulation",
+        "mean_return_annual": 0.07763259885603113,
+        "risk_annual": 0.08720869331298395,
+        "history_first_month": "2016-01",
+        "history_last_month": "2025-12",
+        "history_sha256": "0deafcda771be160e9e52b1b637fa647b132dc94d0414282a46b55ebe576dce8"
+      },
+      {
+        "name": "withdrawal",
+        "mean_return_annual": 0.025288456983290075,
+        "risk_annual": 0.03118613705482808,
+        "history_first_month": "2016-01",
+        "history_last_month": "2025-12",
+        "history_sha256": "18f3bc37ee9722cba48402c44903c754a0d5d759cc6ead15c671f44b74222b73"
+      }
+    ]
+  }
+}

@@ -21,6 +21,7 @@ def register_all(mcp: FastMCP) -> None:
         mc_diagnostics,
         monte_carlo,
         plots,
+        planner,
         portfolio,
         search,
     )
@@ -36,3 +37,4 @@ def register_all(mcp: FastMCP) -> None:
     frontier.register(mcp)
     macro.register(mcp)
     plots.register(mcp)
+    planner.register(mcp)

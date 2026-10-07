@@ -22,6 +22,17 @@ from pydantic import (
     model_validator,
 )
 
+
+def get_planner_request_model() -> type[BaseModel] | None:
+    """Load the companion's complete schema when its optional package is installed."""
+    try:
+        from okama_planner import ForecastRequest
+    except ModuleNotFoundError as exc:
+        if exc.name != "okama_planner":
+            raise
+        return None
+    return ForecastRequest
+
 # ---------------------------------------------------------------------------
 # Common literals
 # ---------------------------------------------------------------------------

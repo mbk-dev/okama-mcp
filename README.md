@@ -429,3 +429,12 @@ src/okama_mcp/
 ## License
 
 [MIT](LICENSE) — same license as okama itself.
+
+## Optional household planner
+
+With the separate okama Planner companion installed, `planner_forecast` accepts a complete
+household plan and returns monthly budget/goal flows, forecast metrics, goal affordability and
+separate portfolio/net-capital chart series. The portfolio-oriented `finplan_*` contracts stay
+unchanged. Without the companion, existing tools continue to work and the Planner tool is not
+registered. See [local installation, client configuration and synthetic examples](docs/planner.md).
+The first companion release is being prepared; this adapter does not imply public HTTP deployment.
