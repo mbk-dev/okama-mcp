@@ -434,7 +434,14 @@ src/okama_mcp/
 
 With the separate okama Planner companion installed, `planner_forecast` accepts a complete
 household plan and returns monthly budget/goal flows, forecast metrics, goal affordability and
-separate portfolio/net-capital chart series. The portfolio-oriented `finplan_*` contracts stay
-unchanged. Without the companion, existing tools continue to work and the Planner tool is not
-registered. See [local installation, client configuration and synthetic examples](docs/planner.md).
-The first companion release is being prepared; this adapter does not imply public HTTP deployment.
+separate portfolio/net-capital chart series. The default `single` investment portfolio and
+`per_goal` portfolios support explicit allocation and synchronized joint asset history.
+`planner_compare_modes(baseline, variant)` compares complete requests while preserving household
+inputs, goals, history, seed and simulation count, returning both forecasts and their differences.
+Fixed-rate savings remain separate from goal investment portfolios; Gamma, equivalent alpha and
+FX conversion are not integrated. The portfolio-oriented `finplan_*` contracts stay unchanged.
+Without the companion, existing tools continue to work and Planner tools are not registered.
+An older companion without `compare_portfolio_modes` still exposes `planner_forecast`; upgrade
+the companion to enable comparisons. See [local installation, client configuration and synthetic
+examples](docs/planner.md).
+The companion is released independently; this source adapter does not imply public HTTP deployment.

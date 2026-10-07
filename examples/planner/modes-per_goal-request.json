@@ -1,0 +1,154 @@
+{
+  "currency": "USD",
+  "seed": 42,
+  "mc_number": 4,
+  "portfolio_mode": "per_goal",
+  "plan": {
+    "t0": "2026-01",
+    "horizon_years": 2,
+    "retirement_year": 2027,
+    "buffer_lookahead_months": 0,
+    "rates": {
+      "inflation_rate": 0,
+      "expense_indexation_rate": 0,
+      "income_indexation_rate": 0,
+      "goal_indexation_rate": 0,
+      "discount_rate": 0,
+      "buffer_rate": 0
+    },
+    "assets": [
+      {
+        "label": "Synthetic invested capital",
+        "amount": 100,
+        "currency": "USD",
+        "asset_class": "portfolio"
+      }
+    ],
+    "goals": [
+      {
+        "goal_id": 1,
+        "label": "Synthetic purchase",
+        "kind": "lump",
+        "amount_pv": 50,
+        "pv_year": 2026,
+        "target_year": 2026
+      }
+    ]
+  },
+  "joint_history": {
+    "start_month": "2020-01",
+    "currency": "USD",
+    "method": "synchronized_bootstrap",
+    "asset_returns": {
+      "Synthetic zero-return asset": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "allocation": {
+    "segments": [
+      {
+        "segment_id": "household",
+        "goal_id": null,
+        "opening_amount": 100,
+        "currency": "USD",
+        "strategy": [
+          {
+            "start_month": "2026-01",
+            "weights": [
+              {
+                "asset": "Synthetic zero-return asset",
+                "weight": 1
+              }
+            ]
+          }
+        ],
+        "completion": {
+          "action": "retain"
+        }
+      },
+      {
+        "segment_id": "purchase",
+        "goal_id": 1,
+        "opening_amount": 0,
+        "currency": "USD",
+        "strategy": [
+          {
+            "start_month": "2026-01",
+            "weights": [
+              {
+                "asset": "Synthetic zero-return asset",
+                "weight": 1
+              }
+            ]
+          }
+        ],
+        "completion": {
+          "action": "retain"
+        }
+      }
+    ],
+    "single_strategy": [
+      {
+        "start_month": "2026-01",
+        "weights": [
+          {
+            "asset": "Synthetic zero-return asset",
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "surplus_weights": [
+      {
+        "start_month": "2026-01",
+        "weights": [
+          {
+            "segment_id": "household",
+            "weight": 1
+          },
+          {
+            "segment_id": "purchase",
+            "weight": 0
+          }
+        ]
+      }
+    ],
+    "household_segment_id": "household",
+    "goal_funders": [
+      {
+        "goal_id": 1,
+        "segment_id": "purchase"
+      }
+    ],
+    "event_priority": [
+      "expense",
+      "mortgage_payment",
+      "goal:1"
+    ],
+    "funding_source_order": [
+      "cash",
+      "buffer",
+      "segment"
+    ],
+    "transfer_policy": "none",
+    "transfer_order": [],
+    "buffer_policy": "retain",
+    "purchase_execution": "all_or_nothing",
+    "reserve_funding_source_order": [
+      "cash",
+      "segment"
+    ]
+  }
+}
