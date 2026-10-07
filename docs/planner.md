@@ -12,25 +12,27 @@ FX conversion, white label reports and Planner charts rendered as images are not
 Planner returns numeric series for separate portfolio and net-capital charts. The existing
 portfolio chart tool is not a household/net-capital report renderer.
 
-## Install the local companion candidate
+## Install the public companion
 
-The first public Planner release and its license are still being prepared. The MCP adapter does
-not declare a hard dependency on an unavailable release or on a private application. Existing
+[okama Planner v0.1.0](https://github.com/mbk-dev/okama-planner/releases/tag/v0.1.0)
+is available under the MIT license. The MCP adapter does not declare a hard dependency on
+the optional companion or on a private application. Existing
 installations remain usable without the companion; the Planner tool is registered only when
-`okama-planner` is importable. There is no `planner` installation extra in this candidate.
+`okama-planner` is importable. There is no `planner` installation extra.
 
-For a reviewed local wheel, from the adapter source checkout:
+From the adapter source checkout:
 
 ```bash
 poetry env use python3.11
 poetry install
-poetry add /absolute/path/to/okama_planner-0.1.0-py3-none-any.whl
+poetry add "https://github.com/mbk-dev/okama-planner/releases/download/v0.1.0/okama_planner-0.1.0-py3-none-any.whl"
 poetry run python examples/planner/client.py
 ```
 
-The `poetry add` command modifies your local dependency declaration; do not commit the local
-wheel path. When a public release is available, install that companion into the same environment
-as the MCP server instead. No private registry, client database or spreadsheet template is read.
+The `poetry add` command modifies your local dependency declaration. Install the companion into
+the same environment as the MCP server. The adapter is available on `main`; existing indexed
+server packages and the public HTTP server have not been updated for this integration.
+No private registry, client database or spreadsheet template is read.
 The demonstration uses entirely synthetic return histories and does not fetch market data.
 
 ## Connect a local MCP client
