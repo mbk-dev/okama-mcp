@@ -397,3 +397,39 @@ class FinPlanSpec(BaseModel):
             if p < 0 or p > 100:
                 raise ValueError(f"percentile {p} must be in [0, 100]")
         return self
+
+
+def get_client_models() -> tuple[type[BaseModel], type[BaseModel]]:
+    """Load companion-owned registry contracts without copying their validation."""
+    try:
+        from okama_planner.storage.validation import ClientDetails, ResidencyDetails
+    except ModuleNotFoundError as exc:
+        if exc.name in {"okama_planner", "okama_planner.storage"}:
+            raise ValueError("Local clients require the Planner storage companion; see docs/planner.md") from exc
+        raise
+    return ClientDetails, ResidencyDetails
+
+
+class PlannerReportScenario(BaseModel):
+    """Saved request/result pair; the companion verifies its provenance and horizon."""
+    model_config = ConfigDict(extra="forbid")
+    label: str
+    request: dict[str, Any]
+    result: dict[str, Any]
+
+
+class PlannerReportSpec(BaseModel):
+    """Export inside the server-configured local directory."""
+    model_config = ConfigDict(extra="forbid")
+    scenarios: list[PlannerReportScenario] = Field(min_length=1, max_length=2)
+    filename: str
+    language: Literal["en", "ru", "zh", "de", "es"] = "en"
+
+
+class PlannerReportBrand(BaseModel):
+    """Local presentation settings; never supplied through public tool inputs."""
+    model_config = ConfigDict(extra="forbid")
+    company: str = "Example Advisory"
+    contact: str = "team@example.invalid"
+    color: str = Field(default="244C66", pattern=r"^[0-9a-fA-F]{6}$")
+    logo: str | None = None

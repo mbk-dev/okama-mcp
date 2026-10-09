@@ -186,7 +186,8 @@ indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD:
 
 ![Efficient frontier — SPY.US, BND.US, GLD.US (USD)](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/efficient-frontier.png)
 
-All tools are **stateless** — pass the full portfolio specification with every call.
+Financial tools are **stateless** — pass the full portfolio specification with every call.
+Optional local client tools use explicit stable registry codes and persistent creation request IDs.
 The server caches expensive okama objects (`Portfolio`, `EfficientFrontier`) by content
 hash, so repeated calls on the same spec are fast.
 
@@ -430,18 +431,34 @@ src/okama_mcp/
 
 [MIT](LICENSE) — same license as okama itself.
 
-## Optional household planner
+## Planner and local client workflows
 
-With the separate okama Planner companion installed, `planner_forecast` accepts a complete
-household plan and returns monthly budget/goal flows, forecast metrics, goal affordability and
-separate portfolio/net-capital chart series. The default `single` investment portfolio and
-`per_goal` portfolios support explicit allocation and synchronized joint asset history.
-`planner_compare_modes(baseline, variant)` compares complete requests while preserving household
-inputs, goals, history, seed and simulation count, returning both forecasts and their differences.
-Fixed-rate savings remain separate from goal investment portfolios; Gamma, equivalent alpha and
-FX conversion are not integrated. The portfolio-oriented `finplan_*` contracts stay unchanged.
-Without the companion, existing tools continue to work and Planner tools are not registered.
-An older companion without `compare_portfolio_modes` still exposes `planner_forecast`; upgrade
-the companion to enable comparisons. See [local installation, client configuration and synthetic
-examples](docs/planner.md).
-The companion is released independently; this source adapter does not imply public HTTP deployment.
+Version 2.0.0 includes
+50 portfolio tools plus `planner_forecast` and `planner_compare_modes` (52 tools
+by default). Planner 0.4.x with its report dependencies is installed automatically. Local stdio configuration can add
+six client registry tools and `planner_export_report` (59 tools in the full local
+configuration). HTTP never registers local client/report tools.
+
+The client tools are `client_create`, `client_get`, `client_list`, `client_update`,
+`client_set_tax_residency`, and `client_get_tax_residency`. They use PlannerStore,
+retain stable codes, distinguish unknown/empty brokers, reject unknown fields,
+require explicit namesake decisions, and support creation retries with persistent
+request IDs. The packaged `create-client` skill installs with:
+
+```bash
+okama-mcp install-skill --destination /absolute/project/.agents/skills
+```
+
+Planner accepts complete household requests: budgets, loans, savings, assets,
+goals, retirement and pooled/per-goal investment allocation. Local Excel reports
+use saved request/result pairs and separately configured presentation files.
+Client records and organization templates stay in the advisor's local installation.
+
+[Planner v0.4.0](https://github.com/mbk-dev/okama-planner/releases/tag/v0.4.0)
+is the supported companion; `okama-planner[reports]>=0.4.0,<0.5.0` is a mandatory
+runtime dependency. It includes the storage API and Excel dependencies. See the
+[installation, local configuration, tool contracts, synthetic examples and upgrade
+guide](docs/planner.md) and [2.0.0 release notes](docs/releases/2.0.0.md).
+
+Planner 0.4.0 and okama 4.0.0 are available on PyPI. MCP requires `okama>=4.0.0`;
+both dependencies install automatically. See the installation instructions for local configuration.

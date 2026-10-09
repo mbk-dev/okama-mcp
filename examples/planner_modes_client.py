@@ -31,7 +31,7 @@ async def main() -> None:
         required = {"planner_forecast", "planner_compare_modes", "finplan_forecast", "finplan_backtest"}
         missing = required - tools.keys()
         if missing:
-            raise RuntimeError(f"Missing tools {sorted(missing)}; use updated MCP source and okama Planner >=0.3.0")
+            raise RuntimeError(f"Missing tools {sorted(missing)}; reinstall MCP 2.0.0 with okama Planner >=0.4.0")
         for name in ("planner_forecast", "planner_compare_modes"):
             (output / f"{name}-schema.json").write_text(tools[name].model_dump_json(indent=2) + "\n")
         requests = {

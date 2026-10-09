@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "okama-mcp"
-version = "1.9.0"
+version = "2.0.0"
 description = "MCP (Model Context Protocol) server exposing the okama investment portfolio toolkit to AI assistants"
 authors = ["Sergey Kikevich <sergey@rostsber.ru>"]
 readme = "README.md"
@@ -14,13 +14,20 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Investment",
 ]
 packages = [{ include = "okama_mcp", from = "src" }]
+include = [
+    {path = ".agents/skills/create-client/SKILL.md", format = ["wheel", "sdist"]},
+    {path = "examples/**", format = "sdist"},
+    {path = "docs/**", format = "sdist"},
+    {path = "tests/**", format = "sdist"},
+]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0.0"
-okama = ">=3.0.0"
-fastmcp = ">=2.7"
+okama = ">=4.0.0"
+fastmcp = ">=4.0.11,<5"
 pydantic = ">=2.0"
 scipy = ">=1.11"
+okama-planner = {version = ">=0.4.0,<0.5.0", extras = ["reports"]}
 
 [tool.poetry.group.test]
 optional = false
@@ -60,4 +67,4 @@ asyncio_mode = "auto"
 markers = [
     "integration: live test that hits api.okama.io (slow, network-dependent)",
 ]
-addopts = "-m 'not integration'"
+addopts = "-m 'not integration' --basetemp=tmp/pytest"

@@ -16,23 +16,28 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 
 from fastmcp import FastMCP  # noqa: E402
 
-mcp: FastMCP = FastMCP(
-    name="okama-mcp",
-    instructions=(
-        "Investment-analysis tools backed by the okama Python library. "
-        "Use search_assets to discover ticker symbols, filter asset types, or find the "
-        "oldest history in a namespace (e.g. 'GLD.US', 'VNQ.US'); "
-        "then build portfolios, run backtests, Monte Carlo forecasts and efficient "
-        "frontier optimisation. Use the plot_* tools to render charts (wealth index, "
-        "drawdowns, efficient frontier, Monte Carlo, asset comparison) as PNG images — "
-        "prefer them over re-computing charts locally; pass save_path to also write "
-        "the image to a file for clients that don't render MCP images inline. "
-        "All tools are stateless — pass the full portfolio "
-        "specification with every call."
-    ),
-)
+def create_server() -> FastMCP:
+    """Construct an isolated public registry before attaching optional local tools."""
+    from okama_mcp.tools import register_all
 
-# Register tools after the FastMCP instance is created (avoids circular imports).
-from okama_mcp.tools import register_all  # noqa: E402
+    server = FastMCP(
+        name="okama-mcp",
+        instructions=(
+            "Investment-analysis tools backed by the okama Python library. "
+            "Use search_assets to discover ticker symbols, filter asset types, or find the "
+            "oldest history in a namespace (e.g. 'GLD.US', 'VNQ.US'); "
+            "then build portfolios, run backtests, Monte Carlo forecasts and efficient "
+            "frontier optimisation. Use the plot_* tools to render charts (wealth index, "
+            "drawdowns, efficient frontier, Monte Carlo, asset comparison) as PNG images — "
+            "prefer them over re-computing charts locally; pass save_path to also write "
+            "the image to a file for clients that don't render MCP images inline. "
+            "Financial tools are stateless — pass the full portfolio "
+            "specification with every call."
+        ),
+    )
 
-register_all(mcp)
+    register_all(server)
+    return server
+
+
+mcp: FastMCP = create_server()

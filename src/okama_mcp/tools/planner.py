@@ -1,4 +1,4 @@
-"""Optional household-planning adapter; all financial calculations belong to okama Planner."""
+"""Household-planning adapter; all financial calculations belong to okama Planner."""
 
 from typing import Any
 
@@ -23,7 +23,7 @@ def planner_forecast(request: BaseModel | dict[str, Any]) -> dict[str, Any]:
     """
     model = get_planner_request_model()
     if model is None:
-        raise OkamaMcpError("To use planner_forecast, install the optional okama-planner companion package")
+        raise OkamaMcpError("To use planner_forecast, reinstall okama-mcp with its required okama-planner dependency")
     from okama_planner import forecast
 
     validated = model.model_validate(request)
@@ -43,7 +43,7 @@ def planner_compare_modes(
     """
     model = get_planner_request_model()
     if model is None:
-        raise OkamaMcpError("To use planner_compare_modes, install the optional okama-planner companion package")
+        raise OkamaMcpError("To use planner_compare_modes, reinstall okama-mcp with its required okama-planner dependency")
     validated_baseline = model.model_validate(baseline)
     validated_variant = model.model_validate(variant)
     import okama_planner
@@ -55,7 +55,7 @@ def planner_compare_modes(
 
 
 def register(mcp: FastMCP) -> None:
-    """Expose the actual companion schema without copying it or requiring it for other tools."""
+    """Expose the actual companion schema without copying it."""
     model = get_planner_request_model()
     if model is None:
         return
