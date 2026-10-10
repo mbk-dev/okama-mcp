@@ -10,7 +10,7 @@
 ![okama-mcp — investment analytics for AI assistants](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/announce-en.png)
 
 MCP (Model Context Protocol) server that exposes the [okama](https://github.com/mbk-dev/okama)
-investment portfolio toolkit to AI assistants — Claude Desktop, Claude Code, Cursor, Codex,
+investment portfolio toolkit and okama Planner to AI assistants — Claude Desktop, Claude Code, Cursor, Codex,
 and any other MCP-compatible client.
 
 With okama-mcp installed, you can ask an AI things like:
@@ -26,12 +26,13 @@ With okama-mcp installed, you can ask an AI things like:
 
 Built on [FastMCP](https://github.com/jlowin/fastmcp). Single codebase, two transports:
 `stdio` (for local clients) and `streamable-http` (for self-hosting).
-okama-mcp is free and open source — no hosted service, no registration; you run it
-yourself, locally or on your own server.
+okama-mcp is free and open source. Run it locally or on your own server. The public
+HTTP endpoint offers portfolio and planning calculations; client registry tools and
+Excel exports require a configured local stdio installation.
 
 ## Install
 
-Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 2.2.0 is installed automatically.
+Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and okama Planner 0.4.x (with report dependencies) are installed automatically.
 
 The easiest way — no clone, no venv — is [uv](https://docs.astral.sh/uv/) or pipx:
 
@@ -474,7 +475,6 @@ Tools for investing and financial planning.
 | [okama](https://github.com/mbk-dev/okama) | Analyze investments and portfolios in Python. |
 | [okama Data API](https://api.okama.io/) | Access historical market and economic data. |
 | [okama-macro](https://github.com/mbk-dev/okama-macro) | Work with inflation and central-bank rate series. |
-| [okama-mcp](https://mcp.okama.io/) | Use okama tools through an AI assistant. |
 | [okama Planner](https://github.com/mbk-dev/okama-planner) | Build financial plans and manage client planning history. |
 
 **[Join the okama community →](https://github.com/mbk-dev/okama/discussions)**

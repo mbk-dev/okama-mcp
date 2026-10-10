@@ -128,6 +128,7 @@
     .family-name { display: flex; justify-content: space-between; gap: 12px; font-weight: 600; }
     .family-desc, .family-intro, .family-community p { color: var(--muted); }
     .family-community { border-top: 1px solid var(--border); padding-top: 24px; }
+    .family-grid > :last-child:nth-child(odd) { grid-column: 1 / -1; }
     .family-community a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 600; }
     @media (max-width: 540px) { .family-grid { grid-template-columns: 1fr; } }
   </style>
@@ -142,8 +143,8 @@
       AI assistants — Claude Desktop, Claude Code, Cursor, Codex, and any other MCP-compatible client.
     </p>
     <p>
-      Free and open source — no hosted service, no registration.
-      You run it yourself: locally or on your own server.
+      Free and open source. Run it locally or on your own server.
+      Local client-registry tools and Excel exports require a configured stdio installation.
     </p>
     <figure>
       <img src="/announce-en.png" alt="okama-mcp — an AI assistant answers a portfolio question with an IRR distribution chart"
@@ -222,7 +223,7 @@ uvx okama-mcp stdio</code></pre>
   </section>
 
 <!-- okama-family:start -->
-<section class="family"><h2>Explore the okama family</h2><p class="family-intro">Tools for investing and financial planning.</p><nav class="family-grid" aria-label="okama projects"><a class="family-card" href="https://okama.io/"><span class="family-name">okama.io <span aria-hidden="true">↗</span></span><span class="family-desc">Explore portfolios with interactive web tools.</span></a><a class="family-card" href="https://github.com/mbk-dev/okama"><span class="family-name">okama <span aria-hidden="true">↗</span></span><span class="family-desc">Analyze investments and portfolios in Python.</span></a><a class="family-card" href="https://api.okama.io/"><span class="family-name">okama Data API <span aria-hidden="true">↗</span></span><span class="family-desc">Access historical market and economic data.</span></a><a class="family-card" href="https://github.com/mbk-dev/okama-macro"><span class="family-name">okama-macro <span aria-hidden="true">↗</span></span><span class="family-desc">Work with inflation and central-bank rate series.</span></a><a class="family-card" href="https://mcp.okama.io/"><span class="family-name">okama-mcp <span aria-hidden="true">↗</span></span><span class="family-desc">Use okama tools through an AI assistant.</span></a><a class="family-card" href="https://github.com/mbk-dev/okama-planner"><span class="family-name">okama Planner <span aria-hidden="true">↗</span></span><span class="family-desc">Build financial plans and manage client planning history.</span></a></nav><div class="family-community"><a href="https://github.com/mbk-dev/okama/discussions">Join the okama community <span aria-hidden="true">→</span></a><p>Ask questions, share examples and discuss financial planning.</p></div></section>
+<section class="family"><h2>Explore the okama family</h2><p class="family-intro">Tools for investing and financial planning.</p><nav class="family-grid" aria-label="okama projects"><a class="family-card" href="https://okama.io/"><span class="family-name">okama.io <span aria-hidden="true">↗</span></span><span class="family-desc">Explore portfolios with interactive web tools.</span></a><a class="family-card" href="https://github.com/mbk-dev/okama"><span class="family-name">okama <span aria-hidden="true">↗</span></span><span class="family-desc">Analyze investments and portfolios in Python.</span></a><a class="family-card" href="https://api.okama.io/"><span class="family-name">okama Data API <span aria-hidden="true">↗</span></span><span class="family-desc">Access historical market and economic data.</span></a><a class="family-card" href="https://github.com/mbk-dev/okama-macro"><span class="family-name">okama-macro <span aria-hidden="true">↗</span></span><span class="family-desc">Work with inflation and central-bank rate series.</span></a><a class="family-card" href="https://github.com/mbk-dev/okama-planner"><span class="family-name">okama Planner <span aria-hidden="true">↗</span></span><span class="family-desc">Build financial plans and manage client planning history.</span></a></nav><div class="family-community"><a href="https://github.com/mbk-dev/okama/discussions">Join the okama community <span aria-hidden="true">→</span></a><p>Ask questions, share examples and discuss financial planning.</p></div></section>
 <!-- okama-family:end -->
 
   <footer>
