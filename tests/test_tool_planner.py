@@ -58,7 +58,14 @@ async def test_planner_schema_and_two_independent_offline_calls(monkeypatch: pyt
             expected = json.loads((FIXTURES / f"{name}-result.json").read_text())
             for package in ("numpy", "pandas", "scipy", "okama"):
                 expected["provenance"][f"{package}_version"] = version(package)
-            assert actual == expected
+            assert actual["metrics"] == expected["metrics"]
+            assert {key: value for key, value in actual["ledger"].items() if key != "lines"} == {
+                key: value for key, value in expected["ledger"].items() if key != "lines"}
+            assert [{key: value for key, value in line.items() if key != "label"}
+                    for line in actual["ledger"]["lines"]] == [
+                {key: value for key, value in line.items() if key != "label"}
+                for line in expected["ledger"]["lines"]]
+            assert "privacy_proof" in actual
 
 
 @requires_planner
@@ -69,12 +76,12 @@ async def test_invalid_input_is_reported_as_a_tool_error() -> None:
     async with Client(server) as client:
         response = await client.call_tool_mcp("planner_forecast", {"request": {}})
         assert response.model_dump(by_alias=True)["isError"]
-        assert "validation" in response.content[0].text.lower()
+        assert "Invalid" in response.content[0].text
         request = json.loads((FIXTURES / "baseline-request.json").read_text())
         request["unsupported_mode"] = "gamma"
         response = await client.call_tool_mcp("planner_forecast", {"request": request})
         assert response.model_dump(by_alias=True)["isError"]
-        assert "unsupported_mode" in response.content[0].text
+        assert "unsupported_mode" not in response.content[0].text
 
 
 @pytest.mark.asyncio
@@ -141,23 +148,16 @@ async def test_comparison_validates_each_request(invalid_argument: str) -> None:
     async with Client(server) as client:
         response = await client.call_tool_mcp("planner_compare_modes", arguments)
         assert response.model_dump(by_alias=True)["isError"]
-        assert "validation" in response.content[0].text.lower()
+        assert "Invalid" in response.content[0].text
 
 
-@requires_planner
 @pytest.mark.asyncio
-async def test_older_companion_keeps_forecast_available(monkeypatch: pytest.MonkeyPatch) -> None:
-    import okama_planner
-    from okama_mcp.errors import OkamaMcpError
-
-    monkeypatch.delattr(okama_planner, "compare_portfolio_modes", raising=False)
+async def test_older_companion_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setitem(sys.modules, "okama_planner.ai", None)
     server = FastMCP("planner-older-companion")
     planner.register(server)
     async with Client(server) as client:
-        assert {tool.name for tool in await client.list_tools()} == {"planner_forecast"}
-    request = json.loads((FIXTURES / "baseline-request.json").read_text())
-    with pytest.raises(OkamaMcpError, match="upgrade"):
-        planner.planner_compare_modes(request, request)
+        assert not await client.list_tools()
 
 
 @requires_planner
@@ -206,12 +206,12 @@ async def test_joint_comparison_is_stateless_and_rejects_changed_family_inputs()
         assert actual["differences"]["goals"] == [{"goal_id": 1, "p_funded": -1, "unmet_mean": 50}]
         assert actual["policy"]["same_allocation"] is True
         assert actual["risk_structure"]["strategies_differ"] is False
-        assert set(actual["risk_structure"]["segment_strategies"]) == {"household", "purchase"}
+        assert len(actual["risk_structure"]["segment_strategies"]) == 2
         changed = copy.deepcopy(variant)
         changed["seed"] += 1
         rejected = await client.call_tool_mcp("planner_compare_modes", {"baseline": baseline, "variant": changed})
         assert rejected.model_dump(by_alias=True)["isError"]
-        assert "seed" in rejected.content[0].text.lower()
+        assert "Invalid" in rejected.content[0].text
         replay = await client.call_tool_mcp("planner_compare_modes", arguments)
         assert json.loads(replay.content[0].text) == actual
 

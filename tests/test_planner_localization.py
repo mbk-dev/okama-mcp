@@ -32,13 +32,14 @@ async def test_client_language_is_per_call_and_preserves_raw_values(tmp_path: Pa
             assert not response.is_error, response.content
             result = data(response)
             if language == "en":
-                assert result == record
+                assert result["code"] == record["code"]
             else:
-                assert result["client"] == record
-                assert any(row["key"] == "full_name" and row["value"] == record["full_name"]
-                           for row in result["presentation"])
+                assert result["client"]["code"] == record["code"]
+                assert "Synthetic Unabridged Label" not in response.model_dump_json()
+                assert "synthetic@example.invalid" not in response.model_dump_json()
         default = data(await client.call_tool_mcp("client_get", {"code": record["code"]}))
-        assert default == record
+        assert default["code"] == record["code"]
+        assert default.get("full_name") != record["full_name"]
         bad = await client.call_tool_mcp("client_update", {
             "code": record["code"], "changes": {"unknown": "secret-synthetic-value"}, "language": "ru"})
         assert bad.is_error
@@ -57,7 +58,7 @@ async def test_planner_language_schema_help_and_framework_validation() -> None:
         invalid = await client.call_tool_mcp("planner_forecast", {"request": {}, "language": "ru"})
         assert invalid.is_error
         assert "input_value" not in invalid.content[0].text
-        assert "Поле" in invalid.content[0].text or "поле" in invalid.content[0].text
+        assert "Некорректные" in invalid.content[0].text
 
 
 def test_startup_language_is_explicit_and_validated() -> None:
@@ -87,36 +88,10 @@ async def test_report_language_controls_errors_and_description(tmp_path: Path, l
             "filename": "../escape.xlsx", "language": language,
             "scenarios": [{"label": "Synthetic full label", "request": {}, "result": {}}]}})
         assert result.is_error
-        assert caption("filename must be a .xlsx basename within --reports-dir", language) in result.content[0].text
+        assert caption("invalid", language) in result.content[0].text
         assert not list(tmp_path.iterdir())
 
 
-@pytest.mark.asyncio
-async def test_create_list_and_residency_presentation_preserve_codes(tmp_path: Path) -> None:
-    from okama_planner.storage import PlannerStore
-
-    path = tmp_path / "synthetic.sqlite3"
-    with PlannerStore.initialize(path):
-        pass
-    server = FastMCP("registry-presentation")
-    clients.register(server, path)
-    async with Client(server) as client:
-        created = data(await client.call_tool_mcp("client_create", {
-            "details": {"full_name": "Synthetic Full Label", "sex": "female"},
-            "request_id": "localized-create", "language": "es"}))
-        assert created["status"] == "created"
-        assert created["client"]["sex"] == "female"
-        assert any(row["key"] == "sex" and row["value"] == "Femenino" for row in created["presentation"][0])
-        code = created["client"]["code"]
-        residency = data(await client.call_tool_mcp("client_set_tax_residency", {
-            "code": code, "residency": {"year": 2026, "country": "de"}, "language": "zh"}))
-        assert residency["residency"]["country"] == "DE"
-        assert any(row["key"] == "year" and row["label"] == "年份" for row in residency["presentation"])
-        assert data(await client.call_tool_mcp("client_get_tax_residency", {
-            "code": code, "year": 2025, "language": "ru"})) is None
-        listed = data(await client.call_tool_mcp("client_list", {"language": "de"}))
-        assert listed["clients"][0]["code"] == code
-        assert listed["clients"][0]["full_name"] == "Synthetic Full Label"
 
 
 def test_packaged_catalog_has_unique_complete_translations() -> None:
@@ -141,43 +116,22 @@ def test_published_companion_fallback_formats_registry_timestamps(monkeypatch: p
 
 
 @pytest.mark.asyncio
-async def test_known_client_validation_message_explains_contact_requirement(tmp_path: Path) -> None:
+async def test_registry_schema_titles_are_localized_without_changing_safe_models(tmp_path: Path) -> None:
     from okama_planner.storage import PlannerStore
+    from okama_mcp.schemas import ClientSafeChanges
 
-    path = tmp_path / "synthetic.sqlite3"
-    with PlannerStore.initialize(path):
-        pass
-    server = FastMCP("translated-validation")
-    clients.register(server, path)
-    async with Client(server) as client:
-        result = await client.call_tool_mcp("client_create", {
-            "details": {"full_name": "Synthetic Label", "primary_channel": "email"},
-            "request_id": "contact-required", "language": "ru"})
-        assert result.is_error
-        assert "контакт" in result.content[0].text.lower()
-        assert "Synthetic Label" not in result.content[0].text
-
-
-@pytest.mark.asyncio
-async def test_registry_schema_titles_are_localized_without_changing_companion_models(tmp_path: Path) -> None:
-    from okama_planner.storage import PlannerStore
-    from okama_mcp.schemas import get_client_models
-
-    model, _ = get_client_models()
-    original_schema = model.model_json_schema()
+    original_schema = ClientSafeChanges.model_json_schema()
     path = tmp_path / "synthetic.sqlite3"
     with PlannerStore.initialize(path):
         pass
     server = FastMCP("translated-field-titles")
     clients.register(server, path, language="ru")
-    tool = await server.get_tool("client_create")
-    details = tool.parameters["properties"]["details"]
+    tool = await server.get_tool("client_update")
+    details = tool.parameters["properties"]["changes"]
     if "$ref" in details:
         details = tool.parameters["$defs"][details["$ref"].split("/")[-1]]
-    field = details["properties"]["full_name"]
-    assert field["title"] == "Полное имя"
-    assert field["description"] == "Полное имя"
-    assert model.model_json_schema() == original_schema
+    assert details["properties"]["sex"]["title"] == "Пол"
+    assert ClientSafeChanges.model_json_schema() == original_schema
 
 
 @pytest.mark.parametrize("defect", ["missing_translation", "duplicate_key", "placeholder"])

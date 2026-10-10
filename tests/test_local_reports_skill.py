@@ -8,7 +8,7 @@ from fastmcp import Client, FastMCP
 @pytest.mark.asyncio
 async def test_local_report_export_and_path_boundary(tmp_path: Path) -> None:
     from okama_mcp.tools import planner_reports
-    from okama_planner import forecast
+    from okama_planner.ai import forecast
     from openpyxl import load_workbook
     request = json.loads((Path(__file__).parents[1] / "examples/planner/modes-single-request.json").read_text())
     scenarios = [{"label": "Synthetic", "request": request, "result": forecast(request)}]
@@ -20,28 +20,25 @@ async def test_local_report_export_and_path_boundary(tmp_path: Path) -> None:
         result = await client.call_tool_mcp("planner_export_report", {
             "report": {"scenarios": scenarios, "filename": "synthetic.xlsx", "language": "en"}})
         assert not result.model_dump(by_alias=True)["isError"], result.content
-        book = load_workbook(tmp_path / "synthetic.xlsx")
-        assert book["Branding"]["B2"].value == "Synthetic Practice"
+        artifact = json.loads(result.content[0].text)["filename"]
+        assert "/" not in artifact
+        assert str(tmp_path) not in result.model_dump_json()
+        book = load_workbook(tmp_path / artifact)
+        assert "fiction@example.invalid" not in str(list(book["Branding"].values))
         book.close()
-        original = (tmp_path / "synthetic.xlsx").read_bytes()
-        for filename in ("synthetic.xlsx", "../escaped.xlsx", "/escaped.xlsx", "bad.txt"):
+        original = (tmp_path / artifact).read_bytes()
+        for filename in ("../escaped.xlsx", "/escaped.xlsx", "bad.txt"):
             invalid = await client.call_tool_mcp("planner_export_report", {
                 "report": {"scenarios": scenarios, "filename": filename}})
             assert invalid.model_dump(by_alias=True)["isError"]
-        assert (tmp_path / "synthetic.xlsx").read_bytes() == original
+        assert (tmp_path / artifact).read_bytes() == original
 
 
-def test_packaged_skill_installs_and_refuses_conflicting_files(tmp_path: Path) -> None:
+def test_legacy_personal_intake_skill_is_retired(tmp_path: Path) -> None:
     from okama_mcp.skills import install_skill
-    target = install_skill(tmp_path)
-    text = target.read_text()
-    assert "client_create" in text and "client_get" in text
-    assert "lfp client" not in text
-    assert "request_id" in text and "brokers" in text
-    assert install_skill(tmp_path) == target
-    target.write_text("local customization")
-    with pytest.raises(FileExistsError):
+    with pytest.raises(ValueError, match="retired"):
         install_skill(tmp_path)
+    assert not list(tmp_path.iterdir())
 
 
 @pytest.mark.asyncio

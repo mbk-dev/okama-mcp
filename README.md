@@ -434,35 +434,21 @@ src/okama_mcp/
 
 ## Planner and local client workflows
 
-Version 2.0.0 includes
-50 portfolio tools plus `planner_forecast` and `planner_compare_modes` (52 tools
-by default). Planner 0.4.x with its report dependencies is installed automatically. Local stdio configuration can add
-six client registry tools and `planner_export_report` (59 tools in the full local
-configuration). HTTP never registers local client/report tools.
+Planner tools require a companion release providing `okama_planner.ai`. Older
+companions fail closed: household tools stay unavailable rather than exposing raw
+records. Market tools remain available. Local stdio configuration can enable nine
+client-code tools and Excel export; HTTP has no client or local report tools.
 
-The client tools are `client_create`, `client_get`, `client_list`, `client_update`,
-`client_set_tax_residency`, and `client_get_tax_residency`. They use PlannerStore,
-retain stable codes, distinguish unknown/empty brokers, reject unknown fields,
-require explicit namesake decisions, and support creation retries with persistent
-request IDs. The packaged `create-client` skill installs with:
+Names and contacts are entered locally by a human into Planner. MCP has no
+`client_create` tool, and the former packaged intake skill is retired. Client reads
+contain pseudonyms; updates accept only `sex`, `birth_year` and `ips_sent_at`.
+Planner owns database access, versioned plan writes and anonymization of free text.
+Forecasts carry a privacy proof; report export verifies it and returns only an opaque
+artifact filename. Tool errors contain fixed messages without private values,
+database details or filesystem paths.
 
-```bash
-okama-mcp install-skill --destination /absolute/project/.agents/skills
-```
-
-Planner accepts complete household requests: budgets, loans, savings, assets,
-goals, retirement and pooled/per-goal investment allocation. Local Excel reports
-use saved request/result pairs and separately configured presentation files.
-Client records and organization templates stay in the advisor's local installation.
-
-[Planner v0.4.0](https://github.com/mbk-dev/okama-planner/releases/tag/v0.4.0)
-is the supported companion; `okama-planner[reports]>=0.4.0,<0.5.0` is a mandatory
-runtime dependency. It includes the storage API and Excel dependencies. See the
-[installation, local configuration, tool contracts, synthetic examples and upgrade
-guide](docs/planner.md) and [2.0.0 release notes](docs/releases/2.0.0.md).
-
-Planner 0.4.0 and okama 4.0.0 are available on PyPI. MCP requires `okama>=4.0.0`;
-both dependencies install automatically. See the installation instructions for local configuration.
+See [configuration and tool contracts](docs/planner.md) and
+[language behavior](docs/planner-localization.md).
 
 <!-- okama-family:start -->
 ## Explore the okama family

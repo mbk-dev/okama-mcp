@@ -23,7 +23,15 @@ jobs:
         run: pipx install poetry
       - name: Install dependencies
         run: poetry install
-      - name: Run unit tests
+      - name: Check out the privacy-capable Planner companion
+        uses: actions/checkout@v5
+        with:
+          repository: mbk-dev/okama-planner
+          ref: 588be5855cfaebddb6725c3f4f4126a3fda72a56
+          path: tmp/planner-companion
+      - name: Run unit tests with the pinned Planner source
+        env:
+          PYTHONPATH: ${{ github.workspace }}/tmp/planner-companion/src:${{ github.workspace }}/src
         run: poetry run pytest -q
       - name: Ruff
         run: poetry run ruff check .

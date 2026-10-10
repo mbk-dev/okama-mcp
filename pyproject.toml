@@ -15,7 +15,6 @@ classifiers = [
 ]
 packages = [{ include = "okama_mcp", from = "src" }]
 include = [
-    {path = ".agents/skills/create-client/SKILL.md", format = ["wheel", "sdist"]},
     {path = "examples/**", format = "sdist"},
     {path = "docs/**", format = "sdist"},
     {path = "tests/**", format = "sdist"},

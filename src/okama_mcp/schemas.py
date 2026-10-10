@@ -399,15 +399,19 @@ class FinPlanSpec(BaseModel):
         return self
 
 
-def get_client_models() -> tuple[type[BaseModel], type[BaseModel]]:
-    """Load companion-owned registry contracts without copying their validation."""
-    try:
-        from okama_planner.storage.validation import ClientDetails, ResidencyDetails
-    except ModuleNotFoundError as exc:
-        if exc.name in {"okama_planner", "okama_planner.storage"}:
-            raise ValueError("Local clients require the Planner storage companion; see docs/planner.md") from exc
-        raise
-    return ClientDetails, ResidencyDetails
+class ClientSafeChanges(BaseModel):
+    """Only non-identifying client metadata is writable from AI."""
+    model_config = ConfigDict(extra="forbid")
+    sex: Literal["male", "female"] | None = None
+    birth_year: int | None = Field(default=None, ge=1900, le=2100)
+    ips_sent_at: str | None = None
+
+
+class ClientSafeResidency(BaseModel):
+    """Year/country only; free-text residency notes stay local."""
+    model_config = ConfigDict(extra="forbid")
+    year: int
+    country: str = Field(pattern=r"^[A-Za-z]{2}$")
 
 
 class PlannerReportScenario(BaseModel):

@@ -27,11 +27,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     stdio_parser.add_argument("--client-db", type=Path, help="Explicit existing local Planner database (POSIX)")
     stdio_parser.add_argument("--reports-dir", type=Path, help="Existing local report output directory")
-    stdio_parser.add_argument("--report-brand", type=Path, help="Local Planner ReportBrand JSON file")
+    stdio_parser.add_argument("--report-brand", type=Path, help="Legacy option; ignored for anonymous AI reports")
     initialize = subparsers.add_parser("init-client-db", help="Create a new empty Planner database")
     initialize.add_argument("--path", type=Path, required=True)
 
-    skill = subparsers.add_parser("install-skill", help="Install the packaged create-client skill")
+    skill = subparsers.add_parser("install-skill", help="Retired AI client intake command")
     skill.add_argument("--destination", type=Path, required=True, help="Project .agents/skills directory")
 
     http_parser = subparsers.add_parser(
@@ -67,9 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "install-skill":
-        from okama_mcp.skills import install_skill
-        print(f"Installed {install_skill(args.destination)}")
-        return 0
+        parser.error("Client intake is local human input in okama-planner; the AI intake skill is retired")
 
     if args.command == "init-client-db":
         from okama_planner.storage import PlannerStore

@@ -22,6 +22,7 @@ def create_server(language: str = "en") -> FastMCP:
 
     server = FastMCP(
         name="okama-mcp",
+        mask_error_details=True,
         instructions=(
             "Investment-analysis tools backed by the okama Python library. "
             "Use search_assets to discover ticker symbols, filter asset types, or find the "

@@ -10,13 +10,13 @@ from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware import Middleware, MiddlewareContext, CallNext
 from fastmcp.tools.base import ToolResult
 from mcp.types import CallToolRequestParams
-from pydantic import ValidationError
+from fastmcp.tools.function_tool import FunctionTool
 
 Language = Literal["en", "ru", "de", "es", "zh"]
 LANGUAGES = ("en", "ru", "de", "es", "zh")
 SCOPED_TOOLS = {"planner_forecast", "planner_compare_modes", "planner_export_report", "client_create",
                 "client_get", "client_list", "client_update", "client_set_tax_residency",
-                "client_get_tax_residency"}
+                "client_get_tax_residency", "client_save_plan", "client_load_plan", "client_list_plans", "client_forecast"}
 
 
 @lru_cache
@@ -80,51 +80,41 @@ def present_client(record: dict[str, Any], language: str) -> dict[str, Any]:
 
 
 def localize_error(error: Exception, language: str) -> str:
-    """Hide validation input values and translate known messages without guessing."""
-    from okama_planner import localization
-    helper = getattr(localization, "localized_error", None)
-    if isinstance(error, ValidationError):
-        messages = []
-        for item in error.errors(include_input=False, include_url=False):
-            location = ".".join(str(part) for part in item["loc"])
-            known_message = item["msg"].removeprefix("Value error, ")
-            message = caption(known_message if known_message in captions(language) else item["type"], language)
-            if message == item["type"]:
-                message = caption("invalid", language)
-            messages.append(f"{location}: {message}")
-        return "; ".join(messages)
-    if str(error) in captions(language):
-        return caption(str(error), language)
-    if callable(helper):
-        return helper(error, language)
-    # Unknown runtime messages may contain personal data; keep only known field names.
-    fields = [key for key in captions("en") if key.isidentifier() and key in str(error)]
-    return f"{caption('invalid', language)}: {', '.join(fields)}" if fields else caption("invalid", language)
+    """Return only a fixed caption; never inspect exception text or field names."""
+    language = language if language in LANGUAGES else "en"
+    return caption("invalid", language)
+
+
+def request_language(arguments: dict[str, Any]) -> str:
+    """Read a supported language without echoing an arbitrary argument."""
+    language = arguments.get("language", "en")
+    report = arguments.get("report")
+    if isinstance(report, dict):
+        language = report.get("language", language)
+    return language if isinstance(language, str) and language in LANGUAGES else "en"
+
+
+class SafePlannerTool(FunctionTool):
+    """Sanitize validation and body errors before FastMCP can log their details."""
+    async def run(self, arguments: dict[str, Any]) -> ToolResult:
+        try:
+            return await super().run(arguments)
+        except Exception:
+            raise ToolError(caption("invalid", request_language(arguments))) from None
 
 
 class PlannerLanguageMiddleware(Middleware):
-    """Localize only Planner/registry errors, including pre-body argument validation."""
+    """Sanitize every Planner/registry error, including English and invalid languages."""
     async def on_call_tool(
         self, context: MiddlewareContext[CallToolRequestParams],
         call_next: CallNext[CallToolRequestParams, ToolResult],
     ) -> ToolResult:
-        arguments = context.message.arguments or {}
-        language = arguments.get("language", "en")
-        if context.message.name == "planner_export_report":
-            report = arguments.get("report")
-            if isinstance(report, dict):
-                language = report.get("language", "en")
-        if context.message.name not in SCOPED_TOOLS or language == "en" or language not in LANGUAGES:
+        if context.message.name not in SCOPED_TOOLS:
             return await call_next(context)
         try:
             return await call_next(context)
-        except Exception as error:
-            cause = error
-            seen = set()
-            while cause.__cause__ is not None and id(cause) not in seen:
-                seen.add(id(cause))
-                cause = cause.__cause__
-            raise ToolError(localize_error(cause, language)) from None
+        except Exception:
+            raise ToolError(caption("invalid", request_language(context.message.arguments or {}))) from None
 
 
 def configure_tool(tool: Any, name: str, language: str) -> None:
@@ -155,6 +145,7 @@ def configure_tool(tool: Any, name: str, language: str) -> None:
 
 def install_middleware(mcp: Any) -> None:
     """Install one scoped middleware for independently registered optional tools."""
+    mcp._mask_error_details = True
     if not any(isinstance(item, PlannerLanguageMiddleware) for item in mcp.middleware):
         mcp.add_middleware(PlannerLanguageMiddleware())
 
@@ -168,7 +159,6 @@ def present_residency(record: dict[str, Any] | None, language: str) -> dict[str,
 
 def register_tool(mcp: Any, function: Any, name: str, language: str) -> None:
     """Register an independent tool schema using the public FunctionTool API."""
-    from fastmcp.tools.function_tool import FunctionTool
-    tool = FunctionTool.from_function(function, name=name, description=function.__doc__)
+    tool = SafePlannerTool.from_function(function, name=name, description=function.__doc__)
     configure_tool(tool, name, language)
     mcp.add_tool(tool)

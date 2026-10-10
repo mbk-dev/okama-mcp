@@ -26,7 +26,7 @@ def planner_forecast(request: BaseModel | dict[str, Any], language: Language = "
     model = get_planner_request_model()
     if model is None:
         raise OkamaMcpError("To use planner_forecast, reinstall okama-mcp with its required okama-planner dependency")
-    from okama_planner import forecast
+    from okama_planner.ai import forecast
 
     validated = model.model_validate(request)
     return forecast(validated)
@@ -49,9 +49,9 @@ def planner_compare_modes(
         raise OkamaMcpError("To use planner_compare_modes, reinstall okama-mcp with its required okama-planner dependency")
     validated_baseline = model.model_validate(baseline)
     validated_variant = model.model_validate(variant)
-    import okama_planner
+    import okama_planner.ai as ai
 
-    compare = getattr(okama_planner, "compare_portfolio_modes", None)
+    compare = getattr(ai, "compare_portfolio_modes", None)
     if compare is None:
         raise OkamaMcpError("To use planner_compare_modes, upgrade the okama-planner companion package")
     return compare(validated_baseline, validated_variant)
@@ -61,6 +61,12 @@ def register(mcp: FastMCP, language: Language = "en") -> None:
     """Expose the actual companion schema without copying it."""
     install_middleware(mcp)
     captions(language)
+    try:
+        import okama_planner.ai as ai
+    except ModuleNotFoundError as error:
+        if error.name in {"okama_planner", "okama_planner.ai"}:
+            return
+        raise
     model = get_planner_request_model()
     if model is None:
         return
@@ -73,9 +79,7 @@ def register(mcp: FastMCP, language: Language = "en") -> None:
     call.__doc__ = planner_forecast.__doc__
     register_tool(mcp, call, "planner_forecast", language)
 
-    import okama_planner
-
-    if not callable(getattr(okama_planner, "compare_portfolio_modes", None)):
+    if not callable(getattr(ai, "compare_portfolio_modes", None)):
         return
 
     def compare(baseline: Any, variant: Any, language: Language = "en") -> dict[str, Any]:
