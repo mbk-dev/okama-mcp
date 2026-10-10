@@ -156,3 +156,52 @@ async def test_known_client_validation_message_explains_contact_requirement(tmp_
         assert result.is_error
         assert "контакт" in result.content[0].text.lower()
         assert "Synthetic Label" not in result.content[0].text
+
+
+@pytest.mark.asyncio
+async def test_registry_schema_titles_are_localized_without_changing_companion_models(tmp_path: Path) -> None:
+    from okama_planner.storage import PlannerStore
+    from okama_mcp.schemas import get_client_models
+
+    model, _ = get_client_models()
+    original_schema = model.model_json_schema()
+    path = tmp_path / "synthetic.sqlite3"
+    with PlannerStore.initialize(path):
+        pass
+    server = FastMCP("translated-field-titles")
+    clients.register(server, path, language="ru")
+    tool = await server.get_tool("client_create")
+    details = tool.parameters["properties"]["details"]
+    if "$ref" in details:
+        details = tool.parameters["$defs"][details["$ref"].split("/")[-1]]
+    field = details["properties"]["full_name"]
+    assert field["title"] == "Полное имя"
+    assert field["description"] == "Полное имя"
+    assert model.model_json_schema() == original_schema
+
+
+@pytest.mark.parametrize("defect", ["missing_translation", "duplicate_key", "placeholder"])
+def test_catalog_loader_rejects_invalid_packaged_rows(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+                                                     defect: str) -> None:
+    import csv
+    from okama_mcp import planner_localization as localization
+
+    row = {"key": "sample", **dict.fromkeys(localization.LANGUAGES, "Caption {name}")}
+    rows = [row]
+    if defect == "missing_translation":
+        row["zh"] = " "
+    elif defect == "duplicate_key":
+        rows.append(row.copy())
+    else:
+        row["de"] = "Caption {other}"
+    with (tmp_path / "planner_terminology.csv").open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=["key", *localization.LANGUAGES])
+        writer.writeheader()
+        writer.writerows(rows)
+    monkeypatch.setattr(localization, "files", lambda package: tmp_path)
+    localization.captions.cache_clear()
+    try:
+        with pytest.raises(ValueError):
+            localization.captions("ru")
+    finally:
+        localization.captions.cache_clear()

@@ -4,6 +4,7 @@ from datetime import date
 from functools import lru_cache
 from importlib.resources import files
 from typing import Any, Literal
+from string import Formatter
 
 from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware import Middleware, MiddlewareContext, CallNext
@@ -24,7 +25,24 @@ def captions(language: str) -> dict[str, str]:
     if language not in LANGUAGES:
         raise ValueError(f"Unsupported language: {language}")
     with files("okama_mcp").joinpath("planner_terminology.csv").open(encoding="utf-8", newline="") as source:
-        return {row["key"]: row[language] for row in csv.DictReader(source)}
+        rows = list(csv.DictReader(source))
+    seen = set()
+    for row in rows:
+        key = row.get("key")
+        if not key or key in seen:
+            raise ValueError("Missing or duplicate localization key")
+        seen.add(key)
+        expected = None
+        for code in LANGUAGES:
+            value = row.get(code)
+            if not value or not value.strip():
+                raise ValueError(f"Missing {code} localization caption: {key}")
+            placeholders = {field for _, field, _, _ in Formatter().parse(value) if field is not None}
+            if expected is None:
+                expected = placeholders
+            elif placeholders != expected:
+                raise ValueError(f"Inconsistent {code} localization placeholders: {key}")
+    return {row["key"]: row[language] for row in rows}
 
 
 def caption(key: str, language: str) -> str:
@@ -120,6 +138,7 @@ def configure_tool(tool: Any, name: str, language: str) -> None:
             for key, field in node.get("properties", {}).items():
                 if key in captions(language) and isinstance(field, dict):
                     field["description"] = caption(key, language)
+                    field["title"] = caption(key, language)
             for value in node.values():
                 visit(value)
         elif isinstance(node, list):
