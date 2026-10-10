@@ -16,7 +16,7 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 
 from fastmcp import FastMCP  # noqa: E402
 
-def create_server() -> FastMCP:
+def create_server(language: str = "en") -> FastMCP:
     """Construct an isolated public registry before attaching optional local tools."""
     from okama_mcp.tools import register_all
 
@@ -36,7 +36,7 @@ def create_server() -> FastMCP:
         ),
     )
 
-    register_all(server)
+    register_all(server, language=language)
     return server
 
 

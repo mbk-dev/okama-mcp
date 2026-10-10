@@ -9,7 +9,7 @@ from __future__ import annotations
 from fastmcp import FastMCP
 
 
-def register_all(mcp: FastMCP) -> None:
+def register_all(mcp: FastMCP, language: str = "en") -> None:
     """Import every tool module and register its tools with ``mcp``."""
     from okama_mcp.tools import (
         asset,
@@ -37,4 +37,4 @@ def register_all(mcp: FastMCP) -> None:
     frontier.register(mcp)
     macro.register(mcp)
     plots.register(mcp)
-    planner.register(mcp)
+    planner.register(mcp, language=language)

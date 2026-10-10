@@ -7,10 +7,11 @@ from pydantic import BaseModel
 
 from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.schemas import get_planner_request_model
+from okama_mcp.planner_localization import Language, install_middleware, captions, register_tool
 
 
 @translates_okama_errors
-def planner_forecast(request: BaseModel | dict[str, Any]) -> dict[str, Any]:
+def planner_forecast(request: BaseModel | dict[str, Any], language: Language = "en") -> dict[str, Any]:
     """Calculate a complete household plan: budget, loans, assets, goals and retirement spending.
 
     Pass the full request on every call. Frozen stage return samples allow offline forecasts;
@@ -21,6 +22,7 @@ def planner_forecast(request: BaseModel | dict[str, Any]) -> dict[str, Any]:
     Fixed-rate savings are separate from goal investment portfolios. Gamma, equivalent alpha,
     FX conversion and tax models are absent.
     """
+    captions(language)
     model = get_planner_request_model()
     if model is None:
         raise OkamaMcpError("To use planner_forecast, reinstall okama-mcp with its required okama-planner dependency")
@@ -32,7 +34,7 @@ def planner_forecast(request: BaseModel | dict[str, Any]) -> dict[str, Any]:
 
 @translates_okama_errors
 def planner_compare_modes(
-    baseline: BaseModel | dict[str, Any], variant: BaseModel | dict[str, Any]
+    baseline: BaseModel | dict[str, Any], variant: BaseModel | dict[str, Any], language: Language = "en"
 ) -> dict[str, Any]:
     """Compare complete single/per_goal household forecast requests without session state.
 
@@ -41,6 +43,7 @@ def planner_compare_modes(
     and risk differences. Fixed-rate savings are separate; Gamma, alpha and FX are unsupported.
     Requires a companion release exporting compare_portfolio_modes.
     """
+    captions(language)
     model = get_planner_request_model()
     if model is None:
         raise OkamaMcpError("To use planner_compare_modes, reinstall okama-mcp with its required okama-planner dependency")
@@ -54,27 +57,31 @@ def planner_compare_modes(
     return compare(validated_baseline, validated_variant)
 
 
-def register(mcp: FastMCP) -> None:
+def register(mcp: FastMCP, language: Language = "en") -> None:
     """Expose the actual companion schema without copying it."""
+    install_middleware(mcp)
+    captions(language)
     model = get_planner_request_model()
     if model is None:
         return
 
-    def call(request: Any) -> dict[str, Any]:
-        return planner_forecast(request)
+    def call(request: Any, language: Language = "en") -> dict[str, Any]:
+        return planner_forecast(request, language)
 
     # FastMCP derives the complete nested input contract from this runtime Pydantic model.
     call.__annotations__["request"] = model
-    mcp.tool(call, name="planner_forecast", description=planner_forecast.__doc__)
+    call.__doc__ = planner_forecast.__doc__
+    register_tool(mcp, call, "planner_forecast", language)
 
     import okama_planner
 
     if not callable(getattr(okama_planner, "compare_portfolio_modes", None)):
         return
 
-    def compare(baseline: Any, variant: Any) -> dict[str, Any]:
-        return planner_compare_modes(baseline, variant)
+    def compare(baseline: Any, variant: Any, language: Language = "en") -> dict[str, Any]:
+        return planner_compare_modes(baseline, variant, language)
 
     compare.__annotations__["baseline"] = model
     compare.__annotations__["variant"] = model
-    mcp.tool(compare, name="planner_compare_modes", description=planner_compare_modes.__doc__)
+    compare.__doc__ = planner_compare_modes.__doc__
+    register_tool(mcp, compare, "planner_compare_modes", language)

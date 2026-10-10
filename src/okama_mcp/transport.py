@@ -55,6 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="HTTP path for the MCP endpoint (default: /mcp)",
     )
 
+    for transport_parser in (stdio_parser, http_parser):
+        transport_parser.add_argument("--language", choices=("en", "ru", "de", "es", "zh"), default="en",
+                                      help="Planner/client tool help language; calls still default to en")
     return parser
 
 
@@ -79,19 +82,19 @@ def main(argv: list[str] | None = None) -> int:
     # Import lazily so that argument-only failures don't pull in okama/matplotlib.
     from okama_mcp.server import create_server
 
-    mcp = create_server()
+    mcp = create_server(language=args.language)
 
     if args.command == "stdio":
         if args.client_db:
             if not args.client_db.is_absolute():
                 parser.error("--client-db must be absolute")
             from okama_mcp.tools import clients
-            clients.register(mcp, args.client_db)
+            clients.register(mcp, args.client_db, language=args.language)
         if args.report_brand and not args.reports_dir:
             parser.error("--report-brand requires --reports-dir")
         if args.reports_dir:
             from okama_mcp.tools import planner_reports
-            planner_reports.register(mcp, args.reports_dir, args.report_brand)
+            planner_reports.register(mcp, args.reports_dir, args.report_brand, language=args.language)
         mcp.run()
         return 0
 

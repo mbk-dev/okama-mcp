@@ -1,0 +1,164 @@
+key,en,ru,de,es,zh
+planner_forecast,Calculate a complete household plan. Pass the full request every time; frozen return samples allow offline runs. Raw financial data stays unchanged.,Рассчитать полный финансовый план семьи. Передавайте полный запрос при каждом вызове; готовые выборки доходности позволяют работать без сети. Финансовые данные сохраняются без изменений.,Berechnen Sie einen vollständigen Haushaltsplan. Übergeben Sie bei jedem Aufruf die vollständige Anfrage; feste Renditestichproben ermöglichen Offline-Berechnungen. Finanzdaten bleiben unverändert.,Calcule un plan financiero familiar completo. Envíe la solicitud completa en cada llamada; las muestras fijas permiten cálculos sin conexión. Los datos financieros permanecen intactos.,计算完整的家庭财务计划。每次调用都须提交完整请求；固定收益样本支持离线计算。财务原始数据保持不变。
+planner_compare_modes,"Compare complete single/per_goal requests with identical family inputs, goals, history, seed and simulation count.","Сравнить полные запросы single/per_goal с одинаковыми данными семьи, целями, историей, начальным числом генератора и числом симуляций.","Vergleichen Sie vollständige single/per_goal-Anfragen mit identischen Haushaltsdaten, Zielen, Verlauf, Startwert und Simulationsanzahl.","Compare solicitudes completas single/per_goal con los mismos datos familiares, objetivos, historial, semilla y número de simulaciones.",比较完整的 single/per_goal 请求，家庭数据、目标、历史、随机种子和模拟次数必须一致。
+client_create,Create a local client. Reuse request_id for retries; allow_duplicate requires confirmation of a different namesake.,"Создать локального клиента. При повторе используйте тот же request_id; allow_duplicate требует подтверждения, что это другой человек с тем же именем.",Erstellen Sie einen lokalen Kunden. Verwenden Sie request_id bei Wiederholungen erneut; allow_duplicate erfordert die Bestätigung eines anderen gleichnamigen Kunden.,Cree un cliente local. Reutilice request_id al reintentar; allow_duplicate requiere confirmar que es otra persona con el mismo nombre.,创建本地客户。重试时复用 request_id；allow_duplicate 要求确认同名客户是另一人。
+client_get,Read a complete local registry record by stable client code.,Прочитать полную запись локального реестра по постоянному коду клиента.,Lesen Sie einen vollständigen lokalen Registereintrag anhand des festen Kundencodes.,Lea un registro local completo por su código de cliente permanente.,通过固定客户代码读取完整的本地登记记录。
+client_list,"List local registry records, including potential duplicates.","Получить записи локального реестра, включая возможные дубли.",Listen Sie lokale Registereinträge einschließlich möglicher Duplikate auf.,"Enumere los registros locales, incluidos posibles duplicados.",列出本地登记记录，包括可能的重复客户。
+client_update,Patch a local client. Missing fields remain; null clears optional fields. Unknown/system fields fail.,Изменить локального клиента. Пропущенные поля сохраняются; null очищает необязательные поля. Неизвестные и системные поля запрещены.,Ändern Sie einen lokalen Kunden. Fehlende Felder bleiben bestehen; null löscht optionale Felder. Unbekannte/Systemfelder sind unzulässig.,Modifique un cliente local. Los campos omitidos permanecen; null borra campos opcionales. Los campos desconocidos o del sistema se rechazan.,修改本地客户。未提供的字段保持不变；null 清除可选字段。拒绝未知字段和系统字段。
+client_set_tax_residency,Record one explicit year/country; no jurisdictional tax is calculated.,Записать явно указанные год и страну налогового резидентства; налоги не рассчитываются.,Erfassen Sie ein ausdrückliches Jahr/Land der Steueransässigkeit; Steuern werden nicht berechnet.,Registre un año y país de residencia fiscal explícitos; no se calculan impuestos.,记录明确的税务居住年份和国家；不计算税款。
+client_get_tax_residency,Read the specified year only; earlier years are never inherited.,Прочитать резидентство только за указанный год; предыдущие годы не наследуются.,Lesen Sie nur das angegebene Jahr; frühere Jahre werden nie übernommen.,Lea solo el año especificado; nunca se heredan años anteriores.,仅读取指定年份；绝不沿用往年记录。
+planner_export_report,Export saved request/result pairs to a new local Excel workbook. No forecast is rerun; branding is configured by the server.,Экспортировать сохранённые запросы и результаты в новую локальную книгу Excel. Прогноз не пересчитывается; оформление задаётся сервером.,Exportieren Sie gespeicherte Anfrage-/Ergebnispaare in eine neue lokale Excel-Datei. Prognosen werden nicht erneut berechnet; das Design wird vom Server konfiguriert.,Exporte solicitudes y resultados guardados a un nuevo archivo Excel local. No se recalculan pronósticos; el servidor configura la marca.,将保存的请求和结果导出到新的本地 Excel 工作簿。不重新计算预测；品牌设置由服务器配置。
+language,Presentation/error language for this call; defaults to en independently of server startup language.,Язык представления и ошибок этого вызова; по умолчанию en независимо от языка запуска сервера.,Sprache für Darstellung/Fehler dieses Aufrufs; Standard en unabhängig von der Startsprache des Servers.,"Idioma de presentación y errores de esta llamada; en por defecto, independientemente del idioma de inicio.",本次调用的显示和错误语言；默认 en，与服务器启动语言无关。
+invalid,Invalid input,Некорректные данные,Ungültige Eingabe,Entrada no válida,输入无效
+missing,Field required,Поле обязательно,Pflichtfeld,Campo obligatorio,必填字段
+extra_forbidden,Unknown field is not permitted,Неизвестное поле запрещено,Unbekanntes Feld ist nicht erlaubt,No se permite un campo desconocido,不允许未知字段
+filename must be a .xlsx basename within --reports-dir,filename must be a .xlsx basename within --reports-dir,filename должен быть именем файла .xlsx в --reports-dir,filename muss ein .xlsx-Dateiname innerhalb von --reports-dir sein,filename debe ser un nombre de archivo .xlsx dentro de --reports-dir,filename 必须是 --reports-dir 内的 .xlsx 文件名
+request_id must contain 1 to 200 characters; reuse it for retries,request_id must contain 1 to 200 characters; reuse it for retries,request_id должен содержать от 1 до 200 символов; повторно используйте его при повторах,request_id muss 1 bis 200 Zeichen enthalten; bei Wiederholungen erneut verwenden,request_id debe contener de 1 a 200 caracteres; reutilícelo al reintentar,request_id 须包含 1 至 200 个字符；重试时复用
+request_id was already used with different inputs,request_id was already used with different inputs,request_id уже использован с другими данными,request_id wurde bereits mit anderen Eingaben verwendet,request_id ya se utilizó con otros datos,request_id 已用于不同的输入
+code,Client code,Код клиента,Kundencode,Código de cliente,客户代码
+full_name,Full name,Полное имя,Vollständiger Name,Nombre completo,姓名
+sex,Sex,Пол,Geschlecht,Sexo,性别
+birth_year,Birth year,Год рождения,Geburtsjahr,Año de nacimiento,出生年份
+email,Email,Электронная почта,E-Mail,Correo electrónico,电子邮箱
+phone,Phone,Телефон,Telefon,Teléfono,电话
+telegram,Telegram,Telegram,Telegram,Telegram,Telegram
+telegram_id,Telegram ID,Идентификатор Telegram,Telegram-ID,ID de Telegram,Telegram ID
+whatsapp,WhatsApp,WhatsApp,WhatsApp,WhatsApp,WhatsApp
+max_messenger,MAX,MAX,MAX,MAX,MAX
+brokers,Brokers,Брокеры,Broker,Brókeres,经纪商
+primary_channel,Primary contact channel,Основной канал связи,Bevorzugter Kontaktkanal,Canal principal de contacto,主要联系渠道
+ips_sent_at,IPS sent date,Дата отправки инвестиционной декларации,Versanddatum der Anlageerklärung,Fecha de envío de la declaración de inversión,投资声明发送日期
+note,Note,Примечание,Anmerkung,Nota,备注
+year,Year,Год,Jahr,Año,年份
+country,Country,Страна,Land,País,国家
+tax_residency,Tax residency,Налоговое резидентство,Steueransässigkeit,Residencia fiscal,税务居住地
+created_at,Created at,Дата создания,Erstellt am,Fecha de creación,创建日期
+updated_at,Updated at,Дата обновления,Aktualisiert am,Fecha de actualización,更新日期
+female,Female,Женский,Weiblich,Femenino,女
+male,Male,Мужской,Männlich,Masculino,男
+id,Record ID,Идентификатор записи,Datensatz-ID,ID de registro,记录 ID
+registry_id,Registry ID,Идентификатор реестра,Register-ID,ID del registro,登记 ID
+max,MAX,MAX,MAX,MAX,MAX
+request,Complete household forecast request,Полный запрос прогноза финансового плана семьи,Vollständige Anfrage zur Haushaltsprognose,Solicitud completa de pronóstico financiero familiar,完整的家庭财务预测请求
+baseline,Complete baseline request,Полный базовый запрос,Vollständige Basisanfrage,Solicitud de referencia completa,完整的基准请求
+variant,Complete variant request,Полный альтернативный запрос,Vollständige Variantenanfrage,Solicitud alternativa completa,完整的变体请求
+details,Complete client details,Полные данные клиента,Vollständige Kundendaten,Datos completos del cliente,完整的客户资料
+changes,Fields to update; null clears optional fields,Поля для изменения; null очищает необязательные поля,Zu ändernde Felder; null löscht optionale Felder,Campos a modificar; null borra campos opcionales,待修改字段；null 清除可选字段
+residency,Explicit tax residency year and country,Явно указанные год и страна налогового резидентства,Ausdrückliches Jahr und Land der Steueransässigkeit,Año y país de residencia fiscal explícitos,明确的税务居住年份和国家
+report,Saved requests/results and report settings,Сохранённые запросы и результаты и настройки отчёта,Gespeicherte Anfragen/Ergebnisse und Berichtseinstellungen,Solicitudes y resultados guardados y configuración del informe,保存的请求和结果及报告设置
+filename,New Excel filename without a directory path,Имя нового файла Excel без пути к каталогу,Neuer Excel-Dateiname ohne Verzeichnispfad,Nuevo nombre de archivo Excel sin ruta de directorio,不含目录路径的新 Excel 文件名
+label,Full scenario label; preserved verbatim,Полное название сценария; сохраняется без изменений,Vollständige Szenariobezeichnung; unverändert erhalten,Nombre completo del escenario; se conserva intacto,完整的情景名称；原样保留
+scenarios,Saved scenarios; no forecast is rerun,Сохранённые сценарии; прогноз не пересчитывается,Gespeicherte Szenarien; Prognosen werden nicht erneut berechnet,Escenarios guardados; no se recalcula el pronóstico,保存的情景；不重新计算预测
+request_id,"Stable retry identifier, 1 to 200 characters","Постоянный идентификатор повторного вызова, от 1 до 200 символов","Feste Wiederholungs-ID, 1 bis 200 Zeichen","Identificador permanente de reintento, de 1 a 200 caracteres",固定的重试标识，1 至 200 个字符
+allow_duplicate,Confirm a different person with the same full name,Подтверждение другого человека с тем же полным именем,Bestätigung einer anderen Person mit gleichem vollständigem Namen,Confirmar otra persona con el mismo nombre completo,确认姓名相同但身份不同的另一人
+First required amount ({unit}),First required amount ({unit}),Первый необходимый платёж ({unit}),Erster erforderlicher Betrag ({unit}),Primer importe requerido ({unit}),首笔所需金额（{unit}）
+Required mean,Required mean,Средняя необходимая сумма,Mittlerer erforderlicher Betrag,Importe requerido medio,平均所需金额
+Actual funding covers every required goal event; pension success covers the full stream.,Actual funding covers every required goal event; pension success covers the full stream.,Фактическое финансирование учитывает все платежи по цели; успех пенсионной цели охватывает весь поток выплат.,Tatsächliche Finanzierung umfasst jedes Zielereignis; Rentenerfolg umfasst den gesamten Zahlungsstrom.,La financiación real cubre cada pago requerido del objetivo; el éxito de la pensión cubre todos los pagos.,实际融资涵盖目标的每笔所需付款；养老金成功率涵盖整个支付流。
+Field is required,Field is required,Обязательное поле,Pflichtfeld,Campo obligatorio,必填字段
+Unknown field,Unknown field,Неизвестное поле,Unbekanntes Feld,Campo desconocido,未知字段
+Select one of the supported values,Select one of the supported values,Выберите одно из допустимых значений,Wählen Sie einen zulässigen Wert,Seleccione uno de los valores admitidos,请选择一个允许的值
+Value is below the allowed minimum,Value is below the allowed minimum,Значение меньше допустимого минимума,Wert unter dem zulässigen Minimum,El valor es inferior al mínimo permitido,值低于允许的最小值
+Value exceeds the allowed maximum,Value exceeds the allowed maximum,Значение превышает допустимый максимум,Wert über dem zulässigen Maximum,El valor supera el máximo permitido,值超过允许的最大值
+Value does not match the required format,Value does not match the required format,Значение не соответствует требуемому формату,Wert entspricht nicht dem erforderlichen Format,El valor no cumple el formato requerido,值不符合所需格式
+Invalid value,Invalid value,Недопустимое значение,Ungültiger Wert,Valor no válido,无效值
+The operation could not be completed,The operation could not be completed,Не удалось выполнить операцию,Der Vorgang konnte nicht abgeschlossen werden,No se pudo completar la operación,无法完成操作
+A recorded name/contact must not be empty,A recorded name/contact must not be empty,Имя или контакт не могут быть пустыми,Name oder Kontakt dürfen nicht leer sein,El nombre o contacto no puede estar vacío,姓名或联系方式不能为空
+Broker names must not be empty,Broker names must not be empty,Название брокера не может быть пустым,Brokernamen dürfen nicht leer sein,Los nombres de intermediarios no pueden estar vacíos,券商名称不能为空
+Primary channel requires a recorded contact,Primary channel requires a recorded contact,Для основного канала связи нужен указанный контакт,Für den bevorzugten Kanal muss ein Kontakt hinterlegt sein,El canal principal requiere un contacto registrado,主要联系方式需要已记录的联系信息
+Country must be an assigned ISO 3166-1 alpha-2 code,Country must be an assigned ISO 3166-1 alpha-2 code,Укажите действующий двухбуквенный код страны ISO 3166-1,Geben Sie einen gültigen ISO-3166-1-Ländercode mit zwei Buchstaben an,Indique un código de país ISO 3166-1 válido de dos letras,国家必须使用有效的 ISO 3166-1 两字母代码
+abs_deviation,Absolute deviation,Абсолютное отклонение,Absolute Abweichung,Desviación absoluta,绝对偏差
+accumulation,Accumulation,Накопление,Ansparphase,Acumulación,积累阶段
+accumulation_holdings,Accumulation holdings,Активы периода накопления,Bestände der Ansparphase,Activos de acumulación,积累阶段持仓
+accumulation_last_date_pin,Pinned accumulation end date,Фиксированная дата окончания накопления,Festes Enddatum der Ansparphase,Fecha final fija de acumulación,固定积累结束日期
+accumulation_rebalancing,Accumulation rebalancing,Ребалансировка при накоплении,Rebalancierung der Ansparphase,Rebalanceo de acumulación,积累阶段再平衡
+action,Action,Действие,Aktion,Acción,操作
+allocation,Allocation,Распределение,Aufteilung,Asignación,分配
+amount,Amount,Сумма,Betrag,Importe,金额
+amount_basis,Amount basis,База расчёта суммы,Betragsbasis,Base del importe,金额计算基准
+amount_pv,Present-value amount,Сумма в текущих ценах,Barwertbetrag,Importe en valor presente,现值金额
+annual_rate,Annual rate,Годовая ставка,Jahresrate,Tasa anual,年利率
+asset,Asset,Актив,Vermögenswert,Activo,资产
+asset_class,Asset class,Класс активов,Anlageklasse,Clase de activo,资产类别
+asset_returns,Asset returns,Доходность активов,Anlagerenditen,Rendimientos de activos,资产收益
+assets,Assets,Активы,Vermögenswerte,Activos,资产
+becomes_asset,Asset created on completion,Актив после достижения цели,Vermögenswert nach Zielerreichung,Activo creado al completar el objetivo,目标完成后形成的资产
+budget_items,Budget items,Статьи бюджета,Budgetposten,Partidas presupuestarias,预算项目
+buffer_lookahead_months,Buffer lookahead months,Горизонт резерва в месяцах,Pufferhorizont in Monaten,Horizonte de reserva en meses,缓冲资金前瞻月数
+buffer_policy,Buffer policy,Правило резерва,Pufferregel,Política de reserva,缓冲资金规则
+buffer_rate,Buffer rate,Ставка резерва,Pufferrate,Tasa de reserva,缓冲资金利率
+can_defer,Deferral allowed,Допустима отсрочка,Aufschub erlaubt,Se permite aplazar,允许延期
+can_resize,Amount adjustment allowed,Допустимо изменение суммы,Betragsanpassung erlaubt,Se permite ajustar el importe,允许调整金额
+completion,Completion,Завершение,Abschluss,Finalización,完成
+currency,Currency,Валюта,Währung,Moneda,货币
+destination,Destination,Назначение,Ziel,Destino,目标位置
+discount_rate,Discount rate,Ставка дисконтирования,Diskontsatz,Tasa de descuento,折现率
+distribution,Distribution,Распределение вероятностей,Wahrscheinlichkeitsverteilung,Distribución de probabilidad,概率分布
+end_month,End month,Месяц окончания,Endmonat,Mes final,结束月份
+end_rule,End rule,Правило окончания,Endregel,Regla de finalización,结束规则
+event_priority,Event priority,Приоритет события,Ereignispriorität,Prioridad del evento,事件优先级
+expense_indexation_rate,Expense indexation rate,Темп индексации расходов,Ausgabenindexierung,Tasa de indexación de gastos,支出调整率
+funding_source_order,Funding source order,Порядок источников финансирования,Reihenfolge der Finanzierungsquellen,Orden de fuentes de financiación,资金来源顺序
+goal_funders,Goal funding sources,Источники финансирования целей,Finanzierungsquellen der Ziele,Fuentes de financiación de objetivos,目标资金来源
+goal_id,Goal ID,Идентификатор цели,Ziel-ID,ID de objetivo,目标 ID
+goal_indexation_rate,Goal indexation rate,Темп индексации целей,Zielindexierung,Tasa de indexación de objetivos,目标金额调整率
+goal_savings_rates,Goal savings rates,Ставки сбережений для целей,Sparzinsen der Ziele,Tasas de ahorro para objetivos,目标储蓄利率
+goals,Goals,Цели,Ziele,Objetivos,目标
+growth_rate,Growth rate,Темп роста,Wachstumsrate,Tasa de crecimiento,增长率
+horizon_years,Horizon in years,Горизонт в годах,Zeithorizont in Jahren,Horizonte en años,期限年数
+household_segment_id,Household segment ID,Идентификатор семейного сегмента,Haushaltssegment-ID,ID del segmento familiar,家庭阶段 ID
+income_indexation_rate,Income indexation rate,Темп индексации доходов,Einkommensindexierung,Tasa de indexación de ingresos,收入调整率
+indexation_rate,Indexation rate,Темп индексации,Indexierungsrate,Tasa de indexación,调整率
+inflation_rate,Inflation rate,Темп инфляции,Inflationsrate,Tasa de inflación,通胀率
+joint_history,Joint return history,Совместная история доходности,Gemeinsamer Renditeverlauf,Historial conjunto de rendimientos,联合收益历史
+kind,Kind,Тип,Art,Tipo,类型
+liabilities,Liabilities,Обязательства,Verbindlichkeiten,Pasivos,负债
+match_moments,Match distribution moments,Согласовать моменты распределения,Verteilungsmomente anpassen,Ajustar los momentos de distribución,匹配分布矩
+mc_number,Simulation count,Число симуляций,Simulationsanzahl,Número de simulaciones,模拟次数
+method,Method,Метод,Methode,Método,方法
+monthly_amount,Monthly amount,Ежемесячная сумма,Monatlicher Betrag,Importe mensual,每月金额
+monthly_payment,Monthly payment,Ежемесячный платёж,Monatliche Zahlung,Pago mensual,每月付款
+monthly_returns,Monthly returns,Месячная доходность,Monatliche Renditen,Rendimientos mensuales,月收益
+name,Full label; preserved verbatim,Полное название; сохраняется без изменений,Vollständige Bezeichnung; unverändert erhalten,Nombre completo; se conserva intacto,完整名称；原样保留
+opening_amount,Opening amount,Начальная сумма,Anfangsbetrag,Importe inicial,期初金额
+pension_replaces_expenses,Pension replaces expenses,Пенсия замещает расходы,Rente ersetzt Ausgaben,La pensión sustituye gastos,养老金替代支出
+period,Period,Период,Zeitraum,Período,期间
+persons,Household members,Члены семьи,Haushaltsmitglieder,Miembros de la familia,家庭成员
+plan,Complete household plan,Полный финансовый план семьи,Vollständiger Haushaltsplan,Plan financiero familiar completo,完整家庭财务计划
+portfolio_mode,Portfolio mode,Режим портфелей,Portfoliomodus,Modo de cartera,投资组合模式
+principal,Principal,Основной долг,Kapitalbetrag,Capital principal,本金
+priority,Priority,Приоритет,Priorität,Prioridad,优先级
+purchase_execution,Purchase execution,Исполнение покупки,Kaufausführung,Ejecución de compra,购买执行
+pv_year,Present-value base year,Базовый год текущих цен,Barwertbasisjahr,Año base del valor presente,现值基准年份
+rates,Rates,Ставки,Raten,Tasas,利率
+rel_deviation,Relative deviation,Относительное отклонение,Relative Abweichung,Desviación relativa,相对偏差
+replaces_asset,Replaced asset,Замещаемый актив,Ersetzter Vermögenswert,Activo sustituido,被替换资产
+reserve_funding_source_order,Reserve funding source order,Порядок источников пополнения резерва,Reihenfolge der Reservefinanzierung,Orden de financiación de la reserva,储备资金来源顺序
+reserve_label,Full reserve label,Полное название резерва,Vollständige Reservebezeichnung,Nombre completo de la reserva,完整储备名称
+reserves_until_retirement,Reserves until retirement,Резервы до выхода на пенсию,Reserven bis zum Ruhestand,Reservas hasta la jubilación,退休前储备
+retirement_year,Retirement year,Год выхода на пенсию,Ruhestandsjahr,Año de jubilación,退休年份
+return_samples,Return samples,Выборки доходности,Renditestichproben,Muestras de rendimientos,收益样本
+role,Role,Роль,Rolle,Rol,角色
+savings_horizon_years,Savings horizon in years,Горизонт сбережений в годах,Sparhorizont in Jahren,Horizonte de ahorro en años,储蓄期限年数
+savings_mode,Savings mode,Режим сбережений,Sparmodus,Modo de ahorro,储蓄模式
+seed,Random seed,Начальное число генератора,Zufallsstartwert,Semilla aleatoria,随机种子
+segment_id,Segment ID,Идентификатор сегмента,Segment-ID,ID de segmento,阶段 ID
+segments,Segments,Сегменты,Segmente,Segmentos,阶段
+single_strategy,Single portfolio strategy,Стратегия единого портфеля,Strategie des Einzelportfolios,Estrategia de cartera única,单一投资组合策略
+start_month,Start month,Месяц начала,Startmonat,Mes inicial,开始月份
+strategy,Strategy,Стратегия,Strategie,Estrategia,策略
+surplus_weights,Surplus allocation weights,Доли распределения остатка,Gewichte der Überschussaufteilung,Pesos de asignación del excedente,结余分配权重
+symbol,Ticker symbol,Тикер,Tickersymbol,Símbolo bursátil,证券代码
+t0,Plan start year,Год начала плана,Planstartjahr,Año inicial del plan,计划开始年份
+target_month,Target month,Целевой месяц,Zielmonat,Mes objetivo,目标月份
+target_year,Target year,Целевой год,Zieljahr,Año objetivo,目标年份
+term_months,Term in months,Срок в месяцах,Laufzeit in Monaten,Plazo en meses,期限月数
+transfer_order,Transfer order,Порядок переводов,Übertragungsreihenfolge,Orden de transferencias,转移顺序
+transfer_policy,Transfer policy,Правило переводов,Übertragungsregel,Política de transferencias,转移规则
+weight,Weight,Доля,Gewicht,Peso,权重
+weights,Weights,Доли,Gewichte,Pesos,权重
+withdrawal,Withdrawal,Изъятия,Entnahmephase,Retiro,提取阶段
+withdrawal_holdings,Withdrawal holdings,Активы периода изъятий,Bestände der Entnahmephase,Activos de retiro,提取阶段持仓
+withdrawal_last_date_pin,Pinned withdrawal end date,Фиксированная дата окончания изъятий,Festes Enddatum der Entnahmephase,Fecha final fija de retiro,固定提取结束日期
+withdrawal_rebalancing,Withdrawal rebalancing,Ребалансировка при изъятиях,Rebalancierung der Entnahmephase,Rebalanceo de retiro,提取阶段再平衡
+withdrawal_years,Withdrawal years,Период изъятий в годах,Entnahmejahre,Años de retiro,提取年数
+Creation receipt is pending; use client_list/client_get to inspect before recovery. Do not repeat creation with a new request_id,Creation receipt is pending; use client_list/client_get to inspect before recovery. Do not repeat creation with a new request_id,Запись о создании клиента не завершена; перед восстановлением проверьте данные через client_list/client_get. Не повторяйте создание с новым request_id,Der Erstellungsvorgang ist noch offen; prüfen Sie vor der Wiederherstellung die Daten mit client_list/client_get. Wiederholen Sie die Erstellung nicht mit einer neuen request_id,El registro de creación está pendiente; inspeccione los datos con client_list/client_get antes de recuperar. No repita la creación con un request_id nuevo,创建记录尚未完成；恢复前使用 client_list/client_get 检查数据。不要使用新的 request_id 重复创建

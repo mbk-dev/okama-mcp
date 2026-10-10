@@ -5,10 +5,12 @@ from pathlib import Path
 from typing import Any
 from fastmcp import FastMCP
 from okama_mcp.schemas import PlannerReportBrand, PlannerReportSpec
+from okama_mcp.planner_localization import Language, register_tool, install_middleware
 
 
-def register(mcp: FastMCP, output_dir: Path, brand_path: Path | None = None) -> None:
+def register(mcp: FastMCP, output_dir: Path, brand_path: Path | None = None, language: Language = "en") -> None:
     """Enable only with an explicitly selected local directory and optional brand file."""
+    install_middleware(mcp)
     from okama_planner.reports import ReportBrand, export_report
     if not output_dir.is_absolute() or not output_dir.is_dir():
         raise ValueError("--reports-dir must be an absolute existing directory")
@@ -26,7 +28,6 @@ def register(mcp: FastMCP, output_dir: Path, brand_path: Path | None = None) -> 
         brand_data["logo"] = logo.resolve(strict=True)
     brand = ReportBrand(**brand_data)
 
-    @mcp.tool
     def planner_export_report(report: PlannerReportSpec) -> dict[str, Any]:
         """Export saved household request/result pairs as a local Excel workbook.
         No forecasts are rerun. Filename must be a new .xlsx basename; local branding
@@ -45,3 +46,5 @@ def register(mcp: FastMCP, output_dir: Path, brand_path: Path | None = None) -> 
             target.unlink()
             raise
         return {"path": str(target), "language": report.language, "scenarios": len(report.scenarios)}
+
+    register_tool(mcp, planner_export_report, "planner_export_report", language)
