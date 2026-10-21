@@ -121,3 +121,8 @@ Every stress-test report carries these as their own slots:
 | Reading a long-window residual as a data defect | Re-run per calendar year — rebalancing path is in there |
 | Scaling a crisis equity crash by devaluation size | Fix the level; betas only where mechanically linked |
 | One "value" column mixing nominal and real | Split the columns |
+
+## Indexed Withdrawal Comparisons
+
+For nominal versus real preservation, depletion horizons and distribution
+calibration, follow [Indexed withdrawal comparisons](references/indexed-withdrawals.md).

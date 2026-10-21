@@ -117,3 +117,7 @@ static file from `okama:/var/www/okama-mcp/public/` (nginx vhost: `deploy/nginx/
   being returned from a tool. Long series should be truncated with head/tail/summary.
 - All tool input contracts live in `okama_mcp.schemas` as pydantic v2 models.
 - Headless servers: set `MPLBACKEND=Agg` before importing okama (matplotlib gets imported eagerly).
+
+## Reference calculations
+
+- [SFA portfolio exercises](docs/research/sfa-course/README.md): dated teaching inputs, answer keys and numerical evidence.
