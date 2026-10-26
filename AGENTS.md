@@ -30,9 +30,7 @@ Never type anything into Orca's local *Setup Script* field: a non-empty local sc
 `git worktree add`, run the same two commands in the new tree before anything else:
 
 ```bash
-poetry env use python3.11   # `.python-version` is inert without pyenv: poetry would
-                            # otherwise grab the system interpreter (3.14), for which
-                            # the okama/scipy wheels do not exist
+poetry env use python3.14   # `.python-version` is inert without pyenv; select explicitly
 poetry install
 ```
 
