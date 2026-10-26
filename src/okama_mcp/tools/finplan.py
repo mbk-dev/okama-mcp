@@ -51,7 +51,7 @@ def clear_cache() -> None:
     _plan_cache.clear()
 
 
-def _validate(spec: dict[str, Any]) -> FinPlanSpec:
+def _validate(spec: FinPlanSpec | dict[str, Any]) -> FinPlanSpec:
     try:
         return FinPlanSpec.model_validate(spec)
     except ValidationError as exc:
@@ -99,7 +99,7 @@ def _build_plan(spec: FinPlanSpec) -> Any:
     )
 
 
-def _get_plan(spec_dict: dict[str, Any]) -> tuple[FinPlanSpec, Any]:
+def _get_plan(spec_dict: FinPlanSpec | dict[str, Any]) -> tuple[FinPlanSpec, Any]:
     """Validate the spec and return a (possibly cached) FinPlan object."""
     spec = _validate(spec_dict)
     key = make_key(spec.model_dump())
@@ -126,7 +126,7 @@ def _stage_summary(spec: FinPlanSpec) -> list[dict[str, Any]]:
 
 @translates_okama_errors
 def finplan_forecast(
-    plan: dict[str, Any],
+    plan: FinPlanSpec,
     success_threshold: float = 0.0,
 ) -> dict[str, Any]:
     """Monte Carlo forecast of a multi-stage financial plan.
@@ -191,7 +191,7 @@ def finplan_forecast(
 
 @translates_okama_errors
 def finplan_backtest(
-    plan: dict[str, Any],
+    plan: FinPlanSpec,
     discounting: str = "fv",
     first_date: str | None = None,
 ) -> dict[str, Any]:

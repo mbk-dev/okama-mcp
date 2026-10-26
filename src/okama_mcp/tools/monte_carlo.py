@@ -23,6 +23,8 @@ from pydantic import ValidationError
 from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.schemas import (
     CashflowAdapter,
+    CashflowSpec,
+    PortfolioSpec,
     CutIfDrawdownCashflow,
     IndexationCashflow,
     MCSpec,
@@ -36,14 +38,14 @@ from okama_mcp.tools.portfolio import _get_portfolio
 _WITHDRAWAL_GOALS = ("maintain_balance_pv", "maintain_balance_fv", "survival_period")
 
 
-def _validate_mc(spec: dict[str, Any]) -> MCSpec:
+def _validate_mc(spec: MCSpec | dict[str, Any]) -> MCSpec:
     try:
         return MCSpec.model_validate(spec)
     except ValidationError as exc:
         raise OkamaMcpError(f"Invalid MC spec: {exc.errors()}") from exc
 
 
-def _validate_cashflow(spec: dict[str, Any]) -> Any:
+def _validate_cashflow(spec: CashflowSpec | dict[str, Any]) -> CashflowSpec:
     try:
         return CashflowAdapter.validate_python(spec)
     except ValidationError as exc:
@@ -175,9 +177,9 @@ def _apply_mc_parameters(pf: Any, mc_spec: MCSpec) -> None:
 
 
 def _prepare_dcf(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
+    cashflow: CashflowSpec,
     discount_rate: float | None = None,
 ) -> tuple[Any, MCSpec]:
     """Validate specs and return (Portfolio configured for MC + cashflow, MCSpec)."""
@@ -192,7 +194,7 @@ def _prepare_dcf(
     return pf, mc_spec
 
 
-def _prepare_mc(portfolio: dict[str, Any], mc: dict[str, Any]) -> tuple[Any, MCSpec]:
+def _prepare_mc(portfolio: PortfolioSpec, mc: MCSpec) -> tuple[Any, MCSpec]:
     """Build the portfolio and configure MC parameters WITHOUT a cashflow.
 
     For distribution-diagnostics tools that only read ``pf.dcf.mc``.
@@ -204,8 +206,8 @@ def _prepare_mc(portfolio: dict[str, Any], mc: dict[str, Any]) -> tuple[Any, MCS
 
 
 def _prepare_cashflow(
-    portfolio: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    cashflow: CashflowSpec,
     discount_rate: float | None = None,
 ) -> tuple[Any, Any]:
     """Build the portfolio + cashflow strategy WITHOUT MC parameters.
@@ -228,8 +230,8 @@ def _prepare_cashflow(
 
 @translates_okama_errors
 def get_portfolio_irr(
-    portfolio: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    cashflow: CashflowSpec,
 ) -> dict[str, Any]:
     """Historical money-weighted return (IRR) of the portfolio with a cash-flow plan.
 
@@ -261,9 +263,9 @@ def get_portfolio_irr(
 
 @translates_okama_errors
 def monte_carlo_forecast(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
+    cashflow: CashflowSpec,
 ) -> dict[str, Any]:
     """Forward-looking Monte Carlo forecast for a portfolio with cash flows.
 
@@ -314,9 +316,9 @@ def monte_carlo_forecast(
 
 @translates_okama_errors
 def find_the_largest_withdrawals_size(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
+    cashflow: CashflowSpec,
     goal: str,
     withdrawals_range: tuple[float, float] = (0.0, 1.0),
     target_survival_period: int = 25,

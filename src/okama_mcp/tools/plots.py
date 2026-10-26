@@ -17,6 +17,7 @@ import scipy.stats
 from fastmcp import FastMCP
 from fastmcp.utilities.types import Image
 
+from okama_mcp.schemas import CashflowSpec, FinPlanSpec, FrontierSpec, MCSpec, PortfolioSpec
 from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.rendering import fig_to_png, make_figure
 from okama_mcp.tools.asset_list import _build_asset_list
@@ -79,7 +80,7 @@ def _join_symbols(obj: Any, spec: Any) -> str:
 
 @translates_okama_errors
 def plot_wealth_index(
-    portfolio: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
+    portfolio: PortfolioSpec, width: int = 1500, height: int = 900, save_path: str | None = None
 ) -> Image | list[Image | str]:
     """Line chart of the portfolio wealth index (growth of 1000 units).
 
@@ -103,7 +104,7 @@ def plot_wealth_index(
 
 @translates_okama_errors
 def plot_drawdowns(
-    portfolio: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
+    portfolio: PortfolioSpec, width: int = 1500, height: int = 900, save_path: str | None = None
 ) -> Image | list[Image | str]:
     """Drawdown chart for the portfolio (percentage decline from previous peak).
 
@@ -124,7 +125,7 @@ def plot_drawdowns(
 
 @translates_okama_errors
 def plot_efficient_frontier(
-    frontier: dict[str, Any], width: int = 1500, height: int = 900, save_path: str | None = None
+    frontier: FrontierSpec, width: int = 1500, height: int = 900, save_path: str | None = None
 ) -> Image | list[Image | str]:
     """Efficient-frontier curve (Risk vs Mean return) with individual asset points.
 
@@ -157,9 +158,9 @@ def plot_efficient_frontier(
 
 @translates_okama_errors
 def plot_monte_carlo(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
+    cashflow: CashflowSpec,
     width: int = 1500,
     height: int = 900,
     save_path: str | None = None,
@@ -198,7 +199,7 @@ def plot_assets(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = False,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
     width: int = 1500,
     height: int = 900,
     save_path: str | None = None,
@@ -223,9 +224,9 @@ def plot_assets(
 
 @translates_okama_errors
 def plot_irr_distribution(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
+    cashflow: CashflowSpec,
     width: int = 1500,
     height: int = 900,
     save_path: str | None = None,
@@ -262,7 +263,7 @@ def plot_irr_distribution(
 
 @translates_okama_errors
 def plot_transition_map(
-    frontier: dict[str, Any],
+    frontier: FrontierSpec,
     x_axe: str = "risk",
     width: int = 1500,
     height: int = 900,
@@ -297,8 +298,8 @@ def plot_transition_map(
 
 @translates_okama_errors
 def plot_qq(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
     width: int = 1500,
     height: int = 900,
     save_path: str | None = None,
@@ -324,8 +325,8 @@ def plot_qq(
 
 @translates_okama_errors
 def plot_hist_fit(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
     bins: int | None = None,
     width: int = 1500,
     height: int = 900,
@@ -404,7 +405,7 @@ def plot_macro(
 
 @translates_okama_errors
 def plot_finplan_forecast(
-    plan: dict[str, Any],
+    plan: FinPlanSpec,
     width: int = 1500,
     height: int = 900,
     save_path: str | None = None,

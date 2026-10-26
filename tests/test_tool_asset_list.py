@@ -7,8 +7,10 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
+from fastmcp import Client
 
 from okama_mcp.errors import OkamaMcpError
+from okama_mcp.server import create_server
 from okama_mcp.tools import asset_list as al_tool
 
 
@@ -282,6 +284,48 @@ class TestAssetReturns:
         assert out["real_mean_return"] == {"SPY.US": 0.08, "GLD.US": 0.02}
         assert out["monthly_geom_mean"] == {"SPY.US": 0.009, "GLD.US": 0.004}
         assert out["annual_returns"]["columns"] == ["SPY.US", "GLD.US"]
+
+    def test_nominal_returns_without_inflation(self) -> None:
+        class NominalAssetList(SimpleNamespace):
+            @property
+            def real_mean_return(self) -> pd.Series:
+                raise AssertionError("Inflation-dependent property must not be accessed")
+
+        mock = self._mock()
+        del mock.real_mean_return
+        nominal = NominalAssetList(**vars(mock))
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", return_value=nominal) as constructor:
+            out = al_tool.get_asset_returns(["SPY.US", "GLD.US"], inflation=False)
+
+        assert constructor.call_args.kwargs["inflation"] is False
+        assert out["cagr"] == {"SPY.US": 0.12, "GLD.US": 0.06}
+        assert out["mean_return"] == {"SPY.US": 0.11, "GLD.US": 0.05}
+        assert out["real_mean_return"] is None
+
+    def test_real_returns_require_inflation(self) -> None:
+        with patch("okama_mcp.tools.asset_list.ok.AssetList") as constructor:
+            with pytest.raises(OkamaMcpError, match="real=True requires inflation=True"):
+                al_tool.get_asset_returns(["SPY.US"], inflation=False, real=True)
+        constructor.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_real_returns_requirement_survives_mcp_error_masking(self) -> None:
+        with patch("okama_mcp.tools.asset_list.ok.AssetList") as constructor:
+            async with Client(create_server()) as client:
+                result = await client.call_tool_mcp(
+                    "get_asset_returns", {"symbols": ["SPY.US"], "inflation": False, "real": True}
+                )
+        assert result.is_error
+        assert "real=True requires inflation=True" in result.content[0].text
+        constructor.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_unexpected_asset_errors_remain_masked(self) -> None:
+        with patch("okama_mcp.tools.asset_list.ok.AssetList", side_effect=RuntimeError("PRIVATE_BACKEND_PATH")):
+            async with Client(create_server()) as client:
+                result = await client.call_tool_mcp("get_asset_returns", {"symbols": ["SPY.US"]})
+        assert result.is_error
+        assert "PRIVATE_BACKEND_PATH" not in str(result.content)
 
 
 class TestRollingReturns:
