@@ -6,8 +6,7 @@ scripts:
     # poetry and the pinned interpreter live in ~/.local/bin, which a
     # non-login setup shell may not have on PATH.
     export PATH="$HOME/.local/bin:$PATH"
-    # `.python-version` is inert without pyenv, so pin the interpreter
-    # explicitly — otherwise poetry picks the system python (3.14) and the
-    # okama wheels are missing.
-    poetry env use python3.11
+    # `.python-version` is inert without pyenv; select the setup interpreter
+    # explicitly while preserving the package's supported Python range.
+    poetry env use python3.14
     poetry install
