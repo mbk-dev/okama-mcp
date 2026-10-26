@@ -1,89 +1,58 @@
-# Planner privacy boundary
+# Planner client access and one local database
 
-Household and client tools require `okama_planner.ai`. A companion without this
-facade cannot expose household tools; local client/report configuration fails closed.
-An older installed Planner dependency must be upgraded to the privacy-capable release.
-Market tools keep their existing contracts.
+MCP 3.1.0 requires `okama-planner[reports]>=0.5.0,<0.6.0`. Planner owns database
+access, migrations, identities, planning history, CRM and meetings. MCP imports no
+SQLite/SQLAlchemy layer and executes no SQL.
 
-## Local setup
-
-A human creates and populates the client database with Planner's local intake CLI.
-Names and contacts must never be sent in MCP calls or AI prompts. The former
-`client_create` tool is removed. `install-skill` refuses to install the retired AI
-intake workflow, which is no longer included in packages.
-
-Use explicitly selected local paths:
+## Default: anonymous read-only client access
 
 ```bash
-uv run okama-mcp stdio \
-  --client-db /absolute/local-data/clients.sqlite3 \
-  --reports-dir /absolute/local-reports
+okama-mcp stdio --client-db /private/planner/clients.sqlite3 --reports-dir /private/reports
 ```
 
-Only stdio supports these options. The public HTTP server has no client tools or
-local report tools. Tool arguments cannot select a database or output directory.
-Planner owns all client and financial-plan database reads and writes. The MCP
-adapter does not inspect tables, registry records or database schema.
+The database and report directory must already exist. Client names, contacts and
+free-text labels are pseudonymized inside Planner. No persistent client mutation
+tools are registered. Client maintenance happens in Planner's local HTML interface.
+There are 52 public tools, or 60 with anonymous local client access and report export.
 
-## Client-code tools
-
-| Tool | Inputs and safe result |
-|---|---|
-| `client_get` | `code`; pseudonymous client metadata |
-| `client_list` | No required arguments; pseudonymous client metadata |
-| `client_update` | `code`, `changes` containing only `sex`, `birth_year`, `ips_sent_at` |
-| `client_set_tax_residency` | `code`, `residency={year,country}`; safe year/country record |
-| `client_get_tax_residency` | `code`, `year`; safe record or null |
-| `client_save_plan` | `code`, full `request`; `{code,version}` |
-| `client_load_plan` | `code`, `version`; request with coded labels |
-| `client_list_plans` | `code`; list of `{code,version}` |
-| `client_forecast` | `code`, `version`; safe forecast with privacy proof |
-
-Names, contacts, free-text notes and client-folder paths are absent from client
-tool contracts. Unknown update fields and residency notes are rejected. Stable
-codes survive restarts. Plan versions and computations are handled inside Planner.
-
-## Forecasts and reports
-
-`planner_forecast(request)` and `planner_compare_modes(baseline,variant)` delegate
-exclusively to Planner's privacy facade. It replaces free-text labels with special
-codes before calculation and removes identifying text from returned results.
-Financial inputs and arithmetic retain their values. Full-plan and goal metrics,
-ledger, portfolio/net-capital series and provenance remain available.
-
-`planner_export_report(report)` accepts one/two scenarios containing `label`,
-`request` and a signed safe `result`, plus a `.xlsx` basename `filename` and
-optional `language`. Planner rejects unsigned or tampered results. Privacy proofs
-belong to the current server process; after a restart, obtain a new safe forecast
-before exporting. Export does not rerun forecasts. MCP generates an opaque artifact basename and returns `filename`,
-`language` and scenario count without exposing the configured absolute directory.
-The legacy startup brand argument is ignored and its file is never read by MCP. The local output is
-not the personalized client deliverable; human-only rendering belongs in Planner.
-
-Validation and runtime errors use fixed translated messages for all supported
-languages, including English. Invalid languages fall back to English errors.
-Neither field names supplied by the caller, private values, chained causes,
-database schema nor filesystem paths appear in errors or server error logs.
-
-## Synthetic hands-on check
+## Explicit local opt-in: personal reads and mutations
 
 ```bash
-uv run python examples/local_planner_client.py
+okama-mcp stdio --client-db /private/planner/clients.sqlite3 --reports-dir /private/reports --allow-personal-data
 ```
 
-The example uses an isolated synthetic database under ignored `tmp/`, creates its
-synthetic identity locally, starts separate stdio processes, and checks pseudonymous
-reads, rejected contact updates, saved plan versions, residency, forecasts, reports
-and restart persistence. No real database or private folder is opened.
+This enables full client records, including names, contacts and CRM identifiers,
+and client creation/update/deletion, meeting CRUD and bounded history pages (68 tools
+with report export). All operations call `okama_planner.ai.PlannerClientAccess`.
+Planner validates records, selects ownership, commits/rolls back writes and rejects
+stale meeting revisions. Client deletion removes owned history; references from a
+different client make it fail atomically. Historical tables are read using
+`client_history(code, table, offset, limit)` with at most 500 records per page.
 
-For a configured MCP client, list tools and confirm `client_create` is absent.
-Read a synthetic code in English and German: names and contacts must be absent in
-both raw and presentation fields. Send an unknown update field containing a
-synthetic personal marker, then an unsupported language containing that marker:
-errors and server logs must not echo it. Export a signed forecast and confirm the
-response contains only an artifact basename. Alter a forecast value or remove its
-privacy proof: report export must fail without leaving a workbook.
+The flag is accepted only at local stdio startup with an explicit database. It is
+not a tool parameter and cannot be enabled by an LLM. Restart without the flag to
+revoke personal access. Public HTTP never enables local client/report tools.
 
-CI checks the privacy contract against a pinned public Planner source commit until the
-companion package is released. It also verifies that an older installed companion cannot
-fall back to raw Planner tools. Production package requirements will advance with that release.
+## One canonical database
+
+Use the same Planner-owned SQLite file for the HTML interface, MCP and older LFP
+commands. Import previous advisory history using Planner's verified importer; keep
+backups and retire the old working file after complete readback. Do not run old
+LFP migrations on the canonical database. See Planner's
+[one database guide](https://github.com/mbk-dev/okama-planner/blob/main/docs/unified-database.md).
+
+## Forecasts, reports and failures
+
+Forecast tools remain stateless and anonymous; reports require untampered signed
+results from the current MCP process. Unsigned/tampered results fail without leaving
+a workbook. Exports use neutral local branding and return only an artifact basename.
+Personal access does not disable report proofs or sanitized error messages.
+
+## Verification
+
+CI runs the full default suite against the published Planner, then installs the MCP
+wheel in an isolated environment and runs real stdio acceptance. Release repeats this
+gate before upload and verifies the exact published package from PyPI afterwards.
+`tests/release/published_pair.py` checks default read-only anonymization, explicit
+personal CRUD, forecast/comparison, storage, reports and rejected invalid proofs.
+There is no companion source checkout or PYTHONPATH override in these gates.

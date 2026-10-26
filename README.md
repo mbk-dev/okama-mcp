@@ -33,16 +33,16 @@ require a compatible Planner companion and a configured local stdio installation
 
 ## Install
 
-Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and okama Planner 0.4.x (with report dependencies) are installed automatically.
+Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and okama Planner ≥0.5.0,<0.6.0 (with report dependencies) are installed automatically.
 
 **3.0 upgrade:** client identity intake through MCP has been removed. Names and
-contacts belong in Planner's human-operated local intake. The currently published
-Planner 0.4.1 lacks `okama_planner.ai`, so standard installs expose **50 market,
-portfolio, financial-plan and chart tools**, without the two household Planner
-tools or local client/report integrations. Those integrations fail closed until
-a compatible companion is published; see [compatibility issue #6](https://github.com/mbk-dev/okama-mcp/issues/6)
-and the [3.0 migration notes](docs/releases/3.0.0.md). Core `finplan_*` tools use
-okama directly and remain available.
+contacts belong in Planner's human-operated local intake. **3.1.0 restores the
+published companion integration:** standard installs expose **52 tools**, including
+`planner_forecast` and `planner_compare_modes`. Local stdio can add anonymous client reads and report export (60 tools total). Explicit local
+`--allow-personal-data` enables full client CRUD through Planner (68 tools total). Planner 0.4.1 lacks the required
+`okama_planner.ai` interface and is outside the supported dependency range.
+See the [3.1.0 release notes](docs/releases/3.1.0.md) and
+[3.0 migration notes](docs/releases/3.0.0.md). Core `finplan_*` tools use okama directly.
 
 The easiest way — no clone, no venv — is [uv](https://docs.astral.sh/uv/) or pipx:
 
@@ -478,12 +478,14 @@ src/okama_mcp/
 
 Planner tools require a companion release providing `okama_planner.ai`. Older
 companions fail closed: household tools stay unavailable rather than exposing raw
-records. Market tools remain available. Local stdio configuration can enable nine
-client-code tools and Excel export; HTTP has no client or local report tools.
+records. Market tools remain available. Local stdio enables anonymous read-only client tools and Excel export.
+`--allow-personal-data` enables full personal reads, creation, updates and deletion
+through Planner. HTTP has no client or local report tools.
 
-Names and contacts are entered locally by a human into Planner. MCP has no
-`client_create` tool, and the former packaged intake skill is retired. Client reads
-contain pseudonyms; updates accept only `sex`, `birth_year` and `ips_sent_at`.
+By default names and contacts are entered by a human in Planner. Full personal
+MCP access requires explicit local startup opt-in; the former packaged intake skill
+remains retired. Client reads
+contain pseudonyms; anonymous mode does not register mutation tools.
 Planner owns database access, versioned plan writes and anonymization of free text.
 Forecasts carry a privacy proof; report export verifies it and returns only an opaque
 artifact filename. Tool errors contain fixed messages without private values,

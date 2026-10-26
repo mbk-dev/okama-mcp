@@ -1,6 +1,6 @@
 [project]
 name = "okama-mcp"
-version = "3.0.0"
+version = "3.1.0"
 description = "MCP (Model Context Protocol) server exposing the okama investment portfolio toolkit to AI assistants"
 authors = [{ name = "Sergey Kikevich", email = "sergey@rostsber.ru" }]
 readme = "README.md"
@@ -17,7 +17,7 @@ dependencies = [
     "fastmcp>=4.0.11,<5",
     "pydantic>=2.0",
     "scipy>=1.11",
-    "okama-planner[reports]>=0.4.0,<0.5.0",
+    "okama-planner[reports]>=0.5.0,<0.6.0",
 ]
 
 [project.urls]

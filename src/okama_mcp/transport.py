@@ -28,6 +28,8 @@ def build_parser() -> argparse.ArgumentParser:
     stdio_parser.add_argument("--client-db", type=Path, help="Explicit existing local Planner database (POSIX)")
     stdio_parser.add_argument("--reports-dir", type=Path, help="Existing local report output directory")
     stdio_parser.add_argument("--report-brand", type=Path, help="Legacy option; ignored for anonymous AI reports")
+    stdio_parser.add_argument("--allow-personal-data", action="store_true",
+                              help="Allow the LLM full client reads and mutations through Planner")
     initialize = subparsers.add_parser("init-client-db", help="Create a new empty Planner database")
     initialize.add_argument("--path", type=Path, required=True)
 
@@ -61,6 +63,12 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+
+def _check_personal_database(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    if args.allow_personal_data and not args.client_db:
+        parser.error("--allow-personal-data requires --client-db")
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point. Returns a POSIX exit code."""
     parser = build_parser()
@@ -83,11 +91,13 @@ def main(argv: list[str] | None = None) -> int:
     mcp = create_server(language=args.language)
 
     if args.command == "stdio":
+        _check_personal_database(parser, args)
         if args.client_db:
             if not args.client_db.is_absolute():
                 parser.error("--client-db must be absolute")
             from okama_mcp.tools import clients
-            clients.register(mcp, args.client_db, language=args.language)
+            clients.register(mcp, args.client_db, language=args.language,
+                             allow_personal_data=args.allow_personal_data)
         if args.report_brand and not args.reports_dir:
             parser.error("--report-brand requires --reports-dir")
         if args.reports_dir:

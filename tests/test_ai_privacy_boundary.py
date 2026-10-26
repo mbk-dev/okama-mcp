@@ -26,17 +26,13 @@ async def test_registry_only_exposes_safe_facade_and_fixed_update_schema(tmp_pat
     async with Client(server) as client:
         tools = {tool.name: tool for tool in await client.list_tools()}
         assert "client_create" not in tools
-        assert {"client_save_plan", "client_load_plan", "client_list_plans", "client_forecast"} <= tools.keys()
+        assert {"client_load_plan", "client_list_plans", "client_forecast"} <= tools.keys()
+        assert not {"client_save_plan", "client_update", "client_set_tax_residency"} & tools.keys()
         for name, args in (("client_get", {"code": code}), ("client_list", {})):
             response = await client.call_tool_mcp(name, args)
             assert not response.is_error
             assert MARKER not in response.model_dump_json()
-        schema = tools["client_update"].input_schema
-        changes = schema["properties"]["changes"]
-        if "$ref" in changes:
-            changes = schema["$defs"][changes["$ref"].split("/")[-1]]
-        assert set(changes["properties"]) == {"sex", "birth_year", "ips_sent_at"}
-        assert changes["additionalProperties"] is False
+
 
 
 @pytest.mark.asyncio
@@ -47,8 +43,8 @@ async def test_framework_errors_hide_input_keys_values_and_logs(tmp_path: Path, 
     server = FastMCP("privacy-errors")
     clients.register(server, path)
     async with Client(server) as client:
-        response = await client.call_tool_mcp("client_update", {
-            "code": code, "changes": {MARKER: MARKER}, "language": language})
+        response = await client.call_tool_mcp("client_get", {
+            "code": MARKER, "language": language})
         assert response.is_error
         assert MARKER not in response.model_dump_json()
         assert MARKER not in caplog.text

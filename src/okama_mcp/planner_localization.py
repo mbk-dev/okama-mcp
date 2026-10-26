@@ -16,7 +16,8 @@ Language = Literal["en", "ru", "de", "es", "zh"]
 LANGUAGES = ("en", "ru", "de", "es", "zh")
 SCOPED_TOOLS = {"planner_forecast", "planner_compare_modes", "planner_export_report", "client_create",
                 "client_get", "client_list", "client_update", "client_set_tax_residency",
-                "client_get_tax_residency", "client_save_plan", "client_load_plan", "client_list_plans", "client_forecast"}
+                "client_get_tax_residency", "client_save_plan", "client_load_plan", "client_list_plans", "client_forecast", "client_delete", "client_history", "client_meeting_list",
+                "client_meeting_save", "client_meeting_delete"}
 
 
 @lru_cache

@@ -162,3 +162,8 @@ withdrawal_last_date_pin,Pinned withdrawal end date,Фиксированная �
 withdrawal_rebalancing,Withdrawal rebalancing,Ребалансировка при изъятиях,Rebalancierung der Entnahmephase,Rebalanceo de retiro,提取阶段再平衡
 withdrawal_years,Withdrawal years,Период изъятий в годах,Entnahmejahre,Años de retiro,提取年数
 Creation receipt is pending; use client_list/client_get to inspect before recovery. Do not repeat creation with a new request_id,Creation receipt is pending; use client_list/client_get to inspect before recovery. Do not repeat creation with a new request_id,Запись о создании клиента не завершена; перед восстановлением проверьте данные через client_list/client_get. Не повторяйте создание с новым request_id,Der Erstellungsvorgang ist noch offen; prüfen Sie vor der Wiederherstellung die Daten mit client_list/client_get. Wiederholen Sie die Erstellung nicht mit einer neuen request_id,El registro de creación está pendiente; inspeccione los datos con client_list/client_get antes de recuperar. No repita la creación con un request_id nuevo,创建记录尚未完成；恢复前使用 client_list/client_get 检查数据。不要使用新的 request_id 重复创建
+client_delete,Delete client and owned history,Удалить клиента и его историю,Kunde und Verlauf löschen,Eliminar cliente e historial,删除客户及其历史记录
+client_history,Read client history,Прочитать историю клиента,Kundenverlauf lesen,Leer historial del cliente,读取客户历史记录
+client_meeting_list,List client meetings,Список встреч клиента,Kundentermine auflisten,Listar reuniones del cliente,列出客户会议
+client_meeting_save,Save client meeting,Сохранить встречу клиента,Kundentermin speichern,Guardar reunión del cliente,保存客户会议
+client_meeting_delete,Delete client meeting,Удалить встречу клиента,Kundentermin löschen,Eliminar reunión del cliente,删除客户会议

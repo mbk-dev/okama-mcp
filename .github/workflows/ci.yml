@@ -26,15 +26,13 @@ jobs:
           version: "0.12.23"
       - name: Install dependencies
         run: uv sync --all-groups
-      - name: Check out the privacy-capable Planner companion
-        uses: actions/checkout@v5
-        with:
-          repository: mbk-dev/okama-planner
-          ref: 588be5855cfaebddb6725c3f4f4126a3fda72a56
-          path: tmp/planner-companion
-      - name: Run unit tests with the pinned Planner source
-        env:
-          PYTHONPATH: ${{ github.workspace }}/tmp/planner-companion/src:${{ github.workspace }}/src
+      - name: Run unit tests with the published Planner companion
         run: uv run --no-sync pytest -q
       - name: Ruff
         run: uv run --no-sync ruff check .
+      - name: Build and test the installed wheel with published dependencies
+        run: |
+          uv build
+          uv venv tmp/installed
+          uv pip install --python tmp/installed/bin/python dist/*.whl
+          tmp/installed/bin/python -I tests/release/published_pair.py --fixtures examples/planner --output tmp/published-pair
