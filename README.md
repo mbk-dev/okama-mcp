@@ -33,11 +33,16 @@ require a compatible Planner companion and a configured local stdio installation
 
 ## Install
 
+**Development status (26 October 2026):** `main` prepares MCP 3.1.0 with Planner
+0.5.0; neither version has been published yet. Use the source setup below to try
+the features documented here. PyPI still provides MCP 3.0.0 with Planner 0.4.1,
+which supports core okama tools but lacks the compatible Planner integrations.
+
 Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and okama Planner ≥0.5.0,<0.6.0 (with report dependencies) are installed automatically.
 
 **3.0 upgrade:** client identity intake through MCP has been removed. Names and
-contacts belong in Planner's human-operated local intake. **3.1.0 restores the
-published companion integration:** standard installs expose **52 tools**, including
+contacts belong in Planner's human-operated local intake. **The prepared 3.1.0
+integration** exposes **52 tools** with its compatible companion, including
 `planner_forecast` and `planner_compare_modes`. Local stdio can add anonymous client reads and report export (60 tools total). Explicit local
 `--allow-personal-data` enables full client CRUD through Planner (68 tools total). Planner 0.4.1 lacks the required
 `okama_planner.ai` interface and is outside the supported dependency range.
@@ -74,6 +79,13 @@ cd okama-mcp
 uv python install 3.14
 uv sync --python 3.14 --all-groups
 ```
+
+Until Planner 0.5.0 is published, `tool.uv.sources` pins the development companion
+to an immutable Planner commit. uv builds and installs that package; no editable
+Planner checkout or `PYTHONPATH` override is needed. The published dependency
+range stays unchanged. Release checks use `uv sync --all-groups --no-sources`
+and isolated wheel installation from PyPI; they remain blocked until the companion
+is published. Remove the development pin after published-pair acceptance passes.
 
 ## Run
 

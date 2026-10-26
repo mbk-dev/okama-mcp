@@ -50,9 +50,18 @@ Personal access does not disable report proofs or sanitized error messages.
 
 ## Verification
 
-CI runs the full default suite against the published Planner, then installs the MCP
-wheel in an isolated environment and runs real stdio acceptance. Release repeats this
-gate before upload and verifies the exact published package from PyPI afterwards.
+Before publication, development setup and CI use the immutable Planner source pin
+in `tool.uv.sources`. uv builds and installs the companion package. CI runs the full
+default suite, then installs the MCP wheel with the exported runtime dependencies
+in an isolated environment and runs real stdio acceptance. This proves development
+compatibility, not availability from PyPI.
+
+The tag-triggered release gate ignores development sources with
+`uv sync --all-groups --no-sources`, tests the suite and installs the MCP wheel using
+only published dependencies. It verifies the exact MCP package from PyPI after upload.
+Until Planner 0.5.0 is published, that gate must fail; no release was performed on
+26 October 2026. Remove the development pin after published-pair acceptance passes.
 `tests/release/published_pair.py` checks default read-only anonymization, explicit
 personal CRUD, forecast/comparison, storage, reports and rejected invalid proofs.
-There is no companion source checkout or PYTHONPATH override in these gates.
+The installed-wheel gates use Python `-I`, check imports inside the environment,
+and do not inject a companion checkout through `PYTHONPATH` or an editable install.

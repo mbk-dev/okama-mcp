@@ -24,15 +24,16 @@ jobs:
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: "0.12.23"
-      - name: Install dependencies
+      - name: Install development dependencies with the pinned Planner companion
         run: uv sync --all-groups
-      - name: Run unit tests with the published Planner companion
+      - name: Run unit tests with the pinned Planner companion
         run: uv run --no-sync pytest -q
       - name: Ruff
         run: uv run --no-sync ruff check .
-      - name: Build and test the installed wheel with published dependencies
+      - name: Build and test the installed wheel with development dependencies
         run: |
           uv build
+          uv export --no-default-groups --no-emit-project --no-hashes --output-file tmp/runtime-requirements.txt
           uv venv tmp/installed
-          uv pip install --python tmp/installed/bin/python dist/*.whl
+          uv pip install --python tmp/installed/bin/python dist/*.whl -r tmp/runtime-requirements.txt
           tmp/installed/bin/python -I tests/release/published_pair.py --fixtures examples/planner --output tmp/published-pair

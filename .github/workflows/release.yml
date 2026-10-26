@@ -34,7 +34,7 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
-          uv sync --all-groups
+          uv sync --all-groups --no-sources
           uv run --no-sync pytest -q
           uv run --no-sync ruff check .
           uv venv tmp/installed
