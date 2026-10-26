@@ -26,13 +26,23 @@ With okama-mcp installed, you can ask an AI things like:
 
 Built on [FastMCP](https://github.com/jlowin/fastmcp). Single codebase, two transports:
 `stdio` (for local clients) and `streamable-http` (for self-hosting).
-okama-mcp is free and open source. Run it locally or on your own server. The public
-HTTP endpoint offers portfolio and planning calculations; client registry tools and
-Excel exports require a configured local stdio installation.
+okama-mcp is free and open source. Run it locally or on your own server. The HTTP
+transport is intended for self-hosting; mcp.okama.io serves the project
+landing page, not a public MCP endpoint. Client registry tools and Excel exports
+require a compatible Planner companion and a configured local stdio installation.
 
 ## Install
 
 Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and okama Planner 0.4.x (with report dependencies) are installed automatically.
+
+**3.0 upgrade:** client identity intake through MCP has been removed. Names and
+contacts belong in Planner's human-operated local intake. The currently published
+Planner 0.4.1 lacks `okama_planner.ai`, so standard installs expose **50 market,
+portfolio, financial-plan and chart tools**, without the two household Planner
+tools or local client/report integrations. Those integrations fail closed until
+a compatible companion is published; see [compatibility issue #6](https://github.com/mbk-dev/okama-mcp/issues/6)
+and the [3.0 migration notes](docs/releases/3.0.0.md). Core `finplan_*` tools use
+okama directly and remain available.
 
 The easiest way — no clone, no venv — is [uv](https://docs.astral.sh/uv/) or pipx:
 
@@ -202,8 +212,8 @@ portfolio against gold, or put a sub-portfolio on the efficient frontier.
 
 | Tool | Purpose |
 |---|---|
-| `search_assets(query="", namespace?, asset_type?, oldest_first?, limit=50)` | Free-text search by name / local name / ticker / ISIN. Filter by okama type and sort by `first_date`; for example, `namespace="MOEX", asset_type="ETF", oldest_first=true, limit=5` finds the five oldest MOEX-listed BPIFs. |
-| `list_namespaces(kind="all"\|"assets"\|"macro")` | Show the available okama namespaces. |
+| `search_assets(query="", namespace?, asset_type?, oldest_first?, limit=50, offset=0)` | Search by name / local name / ticker / ISIN, with exact identifiers and names ranked first; follow `next_offset` while `has_more` is true. Filter by okama type and sort by `first_date`; for example, `namespace="MOEX", asset_type="ETF", oldest_first=true, limit=5` finds the five oldest MOEX-listed BPIFs. |
+| `list_namespaces(kind="all"\|"assets"\|"macro")` | Show namespace descriptions plus `usage`: asset/macro classification, support for asset returns, and available MCP tools. |
 | `get_asset_info(symbol)` | Metadata for one symbol — name, country, currency, type, date range. |
 
 ### Single asset & comparisons
@@ -214,7 +224,7 @@ portfolio against gold, or put a sub-portfolio on the efficient frontier.
 | `compare_assets(symbols, ccy, ..., portfolios?, rf_return?, t_return?)` | Side-by-side statistics (`describe()` table: CAGR, risk, drawdowns by period) plus Sharpe & Sortino per asset. |
 | `get_correlations(symbols, ccy, ..., portfolios?)` | Correlation matrix of monthly returns. |
 | `get_rolling_risk(symbols, ccy, window_months=12, ..., portfolios?)` | Rolling annualized risk per asset. |
-| `get_asset_returns(symbols, ccy, ..., portfolios?, period?, real=False)` | Return metrics per asset: CAGR, cumulative return, mean / real mean return, monthly geometric mean, annual returns table. |
+| `get_asset_returns(symbols, ccy, ..., portfolios?, period?, real=False)` | Return metrics per asset: CAGR, cumulative return, mean / real mean return, monthly geometric mean, annual returns table. With `inflation=False`, nominal metrics remain available and `real_mean_return` is `null`; `real=True` requires `inflation=True`. |
 | `get_rolling_returns(symbols, ccy, window_months=12, real=False, ..., portfolios?)` | Rolling CAGR and rolling cumulative return per asset. |
 | `get_benchmark_metrics(benchmark, symbols, ccy, ..., portfolios?, rolling_window?)` | Beta, correlation, annualized tracking difference and tracking error of each asset vs a benchmark/index. |
 | `get_dividend_info(symbols, ccy, ...)` | LTM dividend yield, 5y mean yield, paying/growing streaks per asset. |
@@ -317,9 +327,36 @@ and open the file reference. Note: in self-hosted (streamable-http) deployments
 | `plot_assets(symbols, ccy, ..., portfolios?)` | Wealth-index comparison of individual assets. |
 | `plot_macro(symbols, first_date?, last_date?, frequency="monthly"\|"daily")` | Line chart of inflation / central-bank rate / CAPE10 series. Overlay multiple symbols (e.g. `["USA_CAPE10.RATIO", "EUR_CAPE10.RATIO"]`). `frequency='daily'` valid only for `.RATE` symbols. |
 
+## Finding symbols and choosing tools
+
+Start with `list_namespaces()`: its original `namespaces` description mapping is
+preserved, and `usage` explains what each namespace supports. Use
+`search_assets(namespace="INDX")` to browse an index catalog, or
+`search_assets(query="bitcoin", namespace="CC")` for cryptocurrencies. Search rows
+include `namespace` and `supports_asset_returns` (null when unknown).
+
+Search is case-insensitive; exact symbol/ticker/ISIN matches rank first, then
+exact names, prefixes and other matches. Scoped queries match punctuation
+literally. With `oldest_first=true`, date order takes precedence. Symbol order
+breaks ties. Results are ordered before paging: repeat the same query and filters
+with `offset=next_offset` until `has_more=false`. `count` describes all filtered
+matches; `truncated` means the current page is not the entire result set, including
+the last page of a multi-page result. Pages reflect the current catalog, so data
+updates between calls can move page boundaries.
+
+`RATE`, `INFL` and `RATIO` are macroeconomic series. Read their values and metadata
+with `get_central_bank_rate`, `get_inflation` and `get_indicator`, respectively.
+For example, `RUS_RUB.RATE` describes a deposit rate, whereas `OKID.INDX` is an
+investment-return index: they are different inputs. Asset tools reject a macro
+symbol with the appropriate next call; they never replace it with an index.
+Discover the intended index separately before comparing returns. Unknown upstream
+namespaces have no advertised MCP routes until support is implemented.
+
 ## Spec shapes
 
-The complex tools take typed dicts validated by pydantic. The full schemas live in
+The complex tools accept JSON objects described by complete Pydantic-generated
+input schemas in MCP `tools/list`: nested fields, required values, constraints,
+defaults and cash-flow variants are visible to the client. Definitions live in
 `src/okama_mcp/schemas.py`; here are the headline shapes:
 
 ```jsonc
