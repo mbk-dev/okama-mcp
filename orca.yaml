@@ -1,12 +1,8 @@
-# Orca per-repo configuration, committed so every worktree is set up the same way.
-# `scripts.setup` runs in every freshly created worktree, with the worktree as CWD.
+# Runs in each fresh worktree before the agent and its MCP client start.
 scripts:
   setup: |
     set -euo pipefail
-    # poetry and the pinned interpreter live in ~/.local/bin, which a
-    # non-login setup shell may not have on PATH.
     export PATH="$HOME/.local/bin:$PATH"
-    # `.python-version` is inert without pyenv; select the setup interpreter
-    # explicitly while preserving the package's supported Python range.
-    poetry env use python3.14
-    poetry install
+    command -v uv >/dev/null || { echo "uv is required; install uv before Orca setup" >&2; exit 1; }
+    uv python install 3.14
+    uv sync --python 3.14 --all-groups

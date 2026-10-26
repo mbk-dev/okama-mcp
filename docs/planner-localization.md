@@ -24,7 +24,7 @@ fails closed, including when an older released companion is installed.
 Run the synthetic language/error checks:
 
 ```bash
-poetry run pytest -q tests/test_planner_localization.py tests/test_ai_privacy_boundary.py
+uv run pytest -q tests/test_planner_localization.py tests/test_ai_privacy_boundary.py
 ```
 
 The legacy `--report-brand` argument is accepted for startup compatibility but ignored:

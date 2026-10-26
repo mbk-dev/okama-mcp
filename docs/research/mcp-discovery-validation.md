@@ -110,13 +110,16 @@ this environment; client-specific context and schema handling remain to be teste
 
 ## Manual client check
 
+After the Poetry-to-uv migration, the equivalent current source commands are below.
+The historical validation commands above retain the tooling actually used for that run.
+
 From the built task worktree, connect a client using:
 
 ```bash
-poetry run okama-mcp stdio
+uv run okama-mcp stdio
 ```
 
-For HTTP, start `poetry run okama-mcp http --host 127.0.0.1 --port 8765` and connect
+For HTTP, start `uv run okama-mcp http --host 127.0.0.1 --port 8765` and connect
 the client to `http://127.0.0.1:8765/mcp`. These commands exercise the local source;
 a remote published server has not received these changes.
 

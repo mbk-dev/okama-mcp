@@ -18,21 +18,24 @@ okama classes directly.
 
 ## Development setup
 
-The project uses [Poetry](https://python-poetry.org/) for environment and dependency
-management. Python ≥ 3.11 is required (same floor as okama).
+The project uses [uv](https://docs.astral.sh/uv/) for environment and dependency
+management. Each checkout owns its `.venv`; test and dev groups are installed
+by default. `uv.lock` is generated locally and is not committed. Fresh checkouts
+resolve compatible dependency versions. Python ≥ 3.11 is required (same floor as okama).
 
 ```bash
 git clone https://github.com/mbk-dev/okama-mcp
 cd okama-mcp
-poetry install
+uv python install 3.14
+uv sync --python 3.14 --all-groups
 ```
 
 Run the server from the source checkout:
 
 ```bash
-poetry run okama-mcp stdio
+uv run okama-mcp stdio
 # or
-poetry run okama-mcp http --host 127.0.0.1 --port 8765
+uv run okama-mcp http --host 127.0.0.1 --port 8765
 ```
 
 ## Test-driven development
@@ -45,19 +48,19 @@ don't need new tests.
 Run the test suite:
 
 ```bash
-poetry run pytest -q
+uv run pytest -q
 ```
 
 The live-API integration test (hits `api.okama.io`, slow and network-dependent) is excluded
 by default; run it explicitly when your change affects okama interaction:
 
 ```bash
-poetry run pytest -m integration
+uv run pytest -m integration
 ```
 
 ## Code style
 
-- Lint with ruff before submitting: `poetry run ruff check .` must report no issues.
+- Lint with ruff before submitting: `uv run ruff check .` must report no issues.
   The ruff configuration in `pyproject.toml` is the authoritative style guide.
 - Use modern Python syntax: built-in generics (`list[int]`, `dict[str, Any]`), union types
   (`X | None`), literals over constructor calls (`{}`, `[]`).
@@ -67,7 +70,7 @@ poetry run pytest -m integration
 
 ## Project conventions
 
-- **Dependencies** go in **both** `pyproject.toml` (via `poetry add`) and `requirements.txt`.
+- **Dependencies** go in **both** `pyproject.toml` (via `uv add`) and `requirements.txt`.
 - **Tool input contracts** live in `src/okama_mcp/schemas.py` as pydantic v2 models.
 - **Tools are stateless** from the client's point of view: every call accepts a full spec
   (e.g. `PortfolioSpec`). Internal caching by content hash is fine; implicit session state
@@ -81,7 +84,7 @@ poetry run pytest -m integration
 
 1. Fork the repository and create a feature branch.
 2. Make your change following TDD (tests first).
-3. Make sure `poetry run pytest -q` and `poetry run ruff check .` pass.
+3. Make sure `uv run pytest -q` and `uv run ruff check .` pass.
 4. Open a pull request using the PR template. Keep PRs focused — one logical change per PR.
 
 For bugs and feature ideas, please use the issue forms — they ask for the details we need

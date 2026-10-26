@@ -29,7 +29,7 @@ Not for: single-asset return lookups, portfolio optimisation, or plain Monte Car
 ## Workflow
 
 1. **Gate the data.**
-   `poetry run python stress_test.py check SYM1 SYM2 ... --first 2010-02`
+   `uv run python stress_test.py check SYM1 SYM2 ... --first 2010-02`
    Reports the binding history floor and every frozen price run. Do not walk past
    a finding — resolve it, or state it and its direction of bias in the report.
 2. **If the episodes predate the floor, build a proxy** from long-history indices

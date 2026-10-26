@@ -71,7 +71,8 @@ To work on the code, install from source instead:
 ```bash
 git clone https://github.com/mbk-dev/okama-mcp
 cd okama-mcp
-poetry install
+uv python install 3.14
+uv sync --python 3.14 --all-groups
 ```
 
 ## Run
@@ -84,7 +85,11 @@ okama-mcp stdio
 okama-mcp http --host 127.0.0.1 --port 8765
 ```
 
-When running from a source checkout, prefix each command with `poetry run`.
+When running from a source checkout, prefix each command with `uv run`.
+Each worktree has its own `.venv`; test and dev groups are installed by default.
+`uv.lock` is generated locally and is not committed, so fresh checkouts resolve
+compatible versions independently. Orca runs the bootstrap in `orca.yaml` before
+starting the agent; its source MCP configuration uses `uv run --no-sync` after setup.
 
 ## Connect a client
 
@@ -114,7 +119,7 @@ To make the server available in **every** project (works from any directory):
 claude mcp add --scope user okama -- uvx okama-mcp stdio
 ```
 
-Developers running from a source checkout can use `claude mcp add okama -- poetry run okama-mcp stdio` from the project root instead.
+Developers running from a source checkout can use `claude mcp add okama -- uv run okama-mcp stdio` from the project root instead.
 
 Or commit a `.mcp.json` at the project root so the whole team picks it up:
 
@@ -173,7 +178,7 @@ Run okama-mcp on your own server and share it across your MCP clients:
 okama-mcp http --host 127.0.0.1 --port 8765 --path /mcp
 ```
 
-(From source: `poetry run okama-mcp http ...`)
+(From source: `uv run okama-mcp http ...`)
 
 Then point your MCP client at `http://<your-server>:8765/mcp`. For a production
 setup put nginx + TLS in front; ready-made examples live in `deploy/`:
@@ -438,14 +443,14 @@ defaults and cash-flow variants are visible to the client. Definitions live in
 The project follows TDD (see `AGENTS.md`). After every code change run:
 
 ```bash
-poetry run pytest -q
-poetry run ruff check .
+uv run pytest -q
+uv run ruff check .
 ```
 
 To run the live-API integration test (hits `api.okama.io`):
 
 ```bash
-poetry run pytest -m integration
+uv run pytest -m integration
 ```
 
 ## Project layout

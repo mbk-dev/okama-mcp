@@ -2,9 +2,10 @@
   "mcpServers": {
     "okama": {
       "type": "stdio",
-      "command": "poetry",
+      "command": "uv",
       "args": [
         "run",
+        "--no-sync",
         "okama-mcp",
         "stdio"
       ],

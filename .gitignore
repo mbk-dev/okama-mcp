@@ -14,5 +14,6 @@ build/
 htmlcov/
 *.log
 poetry.lock
+uv.lock
 tmp/
 .playwright-mcp/

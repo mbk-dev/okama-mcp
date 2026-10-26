@@ -15,7 +15,7 @@ intake workflow, which is no longer included in packages.
 Use explicitly selected local paths:
 
 ```bash
-poetry run okama-mcp stdio \
+uv run okama-mcp stdio \
   --client-db /absolute/local-data/clients.sqlite3 \
   --reports-dir /absolute/local-reports
 ```
@@ -68,7 +68,7 @@ database schema nor filesystem paths appear in errors or server error logs.
 ## Synthetic hands-on check
 
 ```bash
-poetry run python examples/local_planner_client.py
+uv run python examples/local_planner_client.py
 ```
 
 The example uses an isolated synthetic database under ignored `tmp/`, creates its

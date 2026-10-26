@@ -3,7 +3,7 @@
 These are skipped by default (``pytest -q`` ignores them) because they require
 network access and take seconds rather than milliseconds. Run them with:
 
-    poetry run pytest -m integration
+    uv run pytest -m integration
 
 They serve as the smoke-test for Phase 8 — end-to-end proof that the FastMCP
 server, the tool wrappers, the schemas, and okama all line up against the

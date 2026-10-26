@@ -28,8 +28,8 @@ first (RED → GREEN → REFACTOR). Describe the tests that cover this change.
 
 ## Checklist
 
-- [ ] Tests added/updated for the change, and `poetry run pytest -q` passes
-- [ ] `poetry run ruff check .` reports no issues
+- [ ] Tests added/updated for the change, and `uv run pytest -q` passes
+- [ ] `uv run ruff check .` reports no issues
 - [ ] New dependencies (if any) added to **both** `pyproject.toml` and `requirements.txt`
 - [ ] New/changed tools are reflected in the README tool catalog and schemas docs
 - [ ] Comments, docstrings, and documentation are in English

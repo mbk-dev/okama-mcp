@@ -12,7 +12,7 @@ https://mcp.okama.io/ as `deploy/nginx/announce-en.png`).
 
 ## Regenerate the cover
 
-1. (Optional) refresh the chart: `poetry run python docs/images/src/make_irr_chart_en.py` —
+1. (Optional) refresh the chart: `uv run python docs/images/src/make_irr_chart_en.py` —
    then update the IRR numbers quoted in the assistant bubble of `announce-en.html`
    if they changed.
 2. Update the baked-in facts in `announce-en.html`: the tool count in the footer

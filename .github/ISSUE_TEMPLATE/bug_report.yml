@@ -80,7 +80,7 @@ body:
         - uvx
         - pipx
         - pip
-        - source (poetry)
+        - source (uv)
   - type: input
     id: client
     attributes:

@@ -26,11 +26,11 @@ that automation. Do them in order.
   release fails *after* PyPI has accepted the upload, do **not** retry the same
   version — bump to the next patch and start over.
 - **Three versions must match exactly:** the tag (`X.Y.Z`), `pyproject.toml`
-  `[tool.poetry] version`, `server.json` top-level `version`, and `server.json`
+  `[project] version`, `server.json` top-level `version`, and `server.json`
   `packages[0].version`. Both workflows hard-fail otherwise.
 - The tag push is the irreversible, outward step. Treat it like a deploy:
   get the user's go-ahead before pushing the tag.
-- Never commit `poetry.lock` (it is gitignored).
+- Never commit `uv.lock` or legacy `poetry.lock` (both are gitignored).
 
 ## 1. Pre-flight
 
@@ -50,9 +50,9 @@ New okama tools or new optional parameters are **minor**.
 Run the quality gates — all must be clean:
 
 ```bash
-poetry run pytest -q
-poetry run ruff check .
-poetry run pytest -m integration   # optional but recommended: hits api.okama.io
+uv run pytest -q
+uv run ruff check .
+uv run pytest -m integration   # optional but recommended: hits api.okama.io
 ```
 
 ## 2. Bump the version (three places, identical value)
@@ -67,7 +67,7 @@ all four equal before going further:
 
 ```bash
 NEW=X.Y.Z
-PYPROJECT=$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)
+PYPROJECT=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
 SERVER=$(.venv/bin/python -c "import json;print(json.load(open('server.json'))['version'])")
 PKG=$(.venv/bin/python -c "import json;print(json.load(open('server.json'))['packages'][0]['version'])")
 echo "tag=$NEW pyproject=$PYPROJECT server=$SERVER pkg=$PKG"
@@ -108,7 +108,7 @@ commands, feature highlights, or the **tool count baked into the cover image**.
   `file:` protocol is blocked, so serve over HTTP):
 
   ```bash
-  cd docs/images/src && poetry run python -m http.server 8799 --bind 127.0.0.1 &
+  cd docs/images/src && uv run python -m http.server 8799 --bind 127.0.0.1 &
   # headless-browser screenshot of http://127.0.0.1:8799/announce-en.html at
   # 1200x630 -> save to docs/images/announce-en.png AND deploy/nginx/announce-en.png
   # then: pkill -f "http.server 8799"

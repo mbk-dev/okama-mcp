@@ -1,10 +1,13 @@
 # okama-mcp — Development rules for AI agents
 
 ## Environment
-- Project uses poetry for environment & dependency management.
+- Project uses uv for environment and dependency management. Each worktree owns its `.venv/`.
 - New dependencies must be added in `pyproject.toml` and additionally to `requirements.txt`.
-- Use interpreter in poetry env (`poetry run python ...`).
-- Always use `poetry add` instead of `pip install`.
+- Use the interpreter in the uv environment (`uv run python ...`).
+- Use `uv add` for runtime dependencies, `uv add --group test` for test tools, and
+  `uv add --group dev` for development tools. Both groups are installed by default.
+- `uv.lock` is local and gitignored, as this project is distributed through PyPI.
+  Fresh checkouts resolve compatible versions; do not require `--locked` before the first sync.
 - **All temporary files (including generated images, screenshots, scratch scripts, data
   dumps) go into the gitignored `tmp/` directory at the project root** — never into the
   repo root, `/tmp`, or source directories. Clean it up freely; nothing in `tmp/` is
@@ -20,22 +23,26 @@ repo**, so a machine rebuild loses them silently; re-apply both:
   --worktree-base-path ../../../wt`.
 - **Wait for setup to complete before starting agent** — a toggle in Orca's repository
   settings, no CLI equivalent. Without it the agent (and its MCP client) starts while
-  `poetry install` is still running, which is exactly the failure below.
+  `uv sync --all-groups` is still running, which is exactly the failure below.
 
 Never type anything into Orca's local *Setup Script* field: a non-empty local script flips
 `commandSourcePolicy` to `local-only` and silently disables the committed `orca.yaml`.
 
-**A fresh worktree has no usable environment until its poetry env is built.** `orca.yaml`
+**A fresh worktree has no usable environment until its uv environment is built.** `orca.yaml`
 (`scripts.setup`) does that automatically for Orca-created worktrees; for a manual
 `git worktree add`, run the same two commands in the new tree before anything else:
 
 ```bash
-poetry env use python3.14   # `.python-version` is inert without pyenv; select explicitly
-poetry install
+uv python install 3.14
+uv sync --python 3.14 --all-groups
 ```
 
+uv must be installed and visible on PATH to both the setup shell and the later agent/MCP
+process; setup exports do not propagate to later launches. Avoid inherited
+`UV_PROJECT_ENVIRONMENT` overrides that select another worktree.
+
 Skipping this breaks more than the tests: `.mcp.json` starts the okama MCP server with
-`poetry run okama-mcp stdio` in the current directory, so an unbuilt env makes the server
+`uv run --no-sync okama-mcp stdio` in the current directory, so an unbuilt env makes the server
 exit before the MCP handshake and the client reports only `Connection closed`.
 
 ## Test-Driven Development (TDD)
@@ -48,12 +55,12 @@ Cycle: **RED → verify RED → GREEN → verify GREEN → REFACTOR**.
 
 ## After any code changes:
 1) Determine whether *executable Python code* was changed, not just comments or docstrings.
-2) If executable code was changed — always run tests: `poetry run pytest -q`.
+2) If executable code was changed — always run tests: `uv run pytest -q`.
 3) If only comments, docstrings or markdown files were changed — do not run tests.
 4) If test execution reveals any failures or errors, attempt to fix them and re-run the tests.
    Do not repeat this cycle more than 2 times. If tests are still failing after that, stop and
    report the remaining issues instead of continuing.
-5) Before finishing any code change, run `poetry run ruff check .` and fix every reported issue.
+5) Before finishing any code change, run `uv run ruff check .` and fix every reported issue.
    If a warning is truly unavoidable, silence it with a targeted `# noqa: <CODE>` comment on the
    offending line and include a brief rationale. Never disable rules globally or use a bare `# noqa`.
 6) After completing any **significant** change (new or changed tools, schema changes, transport or
@@ -64,10 +71,10 @@ Cycle: **RED → verify RED → GREEN → verify GREEN → REFACTOR**.
 
 ## Python style & modernization
 
-- **Minimum supported Python version is taken from `pyproject.toml`** (the `python = "..."`
-  constraint under `[tool.poetry.dependencies]`). All code must run unchanged on that minimum.
+- **Minimum supported Python version is taken from `pyproject.toml`** (the `requires-python`
+  constraint under `[project]`). All code must run unchanged on that minimum.
 - **Keep the Python version floor aligned with the `okama` library.** Whenever you set or change
-  the `python` constraint in `pyproject.toml`, check okama's own `python` constraint (its
+  the `requires-python` constraint in `pyproject.toml`, check okama's own `python` constraint (its
   `pyproject.toml` / PyPI metadata) and keep the floors identical — okama-mcp must not claim
   support for Python versions okama itself does not support, nor require a higher floor without
   a documented reason.
