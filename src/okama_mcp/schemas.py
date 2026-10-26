@@ -414,6 +414,44 @@ class ClientSafeResidency(BaseModel):
     country: str = Field(pattern=r"^[A-Za-z]{2}$")
 
 
+ClientDataMode = Literal["anonymous", "personal_data"]
+
+
+class ClientDataAccessSettings(BaseModel):
+    """Persistent, database-scoped MCP policy; contains no client identities."""
+    model_config = ConfigDict(extra="forbid")
+    mode: ClientDataMode
+
+
+class ClientPersonalChanges(BaseModel):
+    """Sparse client edits; Planner validates the merged record before saving."""
+    model_config = ConfigDict(extra="forbid")
+    full_name: str | None = Field(default=None, min_length=1)
+    crm_id: str | None = None
+    sex: Literal["male", "female"] | None = None
+    birth_year: int | None = Field(default=None, strict=True, ge=1, le=9999)
+    email: str | None = None
+    phone: str | None = None
+    telegram: str | None = None
+    telegram_id: int | None = Field(default=None, strict=True, ge=1, le=9223372036854775807)
+    whatsapp: str | None = None
+    max_messenger: str | None = None
+    brokers: list[str] | None = None
+    primary_channel: Literal["email", "phone", "telegram", "whatsapp", "max"] | None = None
+    ips_sent_at: str | None = None
+    note: str | None = None
+
+
+class ClientPersonalDetails(ClientPersonalChanges):
+    """Creation requires a name; Planner owns further identity validation."""
+    full_name: str = Field(min_length=1)
+
+
+class ClientPersonalResidency(ClientSafeResidency):
+    """Full residency record, writable only with personal data access enabled."""
+    note: str | None = None
+
+
 class PlannerReportScenario(BaseModel):
     """Saved request/result pair; the companion verifies its provenance and horizon."""
     model_config = ConfigDict(extra="forbid")

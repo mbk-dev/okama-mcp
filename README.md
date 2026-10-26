@@ -34,20 +34,20 @@ require a compatible Planner companion and a configured local stdio installation
 ## Install
 
 **Development status (26 October 2026):** `main` prepares MCP 3.1.0 with Planner
-0.5.0; neither version has been published yet. Use the source setup below to try
-the features documented here. PyPI still provides MCP 3.0.0 with Planner 0.4.1,
-which supports core okama tools but lacks the compatible Planner integrations.
+0.5.0; neither version has been published yet. Use the source setup below.
+PyPI still provides MCP 3.0.0 with Planner 0.4.1 and its earlier contracts.
 
-Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and okama Planner ≥0.5.0,<0.6.0 (with report dependencies) are installed automatically.
+Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and
+`okama-planner[reports]>=0.5.0,<0.6.0` are required.
 
-**3.0 upgrade:** client identity intake through MCP has been removed. Names and
-contacts belong in Planner's human-operated local intake. **The prepared 3.1.0
-integration** exposes **52 tools** with its compatible companion, including
-`planner_forecast` and `planner_compare_modes`. Local stdio can add anonymous client reads and report export (60 tools total). Explicit local
-`--allow-personal-data` enables full client CRUD through Planner (68 tools total). Planner 0.4.1 lacks the required
-`okama_planner.ai` interface and is outside the supported dependency range.
-See the [3.1.0 release notes](docs/releases/3.1.0.md) and
-[3.0 migration notes](docs/releases/3.0.0.md). Core `finplan_*` tools use okama directly.
+**Client data modes (source checkout):** local MCP defaults to anonymous reads.
+`client_data_mode_set({"mode":"personal_data"})` enables full client CRUD;
+`{"mode":"anonymous"}` disables client writes again. The setting persists per
+database across connections. `uv sync` installs a pinned Planner 0.5.0 source
+revision with the required access API. PyPI still provides Planner 0.4.1, so the prepared release remains blocked until the compatible companion is published;
+see [installation and release gates](docs/planner.md#installation).
+Market and `finplan_*` tools remain available independently. See the
+[3.0 migration notes](docs/releases/3.0.0.md) for the earlier release behavior.
 
 The easiest way — no clone, no venv — is [uv](https://docs.astral.sh/uv/) or pipx:
 
@@ -80,12 +80,10 @@ uv python install 3.14
 uv sync --python 3.14 --all-groups
 ```
 
-Until Planner 0.5.0 is published, `tool.uv.sources` pins the development companion
-to an immutable Planner commit. uv builds and installs that package; no editable
-Planner checkout or `PYTHONPATH` override is needed. The published dependency
-range stays unchanged. Release checks use `uv sync --all-groups --no-sources`
-and isolated wheel installation from PyPI; they remain blocked until the companion
-is published. Remove the development pin after published-pair acceptance passes.
+Until Planner 0.5.0 is published, `tool.uv.sources` pins an immutable development
+companion. Release gates use `uv sync --all-groups --no-sources` and require
+published dependencies; no source substitution is used for publication.
+Remove the development pin after published-pair acceptance passes.
 
 ## Run
 
@@ -215,7 +213,8 @@ indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD:
 ![Efficient frontier — SPY.US, BND.US, GLD.US (USD)](https://raw.githubusercontent.com/mbk-dev/okama-mcp/main/docs/images/efficient-frontier.png)
 
 Financial tools are **stateless** — pass the full portfolio specification with every call.
-Optional local client tools use explicit stable registry codes and persistent creation request IDs.
+Optional local client tools use stable registry codes and a persistent, database-scoped access mode.
+Client creation is not idempotent: inspect the registry before retrying an ambiguous creation result.
 The server caches expensive okama objects (`Portfolio`, `EfficientFrontier`) by content
 hash, so repeated calls on the same spec are fast.
 
@@ -488,21 +487,25 @@ src/okama_mcp/
 
 ## Planner and local client workflows
 
-Planner tools require a companion release providing `okama_planner.ai`. Older
-companions fail closed: household tools stay unavailable rather than exposing raw
-records. Market tools remain available. Local stdio enables anonymous read-only client tools and Excel export.
-`--allow-personal-data` enables full personal reads, creation, updates and deletion
-through Planner. HTTP has no client or local report tools.
+Planner tools require a companion providing `okama_planner.ai`; local client
+modes additionally require `PlannerClientAccess`. `uv sync` resolves the pinned
+compatible source. Missing APIs fail closed. Configured local stdio exposes
+17 client tools and Excel export (70 tools total); HTTP has no client or local report tools.
 
-By default names and contacts are entered by a human in Planner. Full personal
-MCP access requires explicit local startup opt-in; the former packaged intake skill
-remains retired. Client reads
-contain pseudonyms; anonymous mode does not register mutation tools.
-Planner owns database access, versioned plan writes and anonymization of free text.
-Forecasts carry a privacy proof; report export verifies it and returns only an opaque
-artifact filename. Tool errors contain fixed messages without private values,
-database details or filesystem paths.
+The default `anonymous` mode returns pseudonyms and refuses all persistent client
+writes. Personal details are maintained in Planner. Call `client_data_mode_set`
+with `mode="personal_data"` to read full records, create, update or delete clients,
+and save residency notes and plan versions through Planner's API. Call it with
+`mode="anonymous"` to return to anonymous access. `client_data_mode_get` shows the
+saved mode, shared by connections using the same database and retained on restart.
 
+Deletion includes the selected client's linked Planner records. Sparse updates
+preserve omitted fields; explicit null clears an optional field where Planner
+permits it. Forecasts and reports stay anonymous in both modes. Errors use fixed
+messages without private values, database details or filesystem paths.
+The legacy `--allow-personal-data` flag only initializes a missing saved setting;
+it never overrides a mode explicitly saved through MCP. Meetings and bounded
+history pages use the same access policy. The former packaged intake skill remains retired.
 See [configuration and tool contracts](docs/planner.md) and
 [language behavior](docs/planner-localization.md).
 

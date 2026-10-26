@@ -19,20 +19,24 @@ def database(tmp_path: Path) -> tuple[Path, str]:
 
 
 @pytest.mark.asyncio
-async def test_registry_only_exposes_safe_facade_and_fixed_update_schema(tmp_path: Path) -> None:
+async def test_registry_defaults_to_safe_reads_and_has_strict_update_schema(tmp_path: Path) -> None:
     path, code = database(tmp_path)
     server = FastMCP("privacy")
     clients.register(server, path)
     async with Client(server) as client:
         tools = {tool.name: tool for tool in await client.list_tools()}
-        assert "client_create" not in tools
-        assert {"client_load_plan", "client_list_plans", "client_forecast"} <= tools.keys()
-        assert not {"client_save_plan", "client_update", "client_set_tax_residency"} & tools.keys()
+        assert {"client_create", "client_delete", "client_data_mode_get", "client_data_mode_set"} <= tools.keys()
+        assert {"client_save_plan", "client_load_plan", "client_list_plans", "client_forecast"} <= tools.keys()
         for name, args in (("client_get", {"code": code}), ("client_list", {})):
             response = await client.call_tool_mcp(name, args)
             assert not response.is_error
             assert MARKER not in response.model_dump_json()
-
+        schema = tools["client_update"].input_schema
+        changes = schema["properties"]["changes"]
+        if "$ref" in changes:
+            changes = schema["$defs"][changes["$ref"].split("/")[-1]]
+        assert {"sex", "birth_year", "ips_sent_at", "full_name", "email"} <= changes["properties"].keys()
+        assert changes["additionalProperties"] is False
 
 
 @pytest.mark.asyncio
@@ -43,8 +47,8 @@ async def test_framework_errors_hide_input_keys_values_and_logs(tmp_path: Path, 
     server = FastMCP("privacy-errors")
     clients.register(server, path)
     async with Client(server) as client:
-        response = await client.call_tool_mcp("client_get", {
-            "code": MARKER, "language": language})
+        response = await client.call_tool_mcp("client_update", {
+            "code": code, "changes": {MARKER: MARKER}, "language": language})
         assert response.is_error
         assert MARKER not in response.model_dump_json()
         assert MARKER not in caplog.text
@@ -144,9 +148,7 @@ async def test_client_get_language_presents_only_pseudonyms(tmp_path: Path, lang
         assert MARKER not in response.model_dump_json()
         assert code in response.model_dump_json()
         schema = json.dumps([tool.input_schema for tool in await client.list_tools()])
-        assert "ClientDetails" not in schema
-        assert '"email"' not in schema
-        assert '"full_name"' not in schema
+        assert MARKER not in schema
 
 
 def test_local_brand_identity_file_is_not_read_by_mcp(tmp_path: Path, monkeypatch) -> None:

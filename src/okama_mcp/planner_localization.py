@@ -12,11 +12,14 @@ from fastmcp.tools.base import ToolResult
 from mcp.types import CallToolRequestParams
 from fastmcp.tools.function_tool import FunctionTool
 
+from okama_mcp.client_data_access import PersonalDataAccessRequired
+
 Language = Literal["en", "ru", "de", "es", "zh"]
 LANGUAGES = ("en", "ru", "de", "es", "zh")
 SCOPED_TOOLS = {"planner_forecast", "planner_compare_modes", "planner_export_report", "client_create",
+                "client_delete", "client_data_mode_get", "client_data_mode_set",
                 "client_get", "client_list", "client_update", "client_set_tax_residency",
-                "client_get_tax_residency", "client_save_plan", "client_load_plan", "client_list_plans", "client_forecast", "client_delete", "client_history", "client_meeting_list",
+                "client_get_tax_residency", "client_save_plan", "client_load_plan", "client_list_plans", "client_forecast", "client_history", "client_meeting_list",
                 "client_meeting_save", "client_meeting_delete"}
 
 
@@ -83,7 +86,8 @@ def present_client(record: dict[str, Any], language: str) -> dict[str, Any]:
 def localize_error(error: Exception, language: str) -> str:
     """Return only a fixed caption; never inspect exception text or field names."""
     language = language if language in LANGUAGES else "en"
-    return caption("invalid", language)
+    key = "personal_data_required" if isinstance(error, PersonalDataAccessRequired) else "invalid"
+    return caption(key, language)
 
 
 def request_language(arguments: dict[str, Any]) -> str:
@@ -100,8 +104,8 @@ class SafePlannerTool(FunctionTool):
     async def run(self, arguments: dict[str, Any]) -> ToolResult:
         try:
             return await super().run(arguments)
-        except Exception:
-            raise ToolError(caption("invalid", request_language(arguments))) from None
+        except Exception as error:
+            raise ToolError(localize_error(error, request_language(arguments))) from None
 
 
 class PlannerLanguageMiddleware(Middleware):
@@ -114,6 +118,12 @@ class PlannerLanguageMiddleware(Middleware):
             return await call_next(context)
         try:
             return await call_next(context)
+        except ToolError as error:
+            # Preserve only fixed public captions emitted by SafePlannerTool.
+            language = request_language(context.message.arguments or {})
+            if str(error) == caption("personal_data_required", language):
+                raise ToolError(caption("personal_data_required", language)) from None
+            raise ToolError(caption("invalid", language)) from None
         except Exception:
             raise ToolError(caption("invalid", request_language(context.message.arguments or {}))) from None
 
