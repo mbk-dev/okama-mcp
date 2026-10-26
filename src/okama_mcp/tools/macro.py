@@ -169,7 +169,7 @@ def get_central_bank_rate(
         ('US'->US_EFFR, 'EU'/'ECB'->EU_MRO, 'RUS'->RUS_CBR, 'UK'/'GB'->UK_BR,
         'ISR'->ISR_IR, 'CN'/'CHN'->CHN_LPR1), or a full okama symbol
         ('US_EFFR.RATE', 'RUONIA.RATE', 'RUSFAR1M.RATE'). Use
-        search_assets(namespace='RATE') to discover all 41 rate symbols.
+        search_assets(namespace='RATE') and follow next_offset to discover rates.
     first_date, last_date : str, optional
         ISO 'YYYY-MM' bounds.
     frequency : {'monthly', 'daily'}, default 'monthly'

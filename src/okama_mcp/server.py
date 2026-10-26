@@ -25,9 +25,15 @@ def create_server(language: str = "en") -> FastMCP:
         mask_error_details=True,
         instructions=(
             "Investment-analysis tools backed by the okama Python library. "
+            "Start with list_namespaces to see asset versus macro capabilities and supported tools. "
+            "RATE, INFL and RATIO contain macro series, not portfolio assets: use get_central_bank_rate, "
+            "get_inflation or get_indicator respectively. A deposit-rate series such as RUS_RUB.RATE "
+            "is different from an investment-return index such as OKID.INDX; do not substitute them. "
             "Use search_assets to discover ticker symbols, filter asset types, or find the "
             "oldest history in a namespace (e.g. 'GLD.US', 'VNQ.US'); "
-            "then build portfolios, run backtests, Monte Carlo forecasts and efficient "
+            "follow next_offset while has_more is true to browse the full filtered catalog. "
+            "Tool input schemas expose nested fields, constraints and defaults. "
+            "Then build portfolios, run backtests, Monte Carlo forecasts and efficient "
             "frontier optimisation. Use the plot_* tools to render charts (wealth index, "
             "drawdowns, efficient frontier, Monte Carlo, asset comparison) as PNG images — "
             "prefer them over re-computing charts locally; pass save_path to also write "

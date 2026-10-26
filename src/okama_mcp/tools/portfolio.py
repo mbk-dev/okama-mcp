@@ -16,6 +16,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 
 from okama_mcp.cache import SpecCache, make_key
+from okama_mcp.discovery import reject_macro_symbols
 from okama_mcp.errors import OkamaMcpError, translates_okama_errors
 from okama_mcp.schemas import PortfolioSpec
 import pandas as pd
@@ -46,7 +47,7 @@ def clear_cache() -> None:
     _portfolio_cache.clear()
 
 
-def _validate(spec: dict[str, Any]) -> PortfolioSpec:
+def _validate(spec: PortfolioSpec | dict[str, Any]) -> PortfolioSpec:
     try:
         return PortfolioSpec.model_validate(spec)
     except ValidationError as exc:
@@ -60,6 +61,7 @@ def _resolve_assets(assets: list[Any]) -> list[Any]:
     into an ``okama.Portfolio`` object, which okama accepts as an asset-like
     component (it has ``.symbol`` and ``.ror``).
     """
+    reject_macro_symbols(item for item in assets if isinstance(item, str))
     resolved: list[Any] = []
     for item in assets:
         if isinstance(item, PortfolioSpec):
@@ -87,7 +89,7 @@ def _build_portfolio(spec: PortfolioSpec) -> Any:
     )
 
 
-def _get_portfolio(spec_dict: dict[str, Any]) -> tuple[PortfolioSpec, Any]:
+def _get_portfolio(spec_dict: PortfolioSpec | dict[str, Any]) -> tuple[PortfolioSpec, Any]:
     """Validate the spec and return a (possibly cached) Portfolio object."""
     spec = _validate(spec_dict)
     key = make_key(spec.model_dump())
@@ -139,7 +141,7 @@ def _scalar_cagr(pf: Any) -> float | None:
 
 @translates_okama_errors
 def analyze_portfolio(
-    portfolio: dict[str, Any],
+    portfolio: PortfolioSpec,
     rf_return: float = 0.0,
     t_return: float = 0.0,
 ) -> dict[str, Any]:
@@ -172,7 +174,7 @@ def analyze_portfolio(
 
 
 @translates_okama_errors
-def get_portfolio_drawdowns(portfolio: dict[str, Any]) -> dict[str, Any]:
+def get_portfolio_drawdowns(portfolio: PortfolioSpec) -> dict[str, Any]:
     """Drawdown time series for a portfolio plus headline max-drawdown stats.
 
     Drawdown is the percentage decline from a previous peak in the wealth index.
@@ -198,7 +200,7 @@ def get_portfolio_drawdowns(portfolio: dict[str, Any]) -> dict[str, Any]:
 
 @translates_okama_errors
 def get_portfolio_var_cvar(
-    portfolio: dict[str, Any],
+    portfolio: PortfolioSpec,
     time_frame: int = 12,
     level: int = 1,
 ) -> dict[str, Any]:
@@ -229,7 +231,7 @@ def get_portfolio_var_cvar(
 
 @translates_okama_errors
 def get_portfolio_wealth_index(
-    portfolio: dict[str, Any],
+    portfolio: PortfolioSpec,
     full: bool = False,
 ) -> dict[str, Any]:
     """Wealth-index time series for the portfolio (cumulative growth of 1000).
@@ -247,7 +249,7 @@ def get_portfolio_wealth_index(
 
 @translates_okama_errors
 def get_rolling_cagr(
-    portfolio: dict[str, Any],
+    portfolio: PortfolioSpec,
     window_months: int = 12,
     real: bool = False,
 ) -> dict[str, Any]:
@@ -270,7 +272,7 @@ def get_rolling_cagr(
 
 @translates_okama_errors
 def get_cagr_probability(
-    portfolio: dict[str, Any],
+    portfolio: PortfolioSpec,
     years: int = 1,
     cagr_target: float = 0.0,
 ) -> dict[str, Any]:

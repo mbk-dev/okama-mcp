@@ -109,6 +109,11 @@ static file from `okama:/var/www/okama-mcp/public/` (nginx vhost: `deploy/nginx/
 
 - This is a thin MCP wrapper around the `okama` Python library. Do **not** re-implement HTTP
   calls to `api.okama.io` — `okama` already does that. Import okama classes directly.
+- When work reveals a defect or improvement opportunity in the underlying `okama` library,
+  report it in [mbk-dev/okama GitHub Issues](https://github.com/mbk-dev/okama/issues).
+  Search for an equivalent issue first; reuse it if present. Follow `tracker-task-hygiene`,
+  include verified evidence or a clearly stated proposal, and link it from the related MCP task.
+  This applies to both bugs and enhancements; do not leave upstream findings only in chat.
 - Tools must be **stateless from the AI's POV**: every call accepts a full spec
   (e.g. `PortfolioSpec`). Internal caching by content-hash is fine, but no implicit session state.
 - DataFrames/Series returned by okama must be normalized via `okama_mcp.serialization` before

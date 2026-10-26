@@ -31,7 +31,7 @@ class TestSearchAssets:
         with patch("okama_mcp.tools.search.ok.search", return_value=df) as m:
             result = search_tool.search_assets("SPY", namespace="US")
 
-        m.assert_called_once_with("SPY", namespace="US", response_format="frame")
+        m.assert_called_once_with("", namespace="US", response_format="frame")
         assert result["count"] == 2
         assert result["results"][0]["symbol"] == "SPY.US"
         assert "SPDR" in result["results"][0]["name"]
@@ -249,3 +249,97 @@ class TestServerRegistration:
         assert "search_assets" in names
         assert "list_namespaces" in names
         assert "get_asset_info" in names
+
+class TestDiscoveryOrdering:
+    def test_exact_bitcoin_name_precedes_more_than_fifty_substring_hits(self) -> None:
+        rows = [{"symbol": f"WRAP{i}.US", "ticker": f"WRAP{i}", "name": "Wrapped Bitcoin Fund"} for i in range(60)]
+        rows.append({"symbol": "BTC-USD.CC", "ticker": "BTC-USD", "name": "Bitcoin"})
+        with patch.object(search_tool.ok, "search", return_value=pd.DataFrame(rows)):
+            result = search_tool.search_assets("bitcoin")
+        assert result["results"][0]["symbol"] == "BTC-USD.CC"
+        assert result["count"] == 61
+        assert result["next_offset"] == 50
+
+    @pytest.mark.parametrize("query", ["SPY", "US78462F1030"])
+    def test_exact_identifiers_precede_name_matches(self, query: str) -> None:
+        rows = [
+            {"symbol": "OTHER.US", "ticker": "OTHER", "isin": "", "name": query},
+            {"symbol": "SPY.US", "ticker": "SPY", "isin": "US78462F1030", "name": "S&P 500"},
+        ]
+        with patch.object(search_tool.ok, "search", return_value=pd.DataFrame(rows)):
+            result = search_tool.search_assets(query)
+        assert result["results"][0]["symbol"] == "SPY.US"
+
+    def test_literal_scoped_search_and_qualified_ticker(self) -> None:
+        frame = pd.DataFrame([
+            {"symbol": "AAA.US", "ticker": "AAA", "name": "Fund [A]", "local_name": None, "isin": None},
+            {"symbol": "BBB.US", "ticker": "BBB", "name": "Fund A", "local_name": "Фонд", "isin": None},
+        ])
+        with patch.object(search_tool.ok, "search", return_value=frame) as backend:
+            result = search_tool.search_assets("[", namespace="us")
+        assert [row["symbol"] for row in result["results"]] == ["AAA.US"]
+        backend.assert_called_once_with("", namespace="US", response_format="frame")
+        with (
+            patch.object(search_tool, "_get_namespaces", return_value={"US": "Stocks"}),
+            patch.object(search_tool.ok, "search", return_value=frame) as backend,
+        ):
+            result = search_tool.search_assets("aaa.us")
+        assert [row["symbol"] for row in result["results"]] == ["AAA.US"]
+        backend.assert_called_once_with("", namespace="US", response_format="frame")
+
+    def test_filtered_pages_are_stable_and_complete(self) -> None:
+        frame = pd.DataFrame([
+            {"symbol": f"F{i:03}.US", "name": "Fund", "type": "ETF", "first_date": "2020-01-01"}
+            for i in range(105)
+        ] + [{"symbol": "STOCK.US", "name": "Stock", "type": "Stock", "first_date": None}])
+        symbols = []
+        for offset in (0, 50, 100, 150):
+            with patch.object(search_tool.ok, "search", return_value=frame.sample(frac=1, random_state=offset)):
+                page = search_tool.search_assets(namespace="US", asset_type="ETF", oldest_first=True, offset=offset)
+            assert page["count"] == 105
+            assert page["offset"] == offset
+            assert page["limit"] == 50
+            assert page["has_more"] == (offset < 100)
+            assert page["next_offset"] == (offset + 50 if offset < 100 else None)
+            symbols.extend(row["symbol"] for row in page["results"])
+        assert symbols == [f"F{i:03}.US" for i in range(105)]
+
+    def test_invalid_offset_is_rejected_before_search(self) -> None:
+        with patch.object(search_tool.ok, "search") as backend:
+            with pytest.raises(OkamaMcpError, match="offset must be non-negative"):
+                search_tool.search_assets("SPY", offset=-1)
+        backend.assert_not_called()
+
+
+@pytest.fixture(autouse=True)
+def offline_namespace_capabilities(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(search_tool, "_get_assets_namespaces", lambda: ["US", "MOEX", "CC", "INDX"])
+    monkeypatch.setattr(search_tool, "_get_macro_namespaces", lambda: ["RATE", "INFL", "RATIO"])
+
+
+class TestNamespaceCapabilities:
+    def test_preserves_descriptions_and_advertises_only_supported_routes(self) -> None:
+        namespaces = {code: code for code in ["US", "RATE", "INFL", "RATIO", "NEW", "UNKNOWN"]}
+        with (
+            patch.object(search_tool, "_get_namespaces", return_value=namespaces),
+            patch.object(search_tool, "_get_macro_namespaces", return_value=["RATE", "INFL", "RATIO", "NEW"]),
+        ):
+            result = search_tool.list_namespaces()
+        assert result["namespaces"] == namespaces
+        assert result["usage"]["US"]["supports_asset_returns"] is True
+        for namespace, tool in [("RATE", "get_central_bank_rate"), ("INFL", "get_inflation"), ("RATIO", "get_indicator")]:
+            assert result["usage"][namespace] == {
+                "kind": "macro", "supports_asset_returns": False, "tools": [tool, "plot_macro"]
+            }
+        assert result["usage"]["NEW"] == {"kind": "macro", "supports_asset_returns": False, "tools": []}
+        assert result["usage"]["UNKNOWN"] == {"kind": "unknown", "supports_asset_returns": None, "tools": []}
+
+    def test_search_rows_distinguish_asset_and_macro_series(self) -> None:
+        rows = [{"symbol": s, "name": "Rate"} for s in ["RUS_RUB.RATE", "OKID.INDX", "FUTURE.NEW"]]
+        with patch.object(search_tool.ok, "search", return_value=pd.DataFrame(rows)):
+            result = search_tool.search_assets("rate")
+        by_symbol = {r["symbol"]: r for r in result["results"]}
+        assert by_symbol["RUS_RUB.RATE"]["namespace"] == "RATE"
+        assert by_symbol["RUS_RUB.RATE"]["supports_asset_returns"] is False
+        assert by_symbol["OKID.INDX"]["supports_asset_returns"] is True
+        assert by_symbol["FUTURE.NEW"]["supports_asset_returns"] is None

@@ -16,11 +16,21 @@ import functools
 from typing import Any, TypeVar
 from collections.abc import Callable
 
+from fastmcp.exceptions import ToolError
+
 
 class OkamaMcpError(RuntimeError):
     """Domain error surfaced by okama-mcp tools.
 
     FastMCP will render this as a tool error to the LLM with the message intact.
+    """
+
+
+class PublicInputError(ToolError, OkamaMcpError):
+    """Expose a fixed, non-sensitive input correction even with error masking.
+
+    Use only deliberately authored messages without raw user input, paths or
+    backend exception text. Other domain and unexpected errors remain masked.
     """
 
 

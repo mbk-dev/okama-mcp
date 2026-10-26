@@ -12,6 +12,7 @@ from typing import Any
 
 from fastmcp import FastMCP
 
+from okama_mcp.schemas import CashflowSpec, MCSpec, PortfolioSpec
 from okama_mcp.errors import translates_okama_errors
 from okama_mcp.serialization import to_json, value_to_json
 from okama_mcp.tools.monte_carlo import (
@@ -25,8 +26,8 @@ from okama_mcp.tools.monte_carlo import (
 
 @translates_okama_errors
 def get_dcf_wealth_index(
-    portfolio: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    cashflow: CashflowSpec,
     discounting: str = "fv",
     include_negative_values: bool = False,
     discount_rate: float | None = None,
@@ -47,8 +48,8 @@ def get_dcf_wealth_index(
 
 @translates_okama_errors
 def get_dcf_cash_flow_ts(
-    portfolio: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    cashflow: CashflowSpec,
     discounting: str = "fv",
     remove_if_wealth_index_negative: bool = True,
     discount_rate: float | None = None,
@@ -71,7 +72,7 @@ def get_dcf_cash_flow_ts(
 
 @translates_okama_errors
 def get_dcf_wealth_with_assets(
-    portfolio: dict[str, Any], cashflow: dict[str, Any]
+    portfolio: PortfolioSpec, cashflow: CashflowSpec
 ) -> dict[str, Any]:
     """Historical wealth index (FV) for the portfolio AND each underlying asset.
 
@@ -85,8 +86,8 @@ def get_dcf_wealth_with_assets(
 
 @translates_okama_errors
 def get_survival_period(
-    portfolio: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    cashflow: CashflowSpec,
     threshold: float = 0.0,
     discount_rate: float | None = None,
 ) -> dict[str, Any]:
@@ -109,8 +110,8 @@ def get_survival_period(
 
 @translates_okama_errors
 def get_initial_investment_values(
-    portfolio: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    cashflow: CashflowSpec,
     discount_rate: float | None = None,
 ) -> dict[str, Any]:
     """Present value (PV) and future value (FV) of the initial investment.
@@ -132,9 +133,9 @@ def get_initial_investment_values(
 
 @translates_okama_errors
 def get_monte_carlo_cash_flow(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
-    cashflow: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
+    cashflow: CashflowSpec,
     discounting: str = "fv",
 ) -> dict[str, Any]:
     """Monte Carlo distribution of future cash flows over time.

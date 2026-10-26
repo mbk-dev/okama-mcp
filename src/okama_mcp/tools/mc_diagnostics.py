@@ -12,13 +12,14 @@ from typing import Any
 
 from fastmcp import FastMCP
 
+from okama_mcp.schemas import MCSpec, PortfolioSpec
 from okama_mcp.errors import translates_okama_errors
 from okama_mcp.serialization import dataframe_to_json, series_to_json, value_to_json
 from okama_mcp.tools.monte_carlo import _prepare_mc
 
 
 @translates_okama_errors
-def get_distribution_fit(portfolio: dict[str, Any], mc: dict[str, Any]) -> dict[str, Any]:
+def get_distribution_fit(portfolio: PortfolioSpec, mc: MCSpec) -> dict[str, Any]:
     """Goodness-of-fit diagnostics for the portfolio's return distribution.
 
     Parameters
@@ -51,7 +52,7 @@ def get_distribution_fit(portfolio: dict[str, Any], mc: dict[str, Any]) -> dict[
 
 @translates_okama_errors
 def get_return_moments(
-    portfolio: dict[str, Any], mc: dict[str, Any], rolling_window: int | None = None
+    portfolio: PortfolioSpec, mc: MCSpec, rolling_window: int | None = None
 ) -> dict[str, Any]:
     """Skewness and kurtosis time series for the portfolio's returns.
 
@@ -76,7 +77,7 @@ def get_return_moments(
 
 @translates_okama_errors
 def optimize_students_df(
-    portfolio: dict[str, Any], mc: dict[str, Any], var_level: int = 5
+    portfolio: PortfolioSpec, mc: MCSpec, var_level: int = 5
 ) -> dict[str, Any]:
     """Degrees of freedom for a Student-t that best matches empirical VaR/CVaR.
 
@@ -94,8 +95,8 @@ def optimize_students_df(
 
 @translates_okama_errors
 def get_cagr_distribution(
-    portfolio: dict[str, Any],
-    mc: dict[str, Any],
+    portfolio: PortfolioSpec,
+    mc: MCSpec,
     percentiles: list[int] | None = None,
     score: float = 0.0,
 ) -> dict[str, Any]:

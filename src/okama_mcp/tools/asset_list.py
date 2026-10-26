@@ -14,7 +14,8 @@ import okama as ok
 from fastmcp import FastMCP
 from pydantic import ValidationError
 
-from okama_mcp.errors import OkamaMcpError, translates_okama_errors
+from okama_mcp.discovery import reject_macro_symbols
+from okama_mcp.errors import OkamaMcpError, PublicInputError, translates_okama_errors
 from okama_mcp.schemas import PortfolioSpec
 from okama_mcp.serialization import dataframe_to_json, value_to_json
 from okama_mcp.tools.portfolio import _build_portfolio
@@ -26,8 +27,9 @@ def _build_asset_list(
     first_date: str | None,
     last_date: str | None,
     inflation: bool,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
 ) -> Any:
+    reject_macro_symbols(symbols)
     resolved: list[Any] = list(symbols)
     for raw in portfolios or []:
         try:
@@ -53,7 +55,7 @@ def compare_assets(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = True,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
     rf_return: float = 0.0,
     t_return: float = 0.0,
 ) -> dict[str, Any]:
@@ -98,7 +100,7 @@ def get_correlations(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = True,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
 ) -> dict[str, Any]:
     """Return the correlation matrix of monthly returns for the given assets.
 
@@ -133,7 +135,7 @@ def get_rolling_risk(
     window_months: int = 12,
     first_date: str | None = None,
     last_date: str | None = None,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
 ) -> dict[str, Any]:
     """Rolling annualized risk (std of monthly returns) for each asset.
 
@@ -187,7 +189,7 @@ def get_benchmark_metrics(
     ccy: str = "USD",
     first_date: str | None = None,
     last_date: str | None = None,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
     rolling_window: int | None = None,
 ) -> dict[str, Any]:
     """Metrics of each asset relative to a benchmark/index.
@@ -229,7 +231,7 @@ def get_asset_returns(
     first_date: str | None = None,
     last_date: str | None = None,
     inflation: bool = True,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
     period: int | None = None,
     real: bool = False,
 ) -> dict[str, Any]:
@@ -241,7 +243,11 @@ def get_asset_returns(
     per-asset values. ``annual_returns`` is the per-calendar-year return table.
     ``real=True`` returns inflation-adjusted CAGR/cumulative return (needs
     ``inflation=True``); ``period`` limits CAGR to the last N years.
+    ``real_mean_return`` is None when ``inflation=False``; nominal metrics
+    remain available without loading inflation data.
     """
+    if real and not inflation:
+        raise PublicInputError("real=True requires inflation=True; enable inflation or request nominal returns")
     al = _build_asset_list(symbols, ccy, first_date, last_date, inflation, portfolios=portfolios)
 
     def _last_row(df: Any) -> dict[str, Any]:
@@ -259,7 +265,7 @@ def get_asset_returns(
         "cagr": _last_row(al.get_cagr(period=period, real=real)),
         "cumulative_return": _last_row(al.get_cumulative_return(real=real)),
         "mean_return": _series(al.mean_return),
-        "real_mean_return": _series(al.real_mean_return),
+        "real_mean_return": _series(al.real_mean_return) if inflation else None,
         "monthly_geom_mean": _series(al.get_monthly_geometric_mean_return()),
         "annual_returns": dataframe_to_json(al.annual_return_ts),
     }
@@ -273,7 +279,7 @@ def get_rolling_returns(
     real: bool = False,
     first_date: str | None = None,
     last_date: str | None = None,
-    portfolios: list[dict[str, Any]] | None = None,
+    portfolios: list[PortfolioSpec] | None = None,
 ) -> dict[str, Any]:
     """Rolling CAGR and rolling cumulative return for each asset.
 

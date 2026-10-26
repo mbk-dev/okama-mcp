@@ -31,7 +31,7 @@ def clear_cache() -> None:
     _frontier_cache.clear()
 
 
-def _validate(spec: dict[str, Any]) -> FrontierSpec:
+def _validate(spec: FrontierSpec | dict[str, Any]) -> FrontierSpec:
     try:
         return FrontierSpec.model_validate(spec)
     except ValidationError as exc:
@@ -62,7 +62,7 @@ def _build_frontier(spec: FrontierSpec) -> Any:
     )
 
 
-def _get_frontier(spec_dict: dict[str, Any]) -> tuple[FrontierSpec, Any]:
+def _get_frontier(spec_dict: FrontierSpec | dict[str, Any]) -> tuple[FrontierSpec, Any]:
     spec = _validate(spec_dict)
     key = make_key(spec.model_dump())
     ef = _frontier_cache.get_or_compute(key, lambda: _build_frontier(spec))
@@ -79,7 +79,7 @@ def _weights_dict(symbols: list[str], weights: Any) -> dict[str, float]:
 
 
 @translates_okama_errors
-def build_efficient_frontier(frontier: dict[str, Any]) -> dict[str, Any]:
+def build_efficient_frontier(frontier: FrontierSpec) -> dict[str, Any]:
     """Build the multi-period Efficient Frontier for a set of assets.
 
     Returns the EF point table with per-asset weights, annualised Risk
@@ -103,7 +103,7 @@ def build_efficient_frontier(frontier: dict[str, Any]) -> dict[str, Any]:
 
 @translates_okama_errors
 def get_tangency_portfolio(
-    frontier: dict[str, Any],
+    frontier: FrontierSpec,
     rf_return: float = 0.0,
     rate_of_return: str = "cagr",
 ) -> dict[str, Any]:
@@ -140,7 +140,7 @@ def get_tangency_portfolio(
 
 
 @translates_okama_errors
-def get_min_variance_portfolio(frontier: dict[str, Any]) -> dict[str, Any]:
+def get_min_variance_portfolio(frontier: FrontierSpec) -> dict[str, Any]:
     """Global Minimum Variance (GMV) portfolio on the Efficient Frontier.
 
     Annualised values. Use this when you want to minimise risk regardless of
@@ -158,7 +158,7 @@ def get_min_variance_portfolio(frontier: dict[str, Any]) -> dict[str, Any]:
 
 @translates_okama_errors
 def get_most_diversified_portfolio(
-    frontier: dict[str, Any],
+    frontier: FrontierSpec,
     target_return: float | None = None,
 ) -> dict[str, Any]:
     """Most Diversified Portfolio (MDP) on the Efficient Frontier.
