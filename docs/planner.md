@@ -1,67 +1,145 @@
-# Planner client access and one local database
+# Planner client data modes
 
-MCP 3.1.0 requires `okama-planner[reports]>=0.5.0,<0.6.0`. Planner owns database
-access, migrations, identities, planning history, CRM and meetings. MCP imports no
-SQLite/SQLAlchemy layer and executes no SQL.
+MCP uses Planner's public Python APIs for all database operations. Client tools
+never execute SQL, inspect schema or implement their own deletion cascade.
 
-## Default: anonymous read-only client access
+## Installation
 
-```bash
-okama-mcp stdio --client-db /private/planner/clients.sqlite3 --reports-dir /private/reports
-```
-
-The database and report directory must already exist. Client names, contacts and
-free-text labels are pseudonymized inside Planner. No persistent client mutation
-tools are registered. Client maintenance happens in Planner's local HTML interface.
-There are 52 public tools, or 60 with anonymous local client access and report export.
-
-## Explicit local opt-in: personal reads and mutations
+Prepared MCP 3.1.0 requires `okama-planner[reports]>=0.5.0,<0.6.0`.
+Local client tools require `okama_planner.ai.PlannerClientAccess` from Planner 0.5.0
+source. PyPI currently provides 0.4.1, which lacks the AI facade. A source checkout
+uses an immutable public revision in `tool.uv.sources`, also used by CI:
 
 ```bash
-okama-mcp stdio --client-db /private/planner/clients.sqlite3 --reports-dir /private/reports --allow-personal-data
+uv sync --all-groups
 ```
 
-This enables full client records, including names, contacts and CRM identifiers,
-and client creation/update/deletion, meeting CRUD and bounded history pages (68 tools
-with report export). All operations call `okama_planner.ai.PlannerClientAccess`.
-Planner validates records, selects ownership, commits/rolls back writes and rejects
-stale meeting revisions. Client deletion removes owned history; references from a
-different client make it fail atomically. Historical tables are read using
-`client_history(code, table, offset, limit)` with at most 500 records per page.
+For a pip-managed environment, install this checkout and the compatible companion:
 
-The flag is accepted only at local stdio startup with an explicit database. It is
-not a tool parameter and cannot be enabled by an LLM. Restart without the flag to
-revoke personal access. Public HTTP never enables local client/report tools.
+```bash
+python -m pip install -e . 'okama-planner[reports] @ git+https://github.com/mbk-dev/okama-planner.git@c69d86ec731cbd09b1f708589d768c6f1cab2857'
+```
 
-## One canonical database
+Missing companion APIs fail closed; no raw-storage fallback is used. Market tools
+keep their existing contracts. Older databases must be migrated using Planner's
+own migration procedure before opening them with the new companion.
 
-Use the same Planner-owned SQLite file for the HTML interface, MCP and older LFP
-commands. Import previous advisory history using Planner's verified importer; keep
-backups and retire the old working file after complete readback. Do not run old
-LFP migrations on the canonical database. See Planner's
+## Local setup
+
+Select an existing database and report directory explicitly:
+
+```bash
+uv run okama-mcp stdio \
+  --client-db /absolute/local-data/clients.sqlite3 \
+  --reports-dir /absolute/local-reports
+```
+
+Only stdio supports these options. HTTP exposes neither client tools nor local
+reports. Tool arguments cannot select a database or output directory. The retired
+`install-skill` intake command remains unavailable. The legacy `--allow-personal-data`
+flag initializes personal access only when no saved mode exists. A mode saved
+through MCP always takes precedence, including an explicit revocation.
+
+## Switch through MCP
+
+| Call | Effect |
+|---|---|
+| `client_data_mode_get({})` | Return `{"mode":"anonymous"}` or `{"mode":"personal_data"}` |
+| `client_data_mode_set({"mode":"personal_data"})` | Enable full client reads and persistent writes |
+| `client_data_mode_set({"mode":"anonymous"})` | Restore pseudonymous reads and reject all client writes |
+
+A database without a saved setting uses `anonymous`. In this mode, update personal
+data in the Planner application. Financial calculations on anonymous inputs remain
+available. All client writes, including metadata, residency and plan saves, require
+`personal_data`. This intentionally replaces the earlier safe-metadata write behavior.
+
+The mode persists across server restarts and connections to the same canonical
+database path. The owner-only `<database>.mcp-access.json` sidecar stores only the
+mode, outside Planner's schema. Back it up with the database if the policy should
+travel with the database. A database moved without its sidecar defaults to anonymous.
+The directory must be writable to change the setting. A malformed or unreadable
+sidecar blocks client access; a successful mode-set call can replace it. No personal
+values or database paths appear in mode responses.
+
+Each operation reads the current setting. An operation already in progress can
+finish after a switch; subsequent operations use the new mode. Concurrent switches
+use the last successfully replaced setting. This is an explicit workflow setting,
+not authentication: a caller authorized to use these local tools can change it.
+Turning anonymous mode back on does not erase data already returned to a client.
+
+## Client tools
+
+| Tool | Inputs | Anonymous mode | Personal data mode |
+|---|---|---|---|
+| `client_get` | `code` | Pseudonyms | Full client record |
+| `client_list` | None | Pseudonyms | Full client records |
+| `client_create` | `details`, including `full_name` | Rejected | Create a record |
+| `client_update` | `code`, sparse `changes` | Rejected | Update supplied fields |
+| `client_delete` | `code` | Rejected | Delete client and linked Planner records |
+| `client_set_tax_residency` | `code`, `residency={year,country,note?}` | Rejected | Save residence and optional note |
+| `client_get_tax_residency` | `code`, `year` | Pseudonymous note | Full residence record or null |
+| `client_save_plan` | `code`, full `request` | Rejected | Save version; return `{code,version}` |
+| `client_load_plan` | `code`, `version` | Coded labels | Original saved request |
+| `client_list_plans` | `code` | `{code,version}` entries | Same |
+| `client_forecast` | `code`, `version` | Anonymous signed forecast | Same |
+| `client_meeting_list` | `code` | Masked meeting text | Full meetings |
+| `client_meeting_save` | `code`, `meeting`, optional `meeting_id`, `revision` | Rejected | Save meeting; edits require current revision |
+| `client_meeting_delete` | `code`, `meeting_id`, `revision` | Rejected | Delete meeting with current revision |
+| `client_history` | `code`, `table`, optional `offset`, `limit` | Rejected | Read owned history; at most 500 rows per page |
+
+Creation/updates support name, CRM ID, sex, birth year, contacts, broker names,
+primary contact channel, investment declaration date and notes. Unknown/system
+fields are rejected. Omitted update fields remain unchanged; explicit null clears
+optional values when the merged record passes Planner validation. Creation is not
+idempotent; inspect the registry before retrying an ambiguous result. Deletion
+uses Planner's transaction, removes linked database history and preserves unrelated
+clients; it does not delete external documents or report files.
+
+## Forecasts, reports and errors
+
+`planner_forecast`, `planner_compare_modes` and `client_forecast` always use
+Planner's anonymous calculation facade, regardless of client data mode. Identifying
+free-text labels become pseudonyms; numeric financial inputs remain unchanged.
+
+`planner_export_report` requires a signed safe forecast and rejects unsigned or
+tampered results. After a server restart, obtain a new forecast before exporting.
+The output contains only an opaque artifact basename, language and scenario count.
+Reports stay anonymous in both modes. The legacy startup brand option remains
+ignored; use Planner for personalized deliverables.
+
+Validation and runtime errors use fixed translated messages (`en`, `ru`, `de`,
+`es`, `zh`) without caller values, paths, chained causes or database details.
+Access-denied errors identify the mode switch needed to enable personal operations.
+
+## Synthetic hands-on check
+
+```bash
+uv run python examples/local_planner_client.py
+```
+
+This starts real stdio processes against a new synthetic database under `tmp/`.
+It verifies default masking and blocked writes; switching on; full CRUD, residency
+and plan saves; persistence in a restarted process; switching off; anonymous
+forecasts and reports. It never opens a real client database.
+
+For an interactive check, connect with the command above against a synthetic DB:
+read the mode, try a write while anonymous, switch to personal_data, create/edit/read
+a synthetic client, reconnect and verify the saved mode, then switch to anonymous
+and verify pseudonyms and blocked deletion. Enable personal_data before deleting
+the synthetic client; its other records are removed with it.
+
+
+## Canonical database and release gates
+
+Use the same Planner-owned database for the HTML interface, MCP and older LFP
+commands. Migrate/import with Planner's verified procedures and retain backups;
+never run old LFP migrations against the canonical database. See Planner's
 [one database guide](https://github.com/mbk-dev/okama-planner/blob/main/docs/unified-database.md).
 
-## Forecasts, reports and failures
-
-Forecast tools remain stateless and anonymous; reports require untampered signed
-results from the current MCP process. Unsigned/tampered results fail without leaving
-a workbook. Exports use neutral local branding and return only an artifact basename.
-Personal access does not disable report proofs or sanitized error messages.
-
-## Verification
-
-Before publication, development setup and CI use the immutable Planner source pin
-in `tool.uv.sources`. uv builds and installs the companion package. CI runs the full
-default suite, then installs the MCP wheel with the exported runtime dependencies
-in an isolated environment and runs real stdio acceptance. This proves development
-compatibility, not availability from PyPI.
-
-The tag-triggered release gate ignores development sources with
-`uv sync --all-groups --no-sources`, tests the suite and installs the MCP wheel using
-only published dependencies. It verifies the exact MCP package from PyPI after upload.
-Until Planner 0.5.0 is published, that gate must fail; no release was performed on
-26 October 2026. Remove the development pin after published-pair acceptance passes.
-`tests/release/published_pair.py` checks default read-only anonymization, explicit
-personal CRUD, forecast/comparison, storage, reports and rejected invalid proofs.
-The installed-wheel gates use Python `-I`, check imports inside the environment,
-and do not inject a companion checkout through `PYTHONPATH` or an editable install.
+CI tests the pinned development companion and an installed MCP wheel in an isolated
+environment using `tests/release/published_pair.py`. This checks real stdio,
+anonymous and personal modes, meetings, forecasts and report tamper rejection.
+It does not prove PyPI availability. Tag-triggered release gates ignore development
+sources (`--no-sources`), require published Planner and verify the published MCP
+package after upload. These gates remain unchanged. No release is performed as
+part of this change.

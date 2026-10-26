@@ -1,4 +1,4 @@
-"""Synthetic local human intake followed by privacy-safe stdio calls."""
+"""Exercise persistent client-data modes through real stdio with synthetic data."""
 from __future__ import annotations
 
 import asyncio
@@ -38,12 +38,16 @@ async def main() -> None:
 
     async with Client(transport()) as client:
         names = {tool.name for tool in await client.list_tools()}
-        assert "client_create" not in names
+        assert {"client_create", "client_delete", "client_data_mode_get", "client_data_mode_set"} <= names
+        assert await call(client, "client_data_mode_get", {}) == {"mode": "anonymous"}
         record = await call(client, "client_get", {"code": code})
         assert "PRIVATE_SYNTHETIC_PERSON" not in json.dumps(record)
         assert "private@example.invalid" not in json.dumps(record)
         rejected = await client.call_tool_mcp("client_update", {"code": code, "changes": {"email": "PRIVATE"}})
         assert rejected.is_error and "PRIVATE" not in rejected.model_dump_json()
+        await call(client, "client_data_mode_set", {"mode": "personal_data"})
+        assert (await call(client, "client_get", {"code": code}))["full_name"] == "PRIVATE_SYNTHETIC_PERSON"
+        created = await call(client, "client_create", {"details": {"full_name": "SECOND_SYNTHETIC_PERSON"}})
         await call(client, "client_update", {"code": code, "changes": {"birth_year": 1980}})
         await call(client, "client_set_tax_residency", {"code": code, "residency": {"year": 2026, "country": "DE"}})
         request = json.loads((root / "examples/planner/modes-single-request.json").read_text())
@@ -54,9 +58,20 @@ async def main() -> None:
         assert (output / artifact["filename"]).is_file()
         assert str(output) not in json.dumps(artifact)
     async with Client(transport()) as client:
+        assert await call(client, "client_data_mode_get", {}) == {"mode": "personal_data"}
         assert (await call(client, "client_get", {"code": code}))["birth_year"] == 1980
         assert await call(client, "client_list_plans", {"code": code}) == [saved]
-    print("verified safe reads, rejected contacts, residency, plan persistence, forecast, report, restart")
+        await call(client, "client_data_mode_set", {"mode": "anonymous"})
+        assert "PRIVATE_SYNTHETIC_PERSON" not in json.dumps(await call(client, "client_get", {"code": code}))
+        rejected = await client.call_tool_mcp("client_delete", {"code": created["code"]})
+        assert rejected.is_error
+    async with Client(transport()) as client:
+        assert await call(client, "client_data_mode_get", {}) == {"mode": "anonymous"}
+        await call(client, "client_data_mode_set", {"mode": "personal_data"})
+        assert await call(client, "client_delete", {"code": created["code"]}) == {
+            "code": created["code"], "deleted": True}
+        await call(client, "client_data_mode_set", {"mode": "anonymous"})
+    print(f"Verified {len(names)} tools: anonymity, blocked writes, personal CRUD, persistent modes, plans and reports")
 
 
 if __name__ == "__main__":

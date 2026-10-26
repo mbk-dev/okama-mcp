@@ -26,7 +26,7 @@ async def test_client_language_is_per_call_and_preserves_raw_values(tmp_path: Pa
     clients.register(server, path, language="de")
     async with Client(server) as client:
         tools = {tool.name: tool for tool in await client.list_tools()}
-        assert "lokalen" in tools["client_get"].description
+        assert "Pseudonyme" in tools["client_get"].description
         for language in ("ru", "zh", "de", "es", "en", "ru"):
             response = await client.call_tool_mcp("client_get", {"code": record["code"], "language": language})
             assert not response.is_error, response.content
@@ -40,8 +40,8 @@ async def test_client_language_is_per_call_and_preserves_raw_values(tmp_path: Pa
         default = data(await client.call_tool_mcp("client_get", {"code": record["code"]}))
         assert default["code"] == record["code"]
         assert default.get("full_name") != record["full_name"]
-        bad = await client.call_tool_mcp("client_get", {
-            "code": "secret-synthetic-value", "language": "ru"})
+        bad = await client.call_tool_mcp("client_update", {
+            "code": record["code"], "changes": {"unknown": "secret-synthetic-value"}, "language": "ru"})
         assert bad.is_error
         assert "secret-synthetic-value" not in bad.content[0].text
         assert any(text in bad.content[0].text for text in ("Некорректные", "Не удалось", "запрещены"))
@@ -116,22 +116,22 @@ def test_published_companion_fallback_formats_registry_timestamps(monkeypatch: p
 
 
 @pytest.mark.asyncio
-async def test_registry_schema_titles_are_localized_without_changing_safe_models(tmp_path: Path) -> None:
+async def test_registry_schema_titles_are_localized_without_changing_shared_models(tmp_path: Path) -> None:
     from okama_planner.storage import PlannerStore
-    from okama_mcp.schemas import ClientSafeChanges
+    from okama_mcp.schemas import ClientPersonalChanges
 
-    original_schema = ClientSafeChanges.model_json_schema()
+    original_schema = ClientPersonalChanges.model_json_schema()
     path = tmp_path / "synthetic.sqlite3"
     with PlannerStore.initialize(path):
         pass
     server = FastMCP("translated-field-titles")
     clients.register(server, path, language="ru")
-    tool = await server.get_tool("client_get")
-    details = tool.parameters
+    tool = await server.get_tool("client_update")
+    details = tool.parameters["properties"]["changes"]
     if "$ref" in details:
         details = tool.parameters["$defs"][details["$ref"].split("/")[-1]]
-    assert details["properties"]["code"]["title"] == "Код клиента"
-    assert ClientSafeChanges.model_json_schema() == original_schema
+    assert details["properties"]["sex"]["title"] == "Пол"
+    assert ClientPersonalChanges.model_json_schema() == original_schema
 
 
 @pytest.mark.parametrize("defect", ["missing_translation", "duplicate_key", "placeholder"])

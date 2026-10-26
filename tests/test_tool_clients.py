@@ -18,7 +18,7 @@ def registry(tmp_path: Path) -> tuple[FastMCP, Path, str]:
     with PlannerStore.initialize(path) as store:
         record = store.create_client({"full_name": "Synthetic Private Person", "email": "private@example.invalid"})
     server = FastMCP("local-clients")
-    clients.register(server, path, allow_personal_data=True)
+    clients.register(server, path)
     return server, path, record["code"]
 
 
@@ -28,13 +28,16 @@ async def test_safe_update_residency_and_restart(tmp_path: Path) -> None:
     server, path, code = registry(tmp_path)
     async with Client(server) as client:
         names = {t.name for t in await client.list_tools()}
-        assert names >= {"client_get", "client_list", "client_update", "client_set_tax_residency",
+        assert names == {"client_get", "client_list", "client_update", "client_set_tax_residency",
                          "client_get_tax_residency", "client_save_plan", "client_load_plan",
-                         "client_list_plans", "client_forecast"}
+                         "client_list_plans", "client_forecast", "client_create", "client_delete",
+                         "client_data_mode_get", "client_data_mode_set", "client_meeting_list",
+                         "client_meeting_save", "client_meeting_delete", "client_history"}
+        await client.call_tool("client_data_mode_set", {"mode": "personal_data"})
         updated = response_data(await client.call_tool_mcp("client_update", {
             "code": code, "changes": {"sex": "female", "birth_year": 1980}}))
         assert updated["sex"] == "female"
-        for changes in ({"sex": "invalid"}, {"birth_year": -1}, {"unknown": "bad"}):
+        for changes in ({"email": ""}, {"full_name": ""}, {"unknown": "bad"}):
             invalid = await client.call_tool_mcp("client_update", {"code": code, "changes": changes})
             assert invalid.is_error
         for country in ("ru", "DE"):
@@ -42,8 +45,9 @@ async def test_safe_update_residency_and_restart(tmp_path: Path) -> None:
                 "code": code, "residency": {"year": 2026, "country": country}}))
             assert residency["country"] == country.upper()
         invalid = await client.call_tool_mcp("client_set_tax_residency", {
-            "code": code, "residency": {"year": 2026, "country": "RU", "note": "Private"}})
-        assert not invalid.is_error
+            "code": code, "residency": {"year": 2026, "country": "XX", "note": "Private"}})
+        assert invalid.is_error
+        await client.call_tool("client_data_mode_set", {"mode": "anonymous"})
     restarted = FastMCP("restarted")
     clients.register(restarted, path)
     async with Client(restarted) as client:
@@ -52,7 +56,7 @@ async def test_safe_update_residency_and_restart(tmp_path: Path) -> None:
         assert "Private" not in json.dumps(saved)
         assert "private@example.invalid" not in json.dumps(saved)
         assert response_data(await client.call_tool_mcp("client_get_tax_residency", {
-            "code": code, "year": 2026}))["country"] == "RU"
+            "code": code, "year": 2026}))["country"] == "DE"
         assert response_data(await client.call_tool_mcp("client_get_tax_residency", {
             "code": code, "year": 2025})) is None
 
@@ -63,6 +67,7 @@ async def test_plan_versions_saved_loaded_and_forecast_inside_planner(tmp_path: 
     request = json.loads((Path(__file__).parents[1] / "examples/planner/modes-single-request.json").read_text())
     request["plan"]["assets"][0]["label"] = "PRIVATE_SYNTHETIC_PLAN_LABEL"
     async with Client(server) as client:
+        await client.call_tool("client_data_mode_set", {"mode": "personal_data"})
         records = []
         for _ in range(2):
             result = await client.call_tool_mcp("client_save_plan", {"code": code, "request": request})
@@ -72,10 +77,11 @@ async def test_plan_versions_saved_loaded_and_forecast_inside_planner(tmp_path: 
             assert record["code"] == code
             records.append(record)
         assert records[0]["version"] != records[1]["version"]
+        await client.call_tool("client_data_mode_set", {"mode": "anonymous"})
         assert response_data(await client.call_tool_mcp("client_list_plans", {"code": code})) == records
         loaded = await client.call_tool_mcp("client_load_plan", records[0])
         assert not loaded.is_error, loaded.content
-        assert "PRIVATE_SYNTHETIC_PLAN_LABEL" in loaded.model_dump_json()
+        assert "PRIVATE_SYNTHETIC_PLAN_LABEL" not in loaded.model_dump_json()
         forecast = await client.call_tool_mcp("client_forecast", records[0])
         assert not forecast.is_error, forecast.content
         assert "PRIVATE_SYNTHETIC_PLAN_LABEL" not in forecast.model_dump_json()

@@ -55,7 +55,7 @@ async def acceptance(fixtures: Path, output: Path, live: bool = False) -> None:
         names = {tool.name for tool in await client.list_tools()}
         assert {"planner_forecast", "planner_compare_modes", "client_list", "client_load_plan",
                 "client_forecast", "planner_export_report", "finplan_forecast", "finplan_backtest"} <= names
-        assert len(names) == 60, sorted(names)
+        assert len(names) == 70, sorted(names)
         forecast = data(await client.call_tool_mcp("planner_forecast", {"request": request}))
         assert "privacy_proof" in forecast
         comparison = data(await client.call_tool_mcp("planner_compare_modes", {
@@ -63,7 +63,11 @@ async def acceptance(fixtures: Path, output: Path, live: bool = False) -> None:
         assert {"baseline", "variant"} <= comparison.keys()
         assert "privacy_proof" in comparison["baseline"]
         assert code in json.dumps(data(await client.call_tool_mcp("client_list", {})))
-        assert not {"client_create", "client_delete", "client_update", "client_save_plan"} & names
+        assert {"client_create", "client_delete", "client_update", "client_save_plan",
+                "client_data_mode_get", "client_data_mode_set"} <= names
+        assert data(await client.call_tool_mcp("client_data_mode_get", {})) == {"mode": "anonymous"}
+        denied = await client.call_tool_mcp("client_update", {"code": code, "changes": {"crm_id": "DENIED"}})
+        assert denied.is_error
         saved = {"code": code, "version": 1}
         data(await client.call_tool_mcp("client_load_plan", saved))
         local = data(await client.call_tool_mcp("client_forecast", saved))
@@ -99,11 +103,14 @@ async def acceptance(fixtures: Path, output: Path, live: bool = False) -> None:
                     "scenarios": 20, "random_seed": 42, "discount_rate": 0}
             core = data(await client.call_tool_mcp("finplan_forecast", {"plan": plan}))
             assert core["plan_spec"]["scenarios"] == 20
-    personal_transport = StdioTransport(command=sys.executable, args=[*command, "--allow-personal-data"],
+        assert data(await client.call_tool_mcp("client_data_mode_set", {"mode": "personal_data"})) == {
+            "mode": "personal_data"}
+    personal_transport = StdioTransport(command=sys.executable, args=command,
                                        cwd=str(output), log_file=output / "personal-server.log")
     async with Client(personal_transport) as client:
         personal_names = {tool.name for tool in await client.list_tools()}
-        assert len(personal_names) == 68
+        assert len(personal_names) == 70
+        assert data(await client.call_tool_mcp("client_data_mode_get", {})) == {"mode": "personal_data"}
         visible = await client.call_tool_mcp("client_get", {"code": code})
         assert not visible.is_error and MARKER in visible.model_dump_json()
         created = await client.call_tool_mcp("client_create", {"details": {"full_name": "Synthetic CRUD"}})
@@ -120,6 +127,11 @@ async def acceptance(fixtures: Path, output: Path, live: bool = False) -> None:
         assert not removed.is_error
         removed = await client.call_tool_mcp("client_delete", {"code": new_code})
         assert not removed.is_error
+        assert data(await client.call_tool_mcp("client_data_mode_set", {"mode": "anonymous"})) == {
+            "mode": "anonymous"}
+        data(await client.call_tool_mcp("client_get", {"code": code}))
+        denied = await client.call_tool_mcp("client_delete", {"code": code})
+        assert denied.is_error
     public_transport = StdioTransport(command=sys.executable, args=["-I", "-m", "okama_mcp.transport", "stdio"],
                                      cwd=str(output), log_file=output / "public-server.log")
     async with Client(public_transport) as client:

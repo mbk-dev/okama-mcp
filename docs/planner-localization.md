@@ -9,13 +9,15 @@ existing contracts.
 an optional top-level `language`. Invalid language values receive a fixed English
 error without echoing the submitted value.
 
-English client reads return safe pseudonymous records. Other languages add
+In anonymous mode, English client reads return pseudonymous records. Other languages add
 `presentation` rows containing `key`, translated `label` and safe displayed
-`value`. Only the already anonymized facade record reaches presentation helpers.
-Names, contacts, notes and private paths cannot reappear in a translated output.
+`value`. The selected Planner facade record reaches presentation helpers: anonymous mode
+never restores private values; personal_data mode presents the full client record.
+Switching mode affects every language equally.
 Dates and sex enum captions may be formatted for display; codes and machine keys
 remain stable. Presentation does not write translated data to the database.
 
+Mode descriptions and access-denied errors are translated in all five languages.
 Errors use only a fixed caption. They never include submitted field names, values,
 validation locations, exception causes or schema details. Validation and runtime
 exceptions are sanitized before FastMCP's server logging. Missing privacy facade

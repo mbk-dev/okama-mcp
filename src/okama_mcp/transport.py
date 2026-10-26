@@ -29,7 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
     stdio_parser.add_argument("--reports-dir", type=Path, help="Existing local report output directory")
     stdio_parser.add_argument("--report-brand", type=Path, help="Legacy option; ignored for anonymous AI reports")
     stdio_parser.add_argument("--allow-personal-data", action="store_true",
-                              help="Allow the LLM full client reads and mutations through Planner")
+                              help="Initialize personal access only if no saved mode exists; use MCP to switch later")
     initialize = subparsers.add_parser("init-client-db", help="Create a new empty Planner database")
     initialize.add_argument("--path", type=Path, required=True)
 
