@@ -1,29 +1,45 @@
 ---
 name: create-client
-description: Route client registration to a human using local Planner intake; use only an existing anonymous client code with MCP.
+description: Use when registering a Planner client or choosing the intake path under the configured MCP client-data access mode.
 ---
 
-# Local human client intake
+# Register a Planner client
 
-Client registration is a human-only operation outside the AI conversation. Do not
-collect, request, read or repeat names, contacts, identifying notes or source files.
-Do not construct registration payloads. The former `client_create` MCP tool is
-removed and must not be called. The packaged skill installer is retired.
+Read `client_data_mode_get({})` before choosing an intake path. The saved mode
+applies to the configured database across connections and server restarts;
+reconnecting does not reset it. Follow an explicit user request to switch with
+`client_data_mode_set({"mode":"personal_data"})` or `{"mode":"anonymous"}`.
+Do not enable personal access merely to bypass a rejected operation.
 
-Tell the user to enter personal details in Planner's local human intake CLI, outside
-this AI session. That CLI requires the updated privacy-capable Planner source;
-older published companions do not provide the new privacy boundary. Refer to the
-installation's Planner intake guide for the exact command and configured database.
-Do not run intake on the user's behalf or inspect its input file or private output.
+## Anonymous mode
 
-Ask only for the resulting anonymous registry code, such as `c-0001`. Once the
-user provides an existing code, `client_get` can verify its safe pseudonymous
-record. If local code tools are unavailable, explain that the server needs an
-explicit local database and the `okama_planner.ai` facade. Do not fall back to raw
-registry APIs, database inspection or identity resolution.
+Keep identity intake in the Planner application. Ask only for the resulting
+anonymous code, such as `c-0001`, and use `client_get` to verify its pseudonymous
+record. Do not request or inspect personal intake fields or files through MCP.
+All client writes are blocked, including metadata, residency and plan saves.
+Existing coded plans can still be loaded and forecast.
 
-MCP updates accept only sex, birth year and investment declaration date. Other
-identity edits stay in the human intake interface. Residency calls accept only
-year and country; free-text notes stay local. Financial plans can be saved, loaded
-and forecast through the client code and version tools. Tool errors remain generic;
-do not ask for private database contents to diagnose them.
+## Personal data mode
+
+For requested registration, use `client_create({"details":{...}})` with the
+user-provided fields and the tool's current input schema; `full_name` is required.
+Return the resulting client code. Full reads, sparse edits and deletion are
+available within the requested task. An already selected personal mode survives
+reconnection; it does not require a new opt-in for every call. Leave the saved
+mode in place unless the user asks to change it.
+
+Creation is not idempotent. If its outcome is uncertain, inspect the registry
+before retrying. Omitted update fields stay unchanged; explicit null clears an
+optional field when Planner validation permits it. Forecasts and reports remain
+anonymous in either mode.
+
+If mode/client tools are unavailable or the mode cannot be read, use the Planner
+application intake path. Local MCP access requires stdio with an explicitly
+configured database and a compatible Planner API. Use the
+[Planner integration guide](../../../docs/planner.md) for setup and contracts;
+do not bypass it with raw storage APIs or direct database inspection. The packaged
+skill installer remains retired.
+
+This replaces the earlier human-only MCP intake restriction, following the
+[persistent-mode decision](../../../docs/superpowers/specs/2026-10-26-client-data-modes-design.md)
+implemented in [PR #18](https://github.com/mbk-dev/okama-mcp/pull/18) on 2026-10-26.

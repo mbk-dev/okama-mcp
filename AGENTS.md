@@ -123,6 +123,10 @@ static file from `okama:/var/www/okama-mcp/public/` (nginx vhost: `deploy/nginx/
   This applies to both bugs and enhancements; do not leave upstream findings only in chat.
 - Tools must be **stateless from the AI's POV**: every call accepts a full spec
   (e.g. `PortfolioSpec`). Internal caching by content-hash is fine, but no implicit session state.
+  The explicit client-data access mode is the exception: `client_data_mode_get/set`
+  reads or saves a per-database policy across connections. Anonymous is the default;
+  all client writes require `personal_data`. Keep database operations in Planner's
+  public API; see [client data modes](docs/planner.md) for the contract.
 - DataFrames/Series returned by okama must be normalized via `okama_mcp.serialization` before
   being returned from a tool. Long series should be truncated with head/tail/summary.
 - All tool input contracts live in `okama_mcp.schemas` as pydantic v2 models.

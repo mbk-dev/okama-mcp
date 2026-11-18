@@ -74,7 +74,8 @@ uv run pytest -m integration
 - **Tool input contracts** live in `src/okama_mcp/schemas.py` as pydantic v2 models.
 - **Tools are stateless** from the client's point of view: every call accepts a full spec
   (e.g. `PortfolioSpec`). Internal caching by content hash is fine; implicit session state
-  is not.
+  is not. The explicit, persistent [client-data access mode](docs/planner.md) is the
+  exception described in `AGENTS.md`.
 - **DataFrames/Series** returned by okama must be normalized via `okama_mcp.serialization`
   before being returned from a tool; long series are truncated with head/tail/summary.
 - New or changed tools must be reflected in the README tool catalog (and "Spec shapes"
