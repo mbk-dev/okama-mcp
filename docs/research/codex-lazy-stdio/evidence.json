@@ -1,0 +1,762 @@
+{
+  "date": "2026-11-17",
+  "host": "Valinor",
+  "codex_version": "codex-cli 0.169.0",
+  "upstream_tag": "rust-v0.169.0",
+  "upstream_tree_sha": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
+  "project_head": "27745d7a758d78ee5768afff3b43ec54b259a93d",
+  "packages": {
+    "okama-mcp": "3.1.0",
+    "okama": "4.0.1",
+    "fastmcp": "4.2.0"
+  },
+  "probe_only_config": {
+    "thread_unload_delay_secs": 0,
+    "mcp_connection_sharing": false
+  },
+  "runs": {
+    "lazy": {
+      "snapshots": [
+        {
+          "stage": "cold-discovery",
+          "at_unix": 1794886862.0570924,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": true,
+              "start_ticks": "41919481",
+              "Pss": 339809,
+              "SwapPss": 0,
+              "VmRSS": 362220,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "cold-unloaded",
+          "at_unix": 1794886862.2005374,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "warm-before-use",
+          "at_unix": 1794886864.2356725,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "dormant-unloaded",
+          "at_unix": 1794886864.2370133,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "warm-again-before-use",
+          "at_unix": 1794886866.2576127,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "call-1",
+          "at_unix": 1794886870.5191398,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            },
+            {
+              "pid": 1215956,
+              "wrapper_started_at": "1794886866.270654955",
+              "alive": true,
+              "start_ticks": "41920146",
+              "Pss": 344215,
+              "SwapPss": 0,
+              "VmRSS": 367132,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "call-2",
+          "at_unix": 1794886870.5379205,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            },
+            {
+              "pid": 1215956,
+              "wrapper_started_at": "1794886866.270654955",
+              "alive": true,
+              "start_ticks": "41920146",
+              "Pss": 344223,
+              "SwapPss": 0,
+              "VmRSS": 367140,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "subscribed-idle-10s",
+          "at_unix": 1794886880.567551,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            },
+            {
+              "pid": 1215956,
+              "wrapper_started_at": "1794886866.270654955",
+              "alive": true,
+              "start_ticks": "41920146",
+              "Pss": 310334,
+              "SwapPss": 0,
+              "VmRSS": 367140,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "used-unloaded",
+          "at_unix": 1794886880.7174323,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            },
+            {
+              "pid": 1215956,
+              "wrapper_started_at": "1794886866.270654955",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "app-server-exit",
+          "at_unix": 1794886880.728914,
+          "app_server_pid": 1214950,
+          "servers": [
+            {
+              "pid": 1215152,
+              "wrapper_started_at": "1794886859.622642151",
+              "alive": false
+            },
+            {
+              "pid": 1215956,
+              "wrapper_started_at": "1794886866.270654955",
+              "alive": false
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "elapsed_sec": 4.247325689007994,
+          "isError": false
+        },
+        {
+          "number": 2,
+          "elapsed_sec": 0.004563644004520029,
+          "isError": false
+        }
+      ],
+      "discovered_tool_counts": [
+        52
+      ],
+      "raw_evidence_dir": "tmp/lazy-startup/validated-lazy",
+      "sha256": {
+        "events.jsonl": "bee7516e1c4e49126a5016a4a53741ac7d488ad46c75c575f2e59c84df92452f",
+        "snapshots.jsonl": "38c69986811427188c1974481b5e43af703be4270f3d3b88177d8f6b4aa10a95",
+        "call-1.json": "be48d9b568ccd0fc78618b0df11385a8dad5625da36eaa59961e6a0d8fdf4980",
+        "call-2.json": "c0a11768b09586a723a43eb5a50a2c0b652fc64715413cb09d7ca4e4022f13ee"
+      }
+    },
+    "eager": {
+      "snapshots": [
+        {
+          "stage": "cold-discovery",
+          "at_unix": 1794886875.652137,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": true,
+              "start_ticks": "41920841",
+              "Pss": 307655,
+              "SwapPss": 0,
+              "VmRSS": 362304,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "cold-unloaded",
+          "at_unix": 1794886875.7910502,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "warm-before-use",
+          "at_unix": 1794886877.8305554,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            },
+            {
+              "pid": 1216950,
+              "wrapper_started_at": "1794886875.810895013",
+              "alive": true,
+              "start_ticks": "41921100",
+              "Pss": 287451,
+              "SwapPss": 0,
+              "VmRSS": 342000,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "call-1",
+          "at_unix": 1794886879.8436997,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            },
+            {
+              "pid": 1216950,
+              "wrapper_started_at": "1794886875.810895013",
+              "alive": true,
+              "start_ticks": "41921100",
+              "Pss": 310381,
+              "SwapPss": 0,
+              "VmRSS": 367172,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "call-2",
+          "at_unix": 1794886879.8553522,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            },
+            {
+              "pid": 1216950,
+              "wrapper_started_at": "1794886875.810895013",
+              "alive": true,
+              "start_ticks": "41921100",
+              "Pss": 310389,
+              "SwapPss": 0,
+              "VmRSS": 367180,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "subscribed-idle-10s",
+          "at_unix": 1794886889.8724442,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            },
+            {
+              "pid": 1216950,
+              "wrapper_started_at": "1794886875.810895013",
+              "alive": true,
+              "start_ticks": "41921100",
+              "Pss": 344295,
+              "SwapPss": 0,
+              "VmRSS": 367180,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "used-unloaded",
+          "at_unix": 1794886890.0194037,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            },
+            {
+              "pid": 1216950,
+              "wrapper_started_at": "1794886875.810895013",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "app-server-exit",
+          "at_unix": 1794886890.0297384,
+          "app_server_pid": 1216610,
+          "servers": [
+            {
+              "pid": 1216789,
+              "wrapper_started_at": "1794886873.221234757",
+              "alive": false
+            },
+            {
+              "pid": 1216950,
+              "wrapper_started_at": "1794886875.810895013",
+              "alive": false
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "elapsed_sec": 2.00469830899965,
+          "isError": false
+        },
+        {
+          "number": 2,
+          "elapsed_sec": 0.0033321770024485886,
+          "isError": false
+        }
+      ],
+      "discovered_tool_counts": [
+        52
+      ],
+      "raw_evidence_dir": "tmp/lazy-startup/validated-eager",
+      "sha256": {
+        "events.jsonl": "916789691d79d853e8d7ada3728f1fd74d27ed60e44335d1b6933f0202d125f5",
+        "snapshots.jsonl": "5bd01bb96dd1a2b5509acef888523b8a0c63a64272fbda8eda70473cad6d608b",
+        "call-1.json": "9655f8ed69e63d65f4d15e98032d2cc8d380d76cc048560b7a527366f6957a71",
+        "call-2.json": "315bc021b21c7e74e71d619d307fc01a69b61bcc1d56fd686df762692bb9490f"
+      }
+    },
+    "required": {
+      "snapshots": [
+        {
+          "stage": "cold-discovery",
+          "at_unix": 1794886909.768918,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": true,
+              "start_ticks": "41924210",
+              "Pss": 306684,
+              "SwapPss": 0,
+              "VmRSS": 361312,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "cold-unloaded",
+          "at_unix": 1794886909.925243,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "warm-before-use",
+          "at_unix": 1794886914.6074626,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            },
+            {
+              "pid": 1220332,
+              "wrapper_started_at": "1794886909.942129400",
+              "alive": true,
+              "start_ticks": "41924513",
+              "Pss": 294285,
+              "SwapPss": 0,
+              "VmRSS": 361336,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "call-1",
+          "at_unix": 1794886916.3553162,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            },
+            {
+              "pid": 1220332,
+              "wrapper_started_at": "1794886909.942129400",
+              "alive": true,
+              "start_ticks": "41924513",
+              "Pss": 300617,
+              "SwapPss": 0,
+              "VmRSS": 366108,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "call-2",
+          "at_unix": 1794886916.3682976,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            },
+            {
+              "pid": 1220332,
+              "wrapper_started_at": "1794886909.942129400",
+              "alive": true,
+              "start_ticks": "41924513",
+              "Pss": 309115,
+              "SwapPss": 0,
+              "VmRSS": 366116,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "subscribed-idle-10s",
+          "at_unix": 1794886926.38806,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            },
+            {
+              "pid": 1220332,
+              "wrapper_started_at": "1794886909.942129400",
+              "alive": true,
+              "start_ticks": "41924513",
+              "Pss": 342379,
+              "SwapPss": 0,
+              "VmRSS": 366116,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "used-unloaded",
+          "at_unix": 1794886926.5297418,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            },
+            {
+              "pid": 1220332,
+              "wrapper_started_at": "1794886909.942129400",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "app-server-exit",
+          "at_unix": 1794886926.5406024,
+          "app_server_pid": 1219553,
+          "servers": [
+            {
+              "pid": 1219728,
+              "wrapper_started_at": "1794886906.903854321",
+              "alive": false
+            },
+            {
+              "pid": 1220332,
+              "wrapper_started_at": "1794886909.942129400",
+              "alive": false
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "elapsed_sec": 1.7394482680247165,
+          "isError": false
+        },
+        {
+          "number": 2,
+          "elapsed_sec": 0.0030709129641763866,
+          "isError": false
+        }
+      ],
+      "discovered_tool_counts": [
+        52
+      ],
+      "raw_evidence_dir": "tmp/lazy-startup/validated-required",
+      "sha256": {
+        "events.jsonl": "d9425e0834266d374885fe4ca8119702dfc169c2f6e6a976b674928aa713d7c8",
+        "snapshots.jsonl": "d29fe5e9b302d5d7c70c438d25f4a026c347c4d45a360af517426528432fa757",
+        "call-1.json": "3368e85c1e650e8b14ee79dc63c164c8dedef3a7f2ae4de4980143d08351e43b",
+        "call-2.json": "d053ecd56a22ec0217967784d7683a055acaa26af06b0fe213b1331a0dcf6992"
+      }
+    },
+    "required-catalog": {
+      "snapshots": [
+        {
+          "stage": "cold-discovery",
+          "at_unix": 1794886942.356464,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": true,
+              "start_ticks": "41927509",
+              "Pss": 340752,
+              "SwapPss": 0,
+              "VmRSS": 364028,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "cold-unloaded",
+          "at_unix": 1794886942.499177,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "warm-before-use",
+          "at_unix": 1794886944.5315676,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "dormant-unloaded",
+          "at_unix": 1794886944.532362,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "warm-again-before-use",
+          "at_unix": 1794886946.5546505,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "call-1",
+          "at_unix": 1794886950.4875476,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            },
+            {
+              "pid": 1224074,
+              "wrapper_started_at": "1794886946.563424439",
+              "alive": true,
+              "start_ticks": "41928176",
+              "Pss": 345815,
+              "SwapPss": 0,
+              "VmRSS": 368620,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "call-2",
+          "at_unix": 1794886950.503931,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            },
+            {
+              "pid": 1224074,
+              "wrapper_started_at": "1794886946.563424439",
+              "alive": true,
+              "start_ticks": "41928176",
+              "Pss": 345823,
+              "SwapPss": 0,
+              "VmRSS": 368628,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "subscribed-idle-10s",
+          "at_unix": 1794886960.5210414,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            },
+            {
+              "pid": 1224074,
+              "wrapper_started_at": "1794886946.563424439",
+              "alive": true,
+              "start_ticks": "41928176",
+              "Pss": 344959,
+              "SwapPss": 0,
+              "VmRSS": 368628,
+              "VmSwap": 0
+            }
+          ]
+        },
+        {
+          "stage": "used-unloaded",
+          "at_unix": 1794886960.66493,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            },
+            {
+              "pid": 1224074,
+              "wrapper_started_at": "1794886946.563424439",
+              "alive": false
+            }
+          ]
+        },
+        {
+          "stage": "app-server-exit",
+          "at_unix": 1794886960.6746316,
+          "app_server_pid": 1223070,
+          "servers": [
+            {
+              "pid": 1223261,
+              "wrapper_started_at": "1794886939.896549541",
+              "alive": false
+            },
+            {
+              "pid": 1224074,
+              "wrapper_started_at": "1794886946.563424439",
+              "alive": false
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "elapsed_sec": 3.9200524739571847,
+          "isError": false
+        },
+        {
+          "number": 2,
+          "elapsed_sec": 0.0037095409934408963,
+          "isError": false
+        }
+      ],
+      "discovered_tool_counts": [
+        52
+      ],
+      "raw_evidence_dir": "tmp/lazy-startup/validated-required-catalog",
+      "sha256": {
+        "events.jsonl": "6741e104f712a34fc470cb7751100fbdd1e020690c9b17329b85dac54d98e8c0",
+        "snapshots.jsonl": "0233d11aebf9698a7df13ecd33fc92c86283f4fb703603d6d2f1569f10d7493e",
+        "call-1.json": "37227443f2f45e6ecdca761a8fe507f4374c75ed59db9be83b417420b2a679e7",
+        "call-2.json": "78bcfe80fd2b43c99c6385fbcbae0b6960a001c9d7172310a658abae07f5c227"
+      }
+    }
+  },
+  "limits": [
+    "Single successful run per mode, not latency averages",
+    "10 seconds of subscribed idle observation; no long-duration idle claim",
+    "Auth/plugin/cache expiry/eviction branches inspected in source only",
+    "Local worktree server; no new production instances or unrelated process cleanup",
+    "PSS varies with other processes; fresh test SwapPss was zero"
+  ]
+}
