@@ -17,7 +17,7 @@ dependencies = [
     "fastmcp>=4.0.11,<5",
     "pydantic>=2.0",
     "scipy>=1.11",
-    "okama-planner[reports]>=0.5.0,<0.6.0",
+    "okama-planner[reports]>=0.5.1,<0.6.0",
 ]
 
 [project.urls]
@@ -33,10 +33,6 @@ dev = ["ruff"]
 
 [tool.uv]
 default-groups = ["dev", "test"]
-
-[tool.uv.sources]
-# Development only until Planner 0.5.0 is published; release gates use --no-sources.
-okama-planner = { git = "https://github.com/mbk-dev/okama-planner.git", rev = "c69d86ec731cbd09b1f708589d768c6f1cab2857" }
 
 [build-system]
 requires = ["hatchling>=1.27,<2"]

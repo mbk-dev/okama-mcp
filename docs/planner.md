@@ -5,20 +5,16 @@ never execute SQL, inspect schema or implement their own deletion cascade.
 
 ## Installation
 
-Prepared MCP 3.1.0 requires `okama-planner[reports]>=0.5.0,<0.6.0`.
-Local client tools require `okama_planner.ai.PlannerClientAccess` from Planner 0.5.0
-source. PyPI currently provides 0.4.1, which lacks the AI facade. A source checkout
-uses an immutable public revision in `tool.uv.sources`, also used by CI:
+MCP 3.1.0 requires `okama-planner[reports]>=0.5.1,<0.6.0`, which resolves from PyPI.
+Local client tools use `okama_planner.ai.PlannerClientAccess`; the companion's public
+Python API is the only path to the database:
 
 ```bash
 uv sync --all-groups
 ```
 
-For a pip-managed environment, install this checkout and the compatible companion:
-
-```bash
-python -m pip install -e . 'okama-planner[reports] @ git+https://github.com/mbk-dev/okama-planner.git@c69d86ec731cbd09b1f708589d768c6f1cab2857'
-```
+The release gates install with `--no-sources`, so no dependency override can replace
+the published companion; CI resolves the same published requirement.
 
 Missing companion APIs fail closed; no raw-storage fallback is used. Market tools
 keep their existing contracts. Older databases must be migrated using Planner's
