@@ -7,6 +7,9 @@ optimisation and macro queries via tool calls.
 
 from __future__ import annotations
 
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 
-__version__ = version("okama-mcp")
+try:
+    __version__ = version("okama-mcp")
+except PackageNotFoundError:
+    __version__ = "0+unknown"
