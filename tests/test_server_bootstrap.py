@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
+from importlib.metadata import version
+
 from fastmcp import FastMCP
+
+
+def test_imported_version_matches_installed_distribution() -> None:
+    import okama_mcp
+
+    assert okama_mcp.__version__ == version("okama-mcp")
 
 
 def test_mcp_instance_is_a_fastmcp_server() -> None:

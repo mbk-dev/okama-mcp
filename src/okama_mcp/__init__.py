@@ -7,4 +7,6 @@ optimisation and macro queries via tool calls.
 
 from __future__ import annotations
 
-__version__ = "1.3.1"
+from importlib.metadata import version
+
+__version__ = version("okama-mcp")

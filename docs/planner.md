@@ -13,8 +13,8 @@ Python API is the only path to the database:
 uv sync --all-groups
 ```
 
-The release gates install with `--no-sources`, so no dependency override can replace
-the published companion; CI resolves the same published requirement.
+CI resolves the same published requirement. The tag-triggered release gates use
+`--no-sources` to require published dependencies.
 
 Missing companion APIs fail closed; no raw-storage fallback is used. Market tools
 keep their existing contracts. Older databases must be migrated using Planner's
@@ -132,10 +132,9 @@ commands. Migrate/import with Planner's verified procedures and retain backups;
 never run old LFP migrations against the canonical database. See Planner's
 [one database guide](https://github.com/mbk-dev/okama-planner/blob/main/docs/unified-database.md).
 
-CI tests the pinned development companion and an installed MCP wheel in an isolated
-environment using `tests/release/published_pair.py`. This checks real stdio,
-anonymous and personal modes, meetings, forecasts and report tamper rejection.
-It does not prove PyPI availability. Tag-triggered release gates ignore development
-sources (`--no-sources`), require published Planner and verify the published MCP
-package after upload. These gates remain unchanged. No release is performed as
-part of this change.
+CI resolves the published Planner companion with `uv sync --all-groups` and runs
+the unit tests. It also builds the MCP wheel, installs it with the resolved runtime
+dependencies in an isolated environment, and runs `tests/release/published_pair.py`.
+The smoke test covers real stdio, anonymous and personal modes, meetings, forecasts
+and report tamper rejection. Tag-triggered release gates resolve published
+dependencies with `--no-sources` and verify the published MCP package after upload.
