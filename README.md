@@ -33,19 +33,14 @@ require a compatible Planner companion and a configured local stdio installation
 
 ## Install
 
-**Development status (26 October 2026):** `main` prepares MCP 3.1.0 with Planner
-0.5.0; neither version has been published yet. Use the source setup below.
-PyPI still provides MCP 3.0.0 with Planner 0.4.1 and its earlier contracts.
+Requires Python ≥ 3.11, okama ≥ 4.0.0 and `okama-planner[reports]>=0.5.1,<0.6.0`.
+[MCP 3.1.0](https://pypi.org/project/okama-mcp/3.1.0/) and
+[Planner 0.5.1](https://pypi.org/project/okama-planner/0.5.1/) are available on PyPI.
 
-Requires Python ≥ 3.11 (same floor as okama itself); okama ≥ 4.0.0 and
-`okama-planner[reports]>=0.5.0,<0.6.0` are required.
-
-**Client data modes (source checkout):** local MCP defaults to anonymous reads.
+**Client data modes:** local MCP defaults to anonymous reads.
 `client_data_mode_set({"mode":"personal_data"})` enables full client CRUD;
 `{"mode":"anonymous"}` disables client writes again. The setting persists per
-database across connections. `uv sync` installs a pinned Planner 0.5.0 source
-revision with the required access API. PyPI still provides Planner 0.4.1, so the prepared release remains blocked until the compatible companion is published;
-see [installation and release gates](docs/planner.md#installation).
+database across connections. See [Planner setup](docs/planner.md#local-setup).
 Market and `finplan_*` tools remain available independently. See the
 [3.0 migration notes](docs/releases/3.0.0.md) for the earlier release behavior.
 
@@ -80,10 +75,9 @@ uv python install 3.14
 uv sync --python 3.14 --all-groups
 ```
 
-Until Planner 0.5.0 is published, `tool.uv.sources` pins an immutable development
-companion. Release gates use `uv sync --all-groups --no-sources` and require
-published dependencies; no source substitution is used for publication.
-Remove the development pin after published-pair acceptance passes.
+The source setup and CI resolve the published Planner dependency from PyPI.
+See the [Planner integration guide](docs/planner.md#canonical-database-and-release-gates)
+for the installed-wheel and release checks.
 
 ## Run
 
@@ -487,10 +481,10 @@ src/okama_mcp/
 
 ## Planner and local client workflows
 
-Planner tools require a companion providing `okama_planner.ai`; local client
-modes additionally require `PlannerClientAccess`. `uv sync` resolves the pinned
-compatible source. Missing APIs fail closed. Configured local stdio exposes
-17 client tools and Excel export (70 tools total); HTTP has no client or local report tools.
+Planner tools require a companion providing `okama_planner.ai`. Local client
+modes additionally require `PlannerClientAccess`. Missing APIs fail closed.
+Configured local stdio exposes 17 client tools and Excel export (70 tools total).
+HTTP has no client or local report tools.
 
 The default `anonymous` mode returns pseudonyms and refuses all persistent client
 writes. Personal details are maintained in Planner. Call `client_data_mode_set`
