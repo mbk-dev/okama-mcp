@@ -185,7 +185,7 @@ def _prepare_dcf(
     """Validate specs and return (Portfolio configured for MC + cashflow, MCSpec)."""
     mc_spec = _validate_mc(mc)
     cashflow_spec = _validate_cashflow(cashflow)
-    _, pf = _get_portfolio(portfolio)
+    _, pf = _get_portfolio(portfolio, use_cache=False)
     _apply_mc_parameters(pf, mc_spec)
     if discount_rate is not None:
         pf.dcf.discount_rate = discount_rate
@@ -200,7 +200,7 @@ def _prepare_mc(portfolio: PortfolioSpec, mc: MCSpec) -> tuple[Any, MCSpec]:
     For distribution-diagnostics tools that only read ``pf.dcf.mc``.
     """
     mc_spec = _validate_mc(mc)
-    _, pf = _get_portfolio(portfolio)
+    _, pf = _get_portfolio(portfolio, use_cache=False)
     _apply_mc_parameters(pf, mc_spec)
     return pf, mc_spec
 
@@ -215,7 +215,7 @@ def _prepare_cashflow(
     For historical DCF tools (wealth index, cash flow, survival) that don't simulate.
     """
     cashflow_spec = _validate_cashflow(cashflow)
-    _, pf = _get_portfolio(portfolio)
+    _, pf = _get_portfolio(portfolio, use_cache=False)
     if discount_rate is not None:
         pf.dcf.discount_rate = discount_rate
     strategy = _build_cashflow_strategy(pf, cashflow_spec)
@@ -251,10 +251,7 @@ def get_portfolio_irr(
     -------
     dict with ``irr`` (float or None) and ``cashflow_spec``.
     """
-    cashflow_spec = _validate_cashflow(cashflow)
-    _, pf = _get_portfolio(portfolio)
-    strategy = _build_cashflow_strategy(pf, cashflow_spec)
-    pf.dcf.cashflow_parameters = strategy
+    pf, cashflow_spec = _prepare_cashflow(portfolio, cashflow)
     return {
         "cashflow_spec": cashflow_spec.model_dump(),
         "irr": value_to_json(float(pf.dcf.irr())),
