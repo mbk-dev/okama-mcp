@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -121,6 +124,59 @@ def test_get_initial_investment_values() -> None:
     assert out["pv"] == 65_000.0
     assert out["fv"] == 100_000.0
     assert out["discount_rate"] == 0.10
+
+
+def test_omitted_discount_rate_uses_default_after_explicit_rate() -> None:
+    with (
+        patch("okama_mcp.tools.portfolio.ok.Portfolio", side_effect=lambda **_: _make_pf_mock_dcf()),
+        patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", side_effect=lambda _: SimpleNamespace()),
+    ):
+        explicit = dcf_tool.get_initial_investment_values(VALID_PF_SPEC, VALID_CASHFLOW, discount_rate=0.10)
+        default = dcf_tool.get_initial_investment_values(VALID_PF_SPEC, VALID_CASHFLOW)
+
+    assert explicit["discount_rate"] == 0.10
+    assert default["discount_rate"] == 0.04
+
+
+def test_overlapping_mc_cash_flows_keep_their_request_settings() -> None:
+    first_calculating = Event()
+    second_finished = Event()
+
+    def build_portfolio(**kwargs: Any) -> SimpleNamespace:
+        dcf = SimpleNamespace()
+
+        def set_mc_parameters(*, mc_number: int, **kwargs: Any) -> None:
+            dcf.scenarios = mc_number
+
+        def monte_carlo_cash_flow(*, discounting: str) -> pd.DataFrame:
+            if dcf.cashflow_parameters.amount == -5_000:
+                first_calculating.set()
+                assert second_finished.wait(timeout=5), "Second request did not finish"
+            return pd.DataFrame([[dcf.cashflow_parameters.amount] * dcf.scenarios])
+
+        dcf.set_mc_parameters = set_mc_parameters
+        dcf.monte_carlo_cash_flow = monte_carlo_cash_flow
+        return SimpleNamespace(dcf=dcf)
+
+    with (
+        patch("okama_mcp.tools.portfolio.ok.Portfolio", side_effect=build_portfolio),
+        patch("okama_mcp.tools.monte_carlo.ok.IndexationStrategy", side_effect=lambda _: SimpleNamespace()),
+        ThreadPoolExecutor(max_workers=1) as executor,
+    ):
+        first_call = executor.submit(dcf_tool.get_monte_carlo_cash_flow, VALID_PF_SPEC, VALID_MC_SPEC, VALID_CASHFLOW)
+        try:
+            assert first_calculating.wait(timeout=5), "First request did not reach the calculation"
+            second = dcf_tool.get_monte_carlo_cash_flow(
+                VALID_PF_SPEC, {**VALID_MC_SPEC, "scenarios": 80}, {**VALID_CASHFLOW, "amount": -8_000.0}
+            )["cash_flow_paths"]
+        finally:
+            second_finished.set()
+        first = first_call.result(timeout=5)["cash_flow_paths"]
+
+    assert second["n_scenarios"] == 80
+    assert second["percentiles"]["50"]["values"] == [-8_000.0]
+    assert first["n_scenarios"] == 50
+    assert first["percentiles"]["50"]["values"] == [-5_000.0]
 
 
 def test_get_monte_carlo_cash_flow_bands() -> None:

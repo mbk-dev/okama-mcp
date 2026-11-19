@@ -2,7 +2,7 @@
 
 Each tool accepts the same ``PortfolioSpec`` dict so the LLM passes a single
 self-contained portfolio definition with every call. Constructed
-``okama.Portfolio`` objects are cached by the canonical hash of the spec — a
+``okama.Portfolio`` objects for read-only analysis are cached by the canonical hash of the spec — a
 typical AI conversation calls four or five tools against the same portfolio in
 a row, and the constructor is expensive (HTTP + pandas).
 """
@@ -89,9 +89,15 @@ def _build_portfolio(spec: PortfolioSpec) -> Any:
     )
 
 
-def _get_portfolio(spec_dict: PortfolioSpec | dict[str, Any]) -> tuple[PortfolioSpec, Any]:
-    """Validate the spec and return a (possibly cached) Portfolio object."""
+def _get_portfolio(
+    spec_dict: PortfolioSpec | dict[str, Any],
+    *,
+    use_cache: bool = True,
+) -> tuple[PortfolioSpec, Any]:
+    """Validate the spec and build a fresh portfolio when the caller mutates its settings."""
     spec = _validate(spec_dict)
+    if not use_cache:
+        return spec, _build_portfolio(spec)
     key = make_key(spec.model_dump())
     pf = _portfolio_cache.get_or_compute(key, lambda: _build_portfolio(spec))
     return spec, pf
