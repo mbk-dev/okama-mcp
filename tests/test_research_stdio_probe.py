@@ -61,7 +61,7 @@ async def test_helper_uses_paths_with_spaces(
 
 
 def assert_shutdown_evidence(
-    output: Path, expected_pid: int | None, expected_alive: bool | None, unreadable_file: str | None
+    output: Path, expected_pid: int | None, expected_alive: bool | None, read_error: tuple[str, type[OSError]] | None
 ) -> None:
     events = [json.loads(line)["message"] for line in (output / "events.jsonl").read_text().splitlines()]
     assert events[0]["result"] == {}
@@ -72,11 +72,14 @@ def assert_shutdown_evidence(
     if expected_pid is not None:
         (helper,) = snapshot["servers"]
         assert helper["alive"] is expected_alive
-        if unreadable_file:
-            assert f"synthetic denial for {unreadable_file}" in helper["inspection_error"]
+        if read_error:
+            filename, error_type = read_error
+            assert helper["inspection_error"] == f"{error_type.__name__}: synthetic read error for {filename}"
 
 
-def fake_proc(proc: Path, state: str | None, unreadable_file: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
+def fake_proc(
+    proc: Path, state: str | None, read_error: tuple[str, type[OSError]] | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
     if state is None:
         return
     proc.mkdir(parents=True)
@@ -84,12 +87,13 @@ def fake_proc(proc: Path, state: str | None, unreadable_file: str | None, monkey
     (proc / "cmdline").write_text("synthetic-helper\x00")
     (proc / "status").write_text("Name: synthetic-helper\n")
     (proc / "smaps_rollup").write_text("Rss: 4 kB\n")
-    if unreadable_file:
+    if read_error:
+        filename, error_type = read_error
         read_text = Path.read_text
 
         def read_proc(path: Path, *args: Any, **kwargs: Any) -> str:
-            if path == proc / unreadable_file:
-                raise PermissionError(f"synthetic denial for {unreadable_file}")
+            if path == proc / filename:
+                raise error_type(f"synthetic read error for {filename}")
             return read_text(path, *args, **kwargs)
 
         monkeypatch.setattr(Path, "read_text", read_proc)
@@ -113,23 +117,32 @@ def expire_rpc_future(monkeypatch: pytest.MonkeyPatch, on_timeout: Callable[[], 
 
 
 @pytest.mark.parametrize(
-    ("helper_state", "unreadable_file", "reply_during_timeout", "expected_alive"),
+    ("helper_state", "read_error", "reply_during_timeout", "expected_alive"),
     [
         (None, None, False, False),
         (None, None, True, False),
         ("S", None, False, True),
         ("Z", None, False, False),
-        ("S", "smaps_rollup", False, True),
-        ("S", "stat", False, None),
+        ("S", ("smaps_rollup", PermissionError), False, True),
+        ("S", ("smaps_rollup", FileNotFoundError), False, True),
+        ("S", ("stat", PermissionError), False, None),
     ],
-    ids=["late-reply", "cancelled-future", "surviving-helper", "zombie-helper", "no-memory-details", "unknown-state"],
+    ids=[
+        "late-reply",
+        "cancelled-future",
+        "surviving-helper",
+        "zombie-helper",
+        "unreadable-memory-details",
+        "missing-memory-details",
+        "unknown-state",
+    ],
 )
 async def test_late_reply_keeps_shutdown_evidence(
     probe_module: ModuleType,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     helper_state: str | None,
-    unreadable_file: str | None,
+    read_error: tuple[str, type[OSError]] | None,
     reply_during_timeout: bool,
     expected_alive: bool | None,
 ) -> None:
@@ -140,7 +153,7 @@ async def test_late_reply_keeps_shutdown_evidence(
     helper_pid = 12345
     stderr = None
 
-    fake_proc(proc_dir / str(helper_pid), helper_state, unreadable_file, monkeypatch)
+    fake_proc(proc_dir / str(helper_pid), helper_state, read_error, monkeypatch)
 
     def path_for_probe(path: str) -> Path:
         return proc_dir if path == "/proc" else Path(path)
@@ -177,4 +190,4 @@ async def test_late_reply_keeps_shutdown_evidence(
 
     stdin.close.assert_called_once_with()
     assert stderr is not None and stderr.closed
-    assert_shutdown_evidence(output, helper_pid if helper_state is not None else None, expected_alive, unreadable_file)
+    assert_shutdown_evidence(output, helper_pid if helper_state is not None else None, expected_alive, read_error)

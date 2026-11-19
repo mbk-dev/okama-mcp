@@ -119,12 +119,11 @@ async def run_lifecycle(  # noqa: C901 - Keep the bounded diagnostic sequence to
                     row["cmdline"] = (proc / "cmdline").read_text().replace("\x00", " ")
                     row["status"] = (proc / "status").read_text()
                     row["smaps"] = (proc / "smaps_rollup").read_text()
-            except (FileNotFoundError, ProcessLookupError):
-                row["alive"] = False
             except (OSError, IndexError) as error:
-                if row["alive"] is False:
-                    row["alive"] = None
-                row["inspection_error"] = f"{type(error).__name__}: {error}"
+                if row["alive"] is True or not isinstance(error, (FileNotFoundError, ProcessLookupError)):
+                    if row["alive"] is False:
+                        row["alive"] = None
+                    row["inspection_error"] = f"{type(error).__name__}: {error}"
             if row["alive"] is not False:
                 unresolved.append(row["pid"])
             rows.append(row)
