@@ -86,10 +86,19 @@ Turning anonymous mode back on does not erase data already returned to a client.
 Creation/updates support name, CRM ID, sex, birth year, contacts, broker names,
 primary contact channel, investment declaration date and notes. Unknown/system
 fields are rejected. Omitted update fields remain unchanged; explicit null clears
-optional values when the merged record passes Planner validation. Creation is not
-idempotent; inspect the registry before retrying an ambiguous result. Deletion
-uses Planner's transaction, removes linked database history and preserves unrelated
+optional values when the merged record passes Planner validation. Deletion uses
+Planner's transaction, removes linked database history and preserves unrelated
 clients; it does not delete external documents or report files.
+
+### Reconcile an ambiguous registration
+
+`client_create` is non-idempotent. Treat a timeout or ambiguous response as
+pending. Use registry reads allowed in the current access mode. If you can
+confirm that the original call created a record, use that client's code.
+
+Retry only after verifying that the original call finished without creating a
+record. A lookup with no match leaves the outcome pending because the original
+call may still complete. Tell the user when the outcome remains pending.
 
 ## Forecasts, reports and errors
 
