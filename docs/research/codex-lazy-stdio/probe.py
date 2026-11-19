@@ -7,42 +7,71 @@ import asyncio
 import json
 import os
 from pathlib import Path
+import sys
 import time
-from typing import Any
+from typing import Any, TextIO
 
 
-async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bounded diagnostic sequence together.
+SERVER_LAUNCHER = """\
+import os
+import sys
+import time
+
+pid_log, executable = sys.argv[1:]
+seconds, nanoseconds = divmod(time.time_ns(), 10**9)
+with open(pid_log, "a", encoding="utf-8") as log:
+    log.write(f"{os.getpid()} {seconds}.{nanoseconds:09d}\\n")
+os.execv(executable, [executable, "stdio"])
+"""
+
+
+def toml_value(value: str | list[str]) -> str:
+    """Encode strings and string arrays as TOML basic values."""
+    return json.dumps(value, ensure_ascii=False).replace("\x7f", "\\u007f")
+
+
+async def probe(mode: str, output: Path) -> None:
     """Run one fresh app-server with at most one live okama server at a time."""
     root = Path(__file__).resolve().parents[3]
     output.mkdir(parents=True, exist_ok=False)
     home = output / "home"
     home.mkdir()
-    pid_log = output / "pids"
-    wrapper = output / "server.sh"
-    wrapper.write_text(
-        f'#!/bin/sh\necho "$$ $(date +%s.%N)" >> "{pid_log}"\n'
-        f'exec "{root}/.venv/bin/okama-mcp" stdio\n'
-    )
-    wrapper.chmod(0o700)
+    server_args = ["-c", SERVER_LAUNCHER, str(output / "pids"), str(root / ".venv/bin/okama-mcp")]
     required = mode in {"required", "required-catalog"}
     lazy = mode != "eager"
     readiness = "catalog" if mode == "required-catalog" else "connection"
     (home / "config.toml").write_text(
-        f'thread_unload_delay_secs = 0\n[features]\n'
-        f'mcp_lazy_stdio_startup = {str(lazy).lower()}\n'
-        f'mcp_connection_sharing = false\n[mcp_servers.okama]\n'
-        f'command = "{wrapper}"\ncwd = "{root}"\nstartup_timeout_sec = 60\n'
-        f'required = {str(required).lower()}\nstartup_readiness = "{readiness}"\n'
+        f"thread_unload_delay_secs = 0\n[features]\n"
+        f"mcp_lazy_stdio_startup = {str(lazy).lower()}\n"
+        f"mcp_connection_sharing = false\n[mcp_servers.okama]\n"
+        f"command = {toml_value(sys.executable)}\nargs = {toml_value(server_args)}\n"
+        f"cwd = {toml_value(str(root))}\nstartup_timeout_sec = 60\n"
+        f'required = {str(required).lower()}\nstartup_readiness = "{readiness}"\n',
+        encoding="utf-8",
     )
-    events = (output / "events.jsonl").open("w")
-    stderr = (output / "stderr.log").open("w")
-    process = await asyncio.create_subprocess_exec(
-        "codex", "app-server", "--stdio", cwd=output,
-        env=dict(os.environ, CODEX_HOME=str(home)),
-        stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
-        stderr=stderr, limit=4 * 1024 * 1024,
-    )
+    with (
+        (output / "events.jsonl").open("w", encoding="utf-8") as events,
+        (output / "stderr.log").open("w", encoding="utf-8") as stderr,
+    ):
+        process = await asyncio.create_subprocess_exec(
+            "codex",
+            "app-server",
+            "--stdio",
+            cwd=output,
+            env=dict(os.environ, CODEX_HOME=str(home)),
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=stderr,
+            limit=4 * 1024 * 1024,
+        )
+        await run_lifecycle(mode, output, process, events)
+
+
+async def run_lifecycle(  # noqa: C901 - Keep the bounded diagnostic sequence together.
+    mode: str, output: Path, process: asyncio.subprocess.Process, events: TextIO
+) -> None:
     assert process.stdin is not None and process.stdout is not None
+    pid_log = output / "pids"
     pending: dict[int, asyncio.Future[dict[str, Any]]] = {}
 
     async def read() -> None:
@@ -51,8 +80,9 @@ async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bound
             message = json.loads(line)
             events.write(json.dumps({"at": time.time(), "message": message}) + "\n")
             events.flush()
-            if message.get("id") in pending:
-                pending.pop(message["id"]).set_result(message)
+            future = pending.pop(message.get("id"), None)
+            if future is not None and not future.done():
+                future.set_result(message)
 
     reader = asyncio.create_task(read())
     counter = 0
@@ -60,19 +90,23 @@ async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bound
     async def rpc(method: str, params: dict[str, Any]) -> dict[str, Any]:
         nonlocal counter
         counter += 1
+        request_id = counter
         future = asyncio.get_running_loop().create_future()
-        pending[counter] = future
-        assert process.stdin is not None
-        process.stdin.write((json.dumps({"id": counter, "method": method, "params": params}) + "\n").encode())
-        await process.stdin.drain()
-        response = await asyncio.wait_for(future, 90)
+        pending[request_id] = future
+        try:
+            assert process.stdin is not None
+            process.stdin.write((json.dumps({"id": request_id, "method": method, "params": params}) + "\n").encode())
+            await process.stdin.drain()
+            response = await asyncio.wait_for(future, 90)
+        finally:
+            pending.pop(request_id, None)
         if "error" in response:
             raise RuntimeError(response)
         return response["result"]
 
     def snapshot(label: str) -> list[int]:
         rows = []
-        alive = []
+        unresolved = []
         for line in pid_log.read_text().splitlines() if pid_log.exists() else []:
             pid, started = line.split()
             proc = Path("/proc") / pid
@@ -80,23 +114,25 @@ async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bound
             try:
                 stat = (proc / "stat").read_text()
                 # Zombies have exited but can remain visible until their parent reaps them.
-                if stat.split(") ", 1)[1].split()[0] != "Z":
-                    row.update(
-                        stat=stat,
-                        cmdline=(proc / "cmdline").read_text().replace("\x00", " "),
-                        status=(proc / "status").read_text(),
-                        smaps=(proc / "smaps_rollup").read_text(),
-                        alive=True,
-                    )
-                    alive.append(int(pid))
+                if stat.rsplit(") ", 1)[1].split()[0] != "Z":
+                    row.update(stat=stat, alive=True)
+                    row["cmdline"] = (proc / "cmdline").read_text().replace("\x00", " ")
+                    row["status"] = (proc / "status").read_text()
+                    row["smaps"] = (proc / "smaps_rollup").read_text()
             except (FileNotFoundError, ProcessLookupError):
-                pass
+                row["alive"] = False
+            except (OSError, IndexError) as error:
+                if row["alive"] is False:
+                    row["alive"] = None
+                row["inspection_error"] = f"{type(error).__name__}: {error}"
+            if row["alive"] is not False:
+                unresolved.append(row["pid"])
             rows.append(row)
         record = {"label": label, "at": time.time(), "app_server_pid": process.pid, "servers": rows}
         with (output / "snapshots.jsonl").open("a") as out:
             out.write(json.dumps(record) + "\n")
-        print(f"{mode}: {label}: live PIDs {alive}", flush=True)
-        return alive
+        print(f"{mode}: {label}: live or unverified PIDs {unresolved}", flush=True)
+        return unresolved
 
     async def unsubscribe(thread_id: str) -> None:
         await rpc("thread/unsubscribe", {"threadId": thread_id})
@@ -110,8 +146,24 @@ async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bound
         result = await rpc("thread/start", {"cwd": str(output), "ephemeral": True})
         return result["thread"]["id"]
 
+    async def stop() -> None:
+        assert process.stdin is not None
+        process.stdin.close()
+        try:
+            await asyncio.wait_for(process.wait(), 15)
+        except TimeoutError:
+            process.terminate()
+            try:
+                await asyncio.wait_for(process.wait(), 5)
+            except TimeoutError:
+                process.kill()
+                await asyncio.wait_for(process.wait(), 5)
+
     try:
-        await rpc("initialize", {"clientInfo": {"name": "lazy-probe", "version": "1"}, "capabilities": {"experimentalApi": True}})
+        await rpc(
+            "initialize",
+            {"clientInfo": {"name": "lazy-probe", "version": "1"}, "capabilities": {"experimentalApi": True}},
+        )
         process.stdin.write(b'{"method":"initialized"}\n')
         await process.stdin.drain()
         first = await start()
@@ -135,7 +187,10 @@ async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bound
             assert not snapshot("warm-again-before-use")
         for number in (1, 2):
             started = time.monotonic()
-            result = await rpc("mcpServer/tool/call", {"threadId": second, "server": "okama", "tool": "list_namespaces", "arguments": {}})
+            result = await rpc(
+                "mcpServer/tool/call",
+                {"threadId": second, "server": "okama", "tool": "list_namespaces", "arguments": {}},
+            )
             elapsed = time.monotonic() - started
             (output / f"call-{number}.json").write_text(json.dumps({"elapsed_sec": elapsed, "response": result}))
             assert result.get("result", result).get("isError") is not True, result
@@ -146,20 +201,15 @@ async def probe(mode: str, output: Path) -> None:  # noqa: C901 - Keep the bound
         await unsubscribe(second)
         assert not snapshot("used-unloaded")
     finally:
-        process.stdin.close()
         try:
-            await asyncio.wait_for(process.wait(), 15)
-        except TimeoutError:
-            process.terminate()
             try:
-                await asyncio.wait_for(process.wait(), 5)
-            except TimeoutError:
-                process.kill()
-                await process.wait()
-        await reader
-        assert not snapshot("app-server-exit")
-        events.close()
-        stderr.close()
+                await stop()
+            finally:
+                await asyncio.wait_for(reader, 5)
+        finally:
+            unresolved = snapshot("app-server-exit")
+            if unresolved:
+                raise RuntimeError(f"app-server-exit: owned servers still running or unverified: {unresolved}")
 
 
 if __name__ == "__main__":
