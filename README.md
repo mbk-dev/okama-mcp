@@ -38,9 +38,10 @@ Requires Python ≥ 3.11, okama ≥ 4.0.0 and `okama-planner[reports]>=0.5.1,<0.
 [Planner 0.5.1](https://pypi.org/project/okama-planner/0.5.1/) are available on PyPI.
 
 **Client data modes:** local MCP defaults to anonymous reads.
-`client_data_mode_set({"mode":"personal_data"})` enables full client CRUD;
-`{"mode":"anonymous"}` disables client writes again. The setting persists per
-database across connections. See [Planner setup](docs/planner.md#local-setup).
+`client_data_mode_set({"mode":"personal_data"})` enables full client CRUD.
+`client_data_mode_set({"mode":"anonymous"})` restores anonymous reads and disables
+client writes. The setting persists per database across connections.
+See [Planner setup](docs/planner.md#local-setup).
 Market and `finplan_*` tools remain available independently. See the
 [3.0 migration notes](docs/releases/3.0.0.md) for the earlier release behavior.
 
@@ -208,7 +209,9 @@ indexed to inflation over 25 years) and the efficient frontier of SPY/BND/GLD:
 
 Financial tools are **stateless** — pass the full portfolio specification with every call.
 Optional local client tools use stable registry codes and a persistent, database-scoped access mode.
-Client creation is not idempotent: inspect the registry before retrying an ambiguous creation result.
+Treat an ambiguous `client_create` outcome as pending, including after a registry
+lookup with no match. Retry only after confirming that the original call finished
+without creating a record. See [registration reconciliation](docs/planner.md#reconcile-an-ambiguous-registration).
 The server caches expensive okama objects (`Portfolio`, `EfficientFrontier`) by content
 hash, so repeated calls on the same spec are fast.
 
